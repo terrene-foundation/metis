@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "last_check": null,
+  "ok": false,
+  "db": false,
+  "feature_store_populated": false,
+  "drift_wiring": false,
+  "xgb_available": false,
+  "explain_available": false,
+  "ortools_available": false,
+  "pulp_available": false,
+  "nexus_port": 8000,
+  "viewer_port": 3000,
+  "port_conflict": null,
+  "notes": "Initial shape. scripts/preflight.py rewrites every field on each run."
+}

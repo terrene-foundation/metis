@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MGMT655 Week 2 — Healthcare: Supervised ML I</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+
+  <!-- Custom Theme -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 1: Domain Context & ML Foundations                     -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 1: Title -->
+      <section class="title-slide">
+        <span class="week-badge">Week 2</span>
+        <h1>Healthcare AI</h1>
+        <div class="subtitle">Supervised Machine Learning I</div>
+        <div class="meta">
+          Dr. Jack Hong<br>
+          Singapore Management University<br>
+          MGMT 655 &mdash; 2026 Term 1
+        </div>
+      </section>
+
+      <!-- Slide 2: Domain Context -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Why Healthcare?</h2>
+        <div class="stat-grid" style="margin-top: 16px;">
+          <div class="stat">
+            <div class="number">$4T+</div>
+            <div class="label">Global Healthcare<br>Market Size</div>
+          </div>
+          <div class="stat">
+            <div class="number">250K</div>
+            <div class="label">Deaths/year from<br>Medical Errors (US)</div>
+          </div>
+          <div class="stat">
+            <div class="number">30%</div>
+            <div class="label">Of Healthcare Spend<br>Is Waste</div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 20px; padding: 12px 16px;">
+          <p style="font-size: 0.75em; margin: 0;"><strong>Prediction saves lives and money.</strong> Earlier detection, better triage, fewer unnecessary procedures. This is where ML has the highest-stakes impact.</p>
+        </div>
+      </section>
+
+      <!-- Slide 3: What Is Supervised ML? -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>What Is Supervised Machine Learning?</h2>
+        <p style="font-size: 0.75em;">Learning from <strong>labeled examples</strong> &mdash; you give the model inputs AND the correct answers, and it learns the pattern.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Classification</h4>
+              <p style="font-size: 0.65em; margin: 0 0 6px 0;"><strong>Predicting a category</strong></p>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Will this patient be readmitted? <em>(Yes/No)</em></li>
+                <li>Is this tumor malignant? <em>(Benign/Malignant)</em></li>
+                <li>What disease does this patient have? <em>(Multi-class)</em></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Regression</h4>
+              <p style="font-size: 0.65em; margin: 0 0 6px 0;"><strong>Predicting a number</strong></p>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>How long will this patient stay? <em>(Days)</em></li>
+                <li>What will the treatment cost? <em>(Dollars)</em></li>
+                <li>What is the risk score? <em>(0&ndash;100)</em></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4: The SML Workflow -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>The Supervised ML Workflow</h2>
+        <div class="mermaid" style="margin-top: 16px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff',
+          'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor':
+          '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Collect\nData"] --> B["Explore\n(EDA)"]
+          B --> C["Engineer\nFeatures"]
+          C --> D["Train\nModel"]
+          D --> E["Evaluate\nPerformance"]
+          E --> F["Deploy\nProduct"]
+          style A fill:#0891b2,color:#fff,stroke:#0891b2
+          style B fill:#0891b2,color:#fff,stroke:#0891b2
+          style C fill:#1a56db,color:#fff,stroke:#1a56db
+          style D fill:#1a56db,color:#fff,stroke:#1a56db
+          style E fill:#1a56db,color:#fff,stroke:#1a56db
+          style F fill:#059669,color:#fff,stroke:#059669
+        </div>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.7em; margin: 0;">COC handles every step of this pipeline. <strong>Your job:</strong> decide what data matters, which features to include, and whether the model's performance is good enough for real patients.</p>
+        </div>
+      </section>
+
+      <!-- Slide 5: EDA -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Exploratory Data Analysis (EDA)</h2>
+        <p style="font-size: 0.7em;"><strong>Before you model, you must understand.</strong> EDA reveals what the data actually looks like.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">What to Look For</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Missing values &mdash; why are they missing?</li>
+              <li>Class imbalance &mdash; 95% healthy, 5% sick?</li>
+              <li>Outliers &mdash; data entry errors or real cases?</li>
+              <li>Correlations &mdash; which features relate?</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Healthcare-Specific Traps</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Survivorship bias &mdash; only patients who lived</li>
+              <li>Label noise &mdash; misdiagnoses in training data</li>
+              <li>Temporal leakage &mdash; using future info</li>
+              <li>Population bias &mdash; who was studied?</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6: Feature Engineering -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Feature Engineering</h2>
+        <p style="font-size: 0.7em;"><strong>The art of telling the model what to pay attention to.</strong> Domain knowledge is your advantage here.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Raw Data</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Age, weight, blood pressure</li>
+              <li>Lab results, medication list</li>
+              <li>Visit dates, procedure codes</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Engineered Features</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>BMI (from height + weight)</li>
+              <li>Days since last visit</li>
+              <li>Number of medications (polypharmacy)</li>
+              <li>Comorbidity index (combined risk)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Which features should the model use? A clinician knows BMI matters more than raw weight. Encode that knowledge.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 2: Classification & Regression Models                  -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 7: Classification Models -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Classification Models</h2>
+        <div class="card-grid" style="margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Logistic Regression</h4>
+            <p style="font-size: 0.65em; margin: 0;">The simplest classifier. Outputs a probability (0&ndash;100%). Highly interpretable &mdash; you can explain exactly why a patient scored high. Start here.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Decision Trees</h4>
+            <p style="font-size: 0.65em; margin: 0;">A flowchart of yes/no questions. Easy to explain to clinicians: "If blood pressure > 140 AND age > 60, then high risk." But can overfit.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Random Forests</h4>
+            <p style="font-size: 0.65em; margin: 0;">Many decision trees voting together. More accurate than a single tree, less prone to overfitting. Harder to explain, but feature importance still visible.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8: Regression Models -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Regression Models</h2>
+        <p style="font-size: 0.7em;">When you need to predict a <strong>continuous number</strong>, not a category.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Linear Regression</h4>
+            <p style="font-size: 0.65em; margin: 0;">Finds the best straight line through the data. Predicts: length of hospital stay, treatment cost, recovery time.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Ridge &amp; Lasso</h4>
+            <p style="font-size: 0.65em; margin: 0;">Linear regression with guardrails. Prevents overfitting when you have many features. Lasso can auto-select relevant features.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Gradient Boosting</h4>
+            <p style="font-size: 0.65em; margin: 0;">Builds models in sequence, each fixing errors of the last. XGBoost, LightGBM &mdash; often the most accurate for structured data.</p>
+          </div>
+          <div class="card" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Healthcare Uses</h4>
+            <p style="font-size: 0.65em; margin: 0;">Predict ICU length of stay, insurance claim amounts, patient risk scores, readmission probability (as a score).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9: Ensemble Methods -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Ensemble Methods</h2>
+        <p style="font-size: 0.7em;"><strong>Why combining models beats single models.</strong> The "wisdom of crowds" for machine learning.</p>
+        <div class="card-grid" style="margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Bagging</h4>
+            <p style="font-size: 0.65em; margin: 0;">Train many models on random subsets of data, then average their predictions. Random Forest does this. Reduces overfitting.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Boosting</h4>
+            <p style="font-size: 0.65em; margin: 0;">Train models sequentially, each focusing on the mistakes of the previous one. XGBoost, LightGBM. Often the most accurate.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Stacking</h4>
+            <p style="font-size: 0.65em; margin: 0;">Use different model types and let a meta-model combine their predictions. Logistic regression + tree + SVM, blended by a final learner.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Trade-off:</strong> Ensembles are more accurate but harder to explain. In healthcare, explainability often wins.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 3: Product & Key Decisions                             -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 10: Product Brief -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Product Brief &mdash; What You're Building</h2>
+        <p style="font-size: 0.7em;">A <strong>clinical decision support product</strong> that helps healthcare professionals make better decisions using ML.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Patient Readmission Predictor</h4>
+            <p style="font-size: 0.65em; margin: 0;">Predict which patients will return within 30 days. Target: reduce readmission penalties.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Disease Risk Classifier</h4>
+            <p style="font-size: 0.65em; margin: 0;">Classify patients by disease risk level. Target: prioritize preventive care.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Insurance Fraud Detector</h4>
+            <p style="font-size: 0.65em; margin: 0;">Flag suspicious claims before payout. Target: save millions in fraudulent claims.</p>
+          </div>
+          <div class="card" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Treatment Cost Estimator</h4>
+            <p style="font-size: 0.65em; margin: 0;">Predict treatment costs based on patient profile. Target: transparent pricing.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 11: Key Decision — Feature Selection & Bias -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Key Decision: Feature Selection &amp; Bias</h2>
+        <p style="font-size: 0.7em;"><strong>Which patient features should your model use?</strong> This is an ethical decision, not just a technical one.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Useful Features</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Clinical vitals, lab results</li>
+                <li>Medical history, comorbidities</li>
+                <li>Medication adherence</li>
+                <li>Prior visit patterns</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Dangerous Features</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Race or ethnicity as predictor</li>
+                <li>Zip code (proxy for income/race)</li>
+                <li>Insurance type (proxy for wealth)</li>
+                <li>Language spoken (access barrier)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout warning" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Real case:</strong> Optum's algorithm used healthcare spending as a proxy for health need &mdash; systematically deprioritized Black patients who had less access to care. Feature choice IS bias choice.</p>
+        </div>
+      </section>
+
+      <!-- Slide 12: Key Decision — Threshold Setting -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Key Decision: Threshold Setting</h2>
+        <p style="font-size: 0.7em;">Your model outputs a probability. <strong>You choose where to draw the line.</strong></p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Low Threshold (e.g., 30%)</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Flag more patients as at-risk</li>
+                <li>Catch almost all true positives</li>
+                <li>Many false alarms (alert fatigue)</li>
+                <li>Higher cost, fewer missed cases</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">High Threshold (e.g., 80%)</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Flag only highest-risk patients</li>
+                <li>Very few false alarms</li>
+                <li>Miss some true positives</li>
+                <li>Lower cost, some missed cases</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The question:</strong> Is it worse to miss a sick patient or to overload clinicians with false alarms? This is a business AND ethical decision.</p>
+        </div>
+      </section>
+
+      <!-- Slide 13: Key Decision — Interpretability vs Accuracy -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Key Decision: Interpretability vs. Accuracy</h2>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="background: #059669; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.65em; font-weight: 600;">High Interpretability &mdash; Logistic Regression</div>
+              <div style="background: #0891b2; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.65em; font-weight: 600;">Medium &mdash; Decision Trees, Rules-Based</div>
+              <div style="background: #1a56db; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.65em; font-weight: 600;">Lower &mdash; Random Forest, XGBoost</div>
+              <div style="background: #4338ca; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.65em; font-weight: 600;">Low Interpretability &mdash; Deep Neural Networks</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">In Healthcare</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Clinicians need to know <em>why</em></li>
+                <li>Regulators require explainability</li>
+                <li>"The model said so" is not enough</li>
+                <li>SHAP values can help explain complex models</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Can you sacrifice 2% accuracy for a model a doctor can actually trust and act on?</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 4: Modern AI & Responsible AI                          -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 14: Modern AI — LLMs in Healthcare -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Modern AI: LLMs in Healthcare</h2>
+        <p style="font-size: 0.7em;">Large Language Models are transforming healthcare &mdash; but <strong>they complement, not replace</strong>, classical ML.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">LLM Strengths</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Clinical note summarization</li>
+              <li>Patient communication drafts</li>
+              <li>Medical literature search</li>
+              <li>Coding and billing assistance</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Where Classical ML Wins</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Structured data prediction (vitals, labs)</li>
+              <li>Real-time risk scoring at scale</li>
+              <li>Regulatory approval pathways</li>
+              <li>Auditable, deterministic outputs</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The winning combination:</strong> Classical ML for prediction, LLMs for communication and summarization.</p>
+        </div>
+      </section>
+
+      <!-- Slide 15: Responsible AI in High-Stakes Domains -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Responsible AI in High-Stakes Domains</h2>
+        <div class="card-grid" style="margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Fairness</h4>
+            <p style="font-size: 0.65em; margin: 0;">Does the model perform equally well across demographic groups? Test for disparate impact before deployment.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Transparency</h4>
+            <p style="font-size: 0.65em; margin: 0;">Can you explain how the model reaches its recommendation? Clinicians and patients deserve to understand.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Safety</h4>
+            <p style="font-size: 0.65em; margin: 0;">What happens when the model is wrong? Fail-safes, human-in-the-loop, and graceful degradation are non-negotiable.</p>
+          </div>
+        </div>
+        <div class="callout warning" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Healthcare is a "cannot undo" domain.</strong> A wrong loan decision costs money. A wrong clinical decision costs a life. Your product must reflect this.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 5: Today's Build & Wrap-up                             -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 16: Today's Build -->
+      <section>
+        <span class="week-badge">Week 2</span>
+        <h2>Today's Build &mdash; COC Guided Session</h2>
+        <div class="flow" style="margin-top: 16px;">
+          <span class="flow-step">/analyze<br><em style="color: rgba(255,255,255,0.7);">45 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/todos<br><em style="color: rgba(255,255,255,0.7);">15 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/implement<br><em style="color: rgba(255,255,255,0.7);">60 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/redteam<br><em style="color: rgba(255,255,255,0.7);">15 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">Show &amp; Tell<br><em style="color: rgba(255,255,255,0.7);">15 min</em></span>
+        </div>
+        <div class="columns" style="margin-top: 16px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Your /analyze Focus</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>What healthcare problem are you solving?</li>
+                <li>Who is the user? Clinician? Administrator?</li>
+                <li>What data would you need?</li>
+                <li>Classification or regression?</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Success Criteria</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Working ML model with real predictions</li>
+                <li>Clear feature selection rationale</li>
+                <li>Threshold decision with justification</li>
+                <li>A product someone would actually use</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 17: Next Week Preview -->
+      <section>
+        <span class="week-badge">Next Week</span>
+        <h2>Week 3 &mdash; Finance: Supervised ML II</h2>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.75em; margin: 0;"><strong>Model evaluation goes deep.</strong> You'll learn to measure, compare, and tune models &mdash; then build dashboards.</p>
+        </div>
+        <div class="card-grid" style="margin-top: 16px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Domain</h4>
+            <p style="font-size: 0.65em; margin: 0;">Financial services &mdash; credit risk, fraud detection, portfolio analytics</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">ML Techniques</h4>
+            <p style="font-size: 0.65em; margin: 0;">Confusion matrices, AUC-ROC, hyperparameter tuning, cross-validation</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">New Skill</h4>
+            <p style="font-size: 0.65em; margin: 0;">Interactive dashboarding with Streamlit &mdash; the dashboard IS the product</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 18: Q&A -->
+      <section class="section-divider">
+        <h2>Q&amp;A</h2>
+        <p>Ask me anything</p>
+      </section>
+
+    </div><!-- /.slides -->
+  </div><!-- /.reveal -->
+
+  <!-- Reveal.js -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#1a56db',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#1a56db',
+        lineColor: '#64748b',
+        secondaryColor: '#e8eefb',
+        tertiaryColor: '#f8fafc',
+        fontSize: '16px'
+      },
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      block: {
+        useMaxWidth: true
+      }
+    });
+
+    // Initialize Reveal.js
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      width: 1280,
+      height: 720,
+      margin: 0,
+      center: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      plugins: []
+    });
+
+    // Render Mermaid diagrams after Reveal is ready
+    Reveal.on('ready', async () => {
+      const mermaidDivs = document.querySelectorAll('.mermaid');
+      for (let i = 0; i < mermaidDivs.length; i++) {
+        const el = mermaidDivs[i];
+        const graphDef = el.textContent.trim();
+        el.textContent = '';
+        try {
+          const { svg } = await mermaid.render('mermaid-' + i, graphDef);
+          el.innerHTML = svg;
+        } catch (e) {
+          console.error('Mermaid render error:', e);
+          el.innerHTML = '<pre style="color: red; font-size: 0.6em;">' + e.message + '</pre>';
+        }
+      }
+    });
+
+    // Re-render Mermaid on slide change (for lazy rendering)
+    Reveal.on('slidechanged', () => {
+      window.dispatchEvent(new Event('resize'));
+    });
+  </script>
+</body>
+
+</html>

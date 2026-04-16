@@ -1,0 +1,4 @@
+{"event": "drift-week-78", "action": "fire", "payload": {"event": "drift-week-78", "scenario": "week78", "window_start": "2025-06-23", "window_days": 30, "cultural_anchor": "post_CNY_week_8", "fired_at": "2026-04-16T10:04:18.380576+00:00"}, "timestamp": "2026-04-16T10:04:18.380922+00:00"}
+{"event": "drift-week-78", "action": "undo", "timestamp": "2026-04-16T10:04:18.485344+00:00"}
+{"event": "union-cap", "action": "fire", "payload": {"event": "union-cap", "constraint": "driver_overtime_hours_max", "new_cap": 5, "unit": "hours_per_week", "classification_hint": "hard", "reason": "MOM Employment Act circular tightens OT ceiling for logistics sector", "fired_at": "2026-04-16T10:04:18.589157+00:00"}, "timestamp": "2026-04-16T10:04:18.589719+00:00"}
+{"event": "union-cap", "action": "undo", "timestamp": "2026-04-16T10:04:18.645763+00:00"}

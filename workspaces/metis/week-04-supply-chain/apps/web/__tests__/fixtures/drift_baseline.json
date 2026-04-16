@@ -1,0 +1,16 @@
+{
+  "model_id": "xgb_007",
+  "reference_set": true,
+  "reference_set_at": "2026-04-16T12:00:00+08:00",
+  "reference_window": "training",
+  "feature_means": {
+    "weekday_orders_lag7": 12040.2,
+    "rolling_7d_mean": 11980.5,
+    "depot_distance_km": 22.4
+  },
+  "feature_stds": {
+    "weekday_orders_lag7": 420.1,
+    "rolling_7d_mean": 410.8,
+    "depot_distance_km": 5.1
+  }
+}

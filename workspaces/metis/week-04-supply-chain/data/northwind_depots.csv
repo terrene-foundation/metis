@@ -1,0 +1,4 @@
+depot_id,city,lat,lon,mean_orders,labour_cost_usd_per_hour
+D01,Jurong,1.3329,103.7436,4500,22.5
+D02,Changi,1.3644,103.9915,4000,23.0
+D03,Woodlands,1.4382,103.789,3500,21.75

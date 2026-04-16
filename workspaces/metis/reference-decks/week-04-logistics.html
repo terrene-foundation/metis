@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MGMT655 Week 4 — Logistics: Optimization + MLOps</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+
+  <!-- Custom Theme -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 1: Domain Context & Optimization                       -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 1: Title -->
+      <section class="title-slide">
+        <span class="week-badge">Week 4</span>
+        <h1>Supply Chain AI</h1>
+        <div class="subtitle">Optimization &amp; MLOps</div>
+        <div class="meta">
+          Dr. Jack Hong<br>
+          Singapore Management University<br>
+          MGMT 655 &mdash; 2026 Term 1
+        </div>
+      </section>
+
+      <!-- Slide 2: Domain Context -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Why Supply Chain?</h2>
+        <p style="font-size: 0.7em;">Supply chains are <strong>optimization at scale</strong> &mdash; moving the right things to the right places at the right time, at minimum cost.</p>
+        <div class="stat-grid" style="margin-top: 12px;">
+          <div class="stat">
+            <div class="number">$28T</div>
+            <div class="label">Global Logistics<br>Market (2024)</div>
+          </div>
+          <div class="stat">
+            <div class="number">5&ndash;10%</div>
+            <div class="label">Cost Savings<br>from AI Optimization</div>
+          </div>
+          <div class="stat">
+            <div class="number">$1.6T</div>
+            <div class="label">Lost Revenue from<br>Stockouts (Annual)</div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>COVID exposed fragile supply chains.</strong> Companies with AI-optimized logistics recovered 2&ndash;3x faster. This is no longer a competitive advantage &mdash; it's survival.</p>
+        </div>
+      </section>
+
+      <!-- Slide 3: What Is Optimization? -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>What Is Optimization?</h2>
+        <p style="font-size: 0.7em;"><strong>Different from prediction.</strong> Prediction asks "what will happen?" Optimization asks "what should we do?"</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Predictive AI (Weeks 2&ndash;3)</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Will this patient be readmitted?</li>
+                <li>Will this loan default?</li>
+                <li>What will demand be next month?</li>
+                <li>Output: a prediction</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Prescriptive AI (This Week)</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Which route minimizes fuel cost?</li>
+                <li>How should we allocate inventory?</li>
+                <li>What production schedule is optimal?</li>
+                <li>Output: a recommended action</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Optimization = finding the best solution under constraints.</strong> You have limited trucks, limited time, limited budget &mdash; what's the best you can do?</p>
+        </div>
+      </section>
+
+      <!-- Slide 4: Linear Programming -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Linear Programming</h2>
+        <p style="font-size: 0.7em;"><strong>Resource allocation under constraints.</strong> The mathematical foundation of optimization.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Three Components</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li><strong>Objective:</strong> What to maximize/minimize (cost, time, profit)</li>
+              <li><strong>Variables:</strong> What you can control (routes, quantities, schedules)</li>
+              <li><strong>Constraints:</strong> What you can't change (capacity, budget, deadlines)</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Example: Warehouse Allocation</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li><strong>Objective:</strong> Minimize total shipping cost</li>
+              <li><strong>Variables:</strong> How much to ship from each warehouse</li>
+              <li><strong>Constraints:</strong> Each warehouse has limited stock; each store has minimum demand</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Define the objective and constraints. The solver finds the optimal solution. You judge whether the solution makes business sense.</p>
+        </div>
+      </section>
+
+      <!-- Slide 5: Constraint Optimization -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Constraint Optimization</h2>
+        <p style="font-size: 0.7em;"><strong>When the real world gets complicated.</strong> Not everything is a straight line.</p>
+        <div class="card-grid" style="margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Scheduling</h4>
+            <p style="font-size: 0.65em; margin: 0;">Assign workers to shifts, machines to jobs, vehicles to routes &mdash; all with overlapping constraints (availability, skills, labor laws).</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Routing</h4>
+            <p style="font-size: 0.65em; margin: 0;">Find the cheapest path visiting all delivery points. The "Travelling Salesman Problem" &mdash; one of the most studied optimization problems in history.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Capacity Planning</h4>
+            <p style="font-size: 0.65em; margin: 0;">How many warehouses? Where to put them? How much inventory in each? Balance service levels against storage and transport costs.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6: Genetic / Meta-heuristic Algorithms -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Genetic &amp; Meta-heuristic Algorithms</h2>
+        <p style="font-size: 0.7em;"><strong>When the solution space is too large to search exhaustively.</strong> Inspired by natural evolution.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">How Genetic Algorithms Work</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Start with random solutions (population)</li>
+                <li>Score them (fitness function)</li>
+                <li>Combine the best ones (crossover)</li>
+                <li>Add random changes (mutation)</li>
+                <li>Repeat until good enough</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">When to Use</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Too many combinations to try all</li>
+                <li>No exact mathematical solution</li>
+                <li>"Good enough" is acceptable</li>
+                <li>Multi-objective optimization</li>
+                <li>Examples: route planning, scheduling</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Trade-off:</strong> Genetic algorithms find very good solutions but not guaranteed optimal ones. In practice, 98% optimal delivered in 10 seconds beats 100% optimal computed in 10 hours.</p>
+        </div>
+      </section>
+
+      <!-- Slide 7: Vehicle Route Planning -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Vehicle Route Planning &mdash; Real-World Example</h2>
+        <div class="mermaid" style="margin-top: 12px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff',
+          'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor':
+          '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Orders\nReceived"] --> B["Cluster\nDeliveries"]
+          B --> C["Assign\nVehicles"]
+          C --> D["Optimize\nRoutes"]
+          D --> E["Schedule\nDrivers"]
+          E --> F["Execute &\nTrack"]
+          style A fill:#0891b2,color:#fff,stroke:#0891b2
+          style B fill:#1a56db,color:#fff,stroke:#1a56db
+          style C fill:#1a56db,color:#fff,stroke:#1a56db
+          style D fill:#1a56db,color:#fff,stroke:#1a56db
+          style E fill:#1a56db,color:#fff,stroke:#1a56db
+          style F fill:#059669,color:#fff,stroke:#059669
+        </div>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Constraints</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Vehicle capacity (weight, volume)</li>
+              <li>Time windows (deliver between 9&ndash;12)</li>
+              <li>Driver hours (8-hour shift max)</li>
+              <li>Road restrictions (no trucks on some roads)</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Optimization Goals</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Minimize total distance/fuel</li>
+              <li>Maximize deliveries per route</li>
+              <li>Meet all time windows</li>
+              <li>Balance workload across drivers</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 2: MLOps                                               -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 8: MLOps Introduction -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>MLOps &mdash; After the Model Is Built</h2>
+        <p style="font-size: 0.7em;"><strong>Building a model is 20% of the work. Keeping it running in production is 80%.</strong></p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Without MLOps</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Model works in a notebook</li>
+                <li>Nobody knows which version is deployed</li>
+                <li>Performance degrades silently</li>
+                <li>"It worked on my laptop"</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">With MLOps</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Model deployed as a service</li>
+                <li>Version-controlled experiments</li>
+                <li>Automated monitoring and alerts</li>
+                <li>Systematic retraining pipeline</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9: MLOps Workflow -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>The MLOps Lifecycle</h2>
+        <div class="mermaid" style="margin-top: 16px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff',
+          'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor':
+          '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Train\nModel"] --> B["Validate &\nTest"]
+          B --> C["Deploy to\nProduction"]
+          C --> D["Monitor\nPerformance"]
+          D --> E["Detect\nDrift"]
+          E -.->|"Retrain"| A
+          style A fill:#1a56db,color:#fff,stroke:#1a56db
+          style B fill:#1a56db,color:#fff,stroke:#1a56db
+          style C fill:#059669,color:#fff,stroke:#059669
+          style D fill:#0891b2,color:#fff,stroke:#0891b2
+          style E fill:#d97706,color:#fff,stroke:#d97706
+        </div>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The key insight:</strong> Models are not "done" when deployed. They degrade as the world changes. A supply chain model trained on pre-COVID data is dangerous post-COVID. Continuous monitoring and retraining is essential.</p>
+        </div>
+      </section>
+
+      <!-- Slide 10: Experimentation Sandboxing -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Experimentation Sandboxing &mdash; MLflow</h2>
+        <p style="font-size: 0.7em;"><strong>Track every experiment. Compare every model. Reproduce any result.</strong></p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">What MLflow Tracks</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Parameters: what settings were used</li>
+              <li>Metrics: how the model performed</li>
+              <li>Artifacts: the model file itself</li>
+              <li>Code version: which code produced it</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Why It Matters</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>"Which model is in production?" &mdash; answered</li>
+              <li>"Can we reproduce this result?" &mdash; yes</li>
+              <li>"Is the new model better?" &mdash; compare side-by-side</li>
+              <li>Audit trail for governance</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> MLflow is part of your product's operational infrastructure. COC sets it up; you define what to track and when to promote a model to production.</p>
+        </div>
+      </section>
+
+      <!-- Slide 11: AI Verify -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>AI Verify &mdash; Model Transparency &amp; Governance</h2>
+        <p style="font-size: 0.7em;">Singapore's framework for <strong>testing and certifying AI systems</strong> before deployment.</p>
+        <div class="card-grid" style="margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">What AI Verify Tests</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li><strong>Transparency:</strong> Can you explain the model?</li>
+              <li><strong>Fairness:</strong> Does it treat groups equally?</li>
+              <li><strong>Robustness:</strong> Does it handle edge cases?</li>
+              <li><strong>Safety:</strong> What happens when it fails?</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Why It Matters for Supply Chain</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Optimization affects workers (scheduling)</li>
+              <li>Route decisions impact communities</li>
+              <li>Inventory decisions affect access to goods</li>
+              <li>Automated decisions need human oversight</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Before deploying an optimization model, run it through AI Verify's testing framework. Document what it does, how it decides, and where humans override.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 3: Product & Key Decisions                             -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 12: Product Brief -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Product Brief &mdash; What You're Building</h2>
+        <p style="font-size: 0.7em;">A <strong>supply chain optimization platform</strong> that recommends actions, not just predictions.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Route Optimizer</h4>
+            <p style="font-size: 0.65em; margin: 0;">Optimize delivery routes across a fleet. Minimize cost while meeting all time windows and capacity constraints.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Inventory Planner</h4>
+            <p style="font-size: 0.65em; margin: 0;">Recommend optimal stock levels across warehouses. Balance stockout risk against holding costs.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Workforce Scheduler</h4>
+            <p style="font-size: 0.65em; margin: 0;">Assign workers to shifts meeting demand coverage, skill requirements, and labor regulations.</p>
+          </div>
+          <div class="card" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Demand Forecaster + Replenisher</h4>
+            <p style="font-size: 0.65em; margin: 0;">Predict demand (ML) then optimize replenishment orders (optimization). The full predict-then-prescribe pipeline.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 13: Key Decision — Hard vs Soft Constraints -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Key Decision: Hard vs. Soft Constraints</h2>
+        <p style="font-size: 0.7em;"><strong>Not all constraints are equal.</strong> Some are unbreakable. Others are preferences.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Hard Constraints</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Vehicle capacity (physics)</li>
+                <li>Driver hours (labor law)</li>
+                <li>Temperature requirements (cold chain)</li>
+                <li>Regulatory compliance</li>
+              </ul>
+              <p style="font-size: 0.65em; margin: 8px 0 0 0; color: var(--danger);"><strong>Cannot be violated. Ever.</strong></p>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Soft Constraints</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Preferred delivery windows</li>
+                <li>Driver route preferences</li>
+                <li>Cost targets (desirable but flexible)</li>
+                <li>Service level agreements</li>
+              </ul>
+              <p style="font-size: 0.65em; margin: 8px 0 0 0; color: var(--warning);"><strong>Can be bent. At a cost.</strong></p>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Classify every constraint as hard or soft. Getting this wrong means either infeasible solutions or missed optimization opportunities.</p>
+        </div>
+      </section>
+
+      <!-- Slide 14: Key Decision — Objective Function Design -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Key Decision: Objective Function Design</h2>
+        <p style="font-size: 0.7em;"><strong>What you optimize for defines what you get.</strong> Choose carefully.</p>
+        <div class="card-grid" style="margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Minimize Cost</h4>
+            <p style="font-size: 0.65em; margin: 0;">Cheapest routes, fewest trucks. Risk: slower delivery, worse customer experience, overworked drivers.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Minimize Time</h4>
+            <p style="font-size: 0.65em; margin: 0;">Fastest delivery. Risk: higher cost, more fuel, more vehicles needed.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Maximize Sustainability</h4>
+            <p style="font-size: 0.65em; margin: 0;">Minimize carbon footprint. Risk: slower, possibly more expensive. But increasingly required by ESG mandates.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The real answer is usually multi-objective:</strong> Minimize cost WHILE meeting delivery windows AND staying under carbon targets. You assign the weights.</p>
+        </div>
+      </section>
+
+      <!-- Slide 15: Key Decision — When to Retrain -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Key Decision: When to Retrain</h2>
+        <p style="font-size: 0.7em;"><strong>Detecting model drift</strong> &mdash; when the world changes and your model hasn't.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Types of Drift</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li><strong>Data drift:</strong> input patterns change (new products, new suppliers)</li>
+                <li><strong>Concept drift:</strong> the relationship changes (demand patterns shift post-COVID)</li>
+                <li><strong>Performance drift:</strong> accuracy declines over time</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Retraining Strategies</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li><strong>Scheduled:</strong> retrain weekly/monthly</li>
+                <li><strong>Triggered:</strong> retrain when performance drops below threshold</li>
+                <li><strong>Continuous:</strong> always learning from new data</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> How often should the model retrain? What performance threshold triggers retraining? Who approves the new model before it goes live?</p>
+        </div>
+      </section>
+
+      <!-- Slide 16: Key Decision — Governance Before Deployment -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Key Decision: Governance Before Deployment</h2>
+        <p style="font-size: 0.7em;"><strong>An optimization model that's deployed without governance is a liability.</strong></p>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px;">
+          <div style="background: #dc2626; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.65em; font-weight: 600;">Gate 4: Human Approval &mdash; Final sign-off before production</div>
+          <div style="background: #d97706; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.65em; font-weight: 600;">Gate 3: AI Verify Testing &mdash; Transparency, fairness, robustness checks</div>
+          <div style="background: #1a56db; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.65em; font-weight: 600;">Gate 2: Shadow Deployment &mdash; Run alongside existing system, compare results</div>
+          <div style="background: #0891b2; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.65em; font-weight: 600;">Gate 1: Backtesting &mdash; Test on historical data, validate against known outcomes</div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Define what "good enough" means at each gate. What metrics must the model hit before it's trusted with real supply chain decisions?</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 4: Modern AI & Wrap-up                                 -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 17: Modern AI — AI Agents & Digital Twins -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Modern AI: Agents &amp; Digital Twins</h2>
+        <p style="font-size: 0.7em;">The frontier of supply chain AI goes beyond optimization to <strong>autonomous action</strong>.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">AI Agents for Supply Chain</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Autonomous reordering when stock is low</li>
+              <li>Dynamic rerouting on disruptions</li>
+              <li>Supplier negotiation bots</li>
+              <li>Real-time demand response</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Digital Twins</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Virtual replica of your supply chain</li>
+              <li>Simulate scenarios before acting</li>
+              <li>"What if port X closes for 2 weeks?"</li>
+              <li>Test optimization changes risk-free</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The combination:</strong> Digital twin simulates. Optimization recommends. AI agent executes. Human sets the boundaries and monitors.</p>
+        </div>
+      </section>
+
+      <!-- Slide 18: Today's Build -->
+      <section>
+        <span class="week-badge">Week 4</span>
+        <h2>Today's Build &mdash; COC Full Cycle</h2>
+        <div class="flow" style="margin-top: 16px;">
+          <span class="flow-step">/analyze<br><em style="color: rgba(255,255,255,0.7);">40 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/todos<br><em style="color: rgba(255,255,255,0.7);">10 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/implement<br><em style="color: rgba(255,255,255,0.7);">50 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/redteam<br><em style="color: rgba(255,255,255,0.7);">20 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/codify<br><em style="color: rgba(255,255,255,0.7);">10 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">Show &amp; Tell<br><em style="color: rgba(255,255,255,0.7);">15 min</em></span>
+        </div>
+        <div class="columns" style="margin-top: 16px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Your /analyze Focus</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>What supply chain problem are you solving?</li>
+                <li>What is the objective function?</li>
+                <li>What are the hard vs. soft constraints?</li>
+                <li>How will you monitor the model?</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">New This Week: /redteam</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Instructor-led adversarial review</li>
+                <li>Break the optimization model</li>
+                <li>Find edge cases and failure modes</li>
+                <li>Test governance documentation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 19: Next Week Preview -->
+      <section>
+        <span class="week-badge">Next Week</span>
+        <h2>Week 5 &mdash; Retail: Unsupervised ML + RAG</h2>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.75em; margin: 0;"><strong>From labeled data to discovering hidden patterns.</strong> Unsupervised ML finds structure in data nobody labeled &mdash; customer segments, anomalies, and associations.</p>
+        </div>
+        <div class="card-grid" style="margin-top: 16px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Domain</h4>
+            <p style="font-size: 0.65em; margin: 0;">Retail &mdash; customer segmentation, recommendation engines, market basket analysis</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">ML Techniques</h4>
+            <p style="font-size: 0.65em; margin: 0;">K-means clustering, hierarchical clustering, PCA, association rules, RAG systems</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">New Skill</h4>
+            <p style="font-size: 0.65em; margin: 0;">RAG (Retrieval-Augmented Generation) &mdash; connecting LLMs to your proprietary data</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 20: Q&A -->
+      <section class="section-divider">
+        <h2>Q&amp;A</h2>
+        <p>Ask me anything</p>
+      </section>
+
+    </div><!-- /.slides -->
+  </div><!-- /.reveal -->
+
+  <!-- Reveal.js -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#1a56db',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#1a56db',
+        lineColor: '#64748b',
+        secondaryColor: '#e8eefb',
+        tertiaryColor: '#f8fafc',
+        fontSize: '16px'
+      },
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      block: {
+        useMaxWidth: true
+      }
+    });
+
+    // Initialize Reveal.js
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      width: 1280,
+      height: 720,
+      margin: 0,
+      center: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      plugins: []
+    });
+
+    // Render Mermaid diagrams after Reveal is ready
+    Reveal.on('ready', async () => {
+      const mermaidDivs = document.querySelectorAll('.mermaid');
+      for (let i = 0; i < mermaidDivs.length; i++) {
+        const el = mermaidDivs[i];
+        const graphDef = el.textContent.trim();
+        el.textContent = '';
+        try {
+          const { svg } = await mermaid.render('mermaid-' + i, graphDef);
+          el.innerHTML = svg;
+        } catch (e) {
+          console.error('Mermaid render error:', e);
+          el.innerHTML = '<pre style="color: red; font-size: 0.6em;">' + e.message + '</pre>';
+        }
+      }
+    });
+
+    // Re-render Mermaid on slide change (for lazy rendering)
+    Reveal.on('slidechanged', () => {
+      window.dispatchEvent(new Event('resize'));
+    });
+  </script>
+</body>
+
+</html>

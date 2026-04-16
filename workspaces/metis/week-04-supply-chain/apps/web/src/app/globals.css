@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Spec: viewer-pane.md §1 — Tailwind only, no custom CSS beyond
+ * the three @tailwind directives + a minimal :root for base colours.
+ * Any additional styling must be expressed as utility classes on
+ * the components themselves. */
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}

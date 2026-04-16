@@ -1,0 +1,33 @@
+{
+  "experiment_run_id": "xgb_007_20260416_143012",
+  "generated_at": "2026-04-16T14:30:12+08:00",
+  "entries": [
+    {
+      "family": "sklearn.ensemble.GradientBoostingRegressor",
+      "params_hash": "gb_42",
+      "mape": 7.2,
+      "rmse": 12.1,
+      "fold_variance": 0.41,
+      "training_duration_s": 14.2,
+      "run_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"
+    },
+    {
+      "family": "sklearn.linear_model.Ridge",
+      "params_hash": "ridge_11",
+      "mape": 9.8,
+      "rmse": 16.4,
+      "fold_variance": 0.22,
+      "training_duration_s": 2.1,
+      "run_id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e"
+    },
+    {
+      "family": "sklearn.linear_model.LinearRegression",
+      "params_hash": "lr_01",
+      "mape": 10.4,
+      "rmse": 17.1,
+      "fold_variance": 0.18,
+      "training_duration_s": 0.8,
+      "run_id": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f"
+    }
+  ]
+}

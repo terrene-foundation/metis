@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MGMT655 Week 3 — Finance: Supervised ML II + Dashboarding</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+
+  <!-- Custom Theme -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 1: Domain Context & Model Evaluation                   -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 1: Title -->
+      <section class="title-slide">
+        <span class="week-badge">Week 3</span>
+        <h1>Financial Services AI</h1>
+        <div class="subtitle">Model Evaluation &amp; Dashboarding</div>
+        <div class="meta">
+          Dr. Jack Hong<br>
+          Singapore Management University<br>
+          MGMT 655 &mdash; 2026 Term 1
+        </div>
+      </section>
+
+      <!-- Slide 2: Domain Context -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Why Finance?</h2>
+        <p style="font-size: 0.7em;">Finance runs on <strong>risk quantification</strong>. Every lending decision, insurance policy, and trading strategy is a prediction about the future.</p>
+        <div class="stat-grid" style="margin-top: 12px;">
+          <div class="stat">
+            <div class="number">$5.3T</div>
+            <div class="label">Daily Forex<br>Trading Volume</div>
+          </div>
+          <div class="stat">
+            <div class="number">$48B</div>
+            <div class="label">Global Fraud<br>Losses (2023)</div>
+          </div>
+          <div class="stat">
+            <div class="number">80%</div>
+            <div class="label">Of Financial Firms<br>Use ML</div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>ML in finance isn't optional &mdash; it's the industry standard.</strong> Credit scoring, fraud detection, algorithmic trading, and regulatory compliance all run on models.</p>
+        </div>
+      </section>
+
+      <!-- Slide 3: Model Evaluation Deep Dive -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Model Evaluation Deep Dive</h2>
+        <p style="font-size: 0.7em;"><strong>"How good is the model?"</strong> has many answers. The right metric depends on the business problem.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Accuracy</h4>
+            <p style="font-size: 0.65em; margin: 0;">What % of predictions are correct? Misleading when classes are imbalanced &mdash; a model that says "no fraud" 99% of the time is 99% accurate but useless.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Precision</h4>
+            <p style="font-size: 0.65em; margin: 0;">Of all flagged items, how many were truly positive? High precision = few false alarms. Critical when flagging is expensive (freezing accounts).</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Recall</h4>
+            <p style="font-size: 0.65em; margin: 0;">Of all actual positives, how many did we catch? High recall = few missed cases. Critical when missing something is costly (fraud, defaults).</p>
+          </div>
+          <div class="card" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">F1 Score</h4>
+            <p style="font-size: 0.65em; margin: 0;">The balance between precision and recall. Use when you need both: catch fraud without harassing legitimate customers.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4: The Confusion Matrix -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>The Confusion Matrix</h2>
+        <p style="font-size: 0.7em;">Every prediction falls into one of four boxes. Understanding this grid is the key to choosing the right metric.</p>
+        <table style="margin-top: 12px;">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Predicted: Fraud</th>
+              <th>Predicted: Legitimate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Actually Fraud</strong></td>
+              <td style="background: #dcfce7; color: #059669; font-weight: 600;">True Positive &mdash; Caught it!</td>
+              <td style="background: #fef2f2; color: #dc2626; font-weight: 600;">False Negative &mdash; Missed fraud</td>
+            </tr>
+            <tr>
+              <td><strong>Actually Legitimate</strong></td>
+              <td style="background: #fffbeb; color: #d97706; font-weight: 600;">False Positive &mdash; False alarm</td>
+              <td style="background: #dcfce7; color: #059669; font-weight: 600;">True Negative &mdash; Correct</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>In fraud detection:</strong> False negatives (missed fraud) cost money. False positives (blocking legitimate customers) cost trust. You decide the balance.</p>
+        </div>
+      </section>
+
+      <!-- Slide 5: AUC-ROC -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>AUC-ROC &mdash; The Model's Report Card</h2>
+        <p style="font-size: 0.7em;">The ROC curve shows how well your model separates positives from negatives <strong>across all possible thresholds</strong>.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">How to Read It</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li><strong>AUC = 1.0</strong> &mdash; Perfect separation</li>
+                <li><strong>AUC = 0.9</strong> &mdash; Excellent model</li>
+                <li><strong>AUC = 0.7</strong> &mdash; Acceptable</li>
+                <li><strong>AUC = 0.5</strong> &mdash; Random coin flip</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Business Translation</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>AUC tells you overall discrimination power</li>
+                <li>Does NOT tell you the best threshold</li>
+                <li>A high AUC model can still be poorly calibrated</li>
+                <li>Compare models, then tune the threshold</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> AUC picks the best model. Then YOU set the threshold based on business costs.</p>
+        </div>
+      </section>
+
+      <!-- Slide 6: Hyperparameter Tuning -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Hyperparameter Tuning</h2>
+        <p style="font-size: 0.7em;"><strong>Fine-tuning the model's settings</strong> &mdash; like adjusting the knobs on an amplifier to get the best sound.</p>
+        <div class="card-grid" style="margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Grid Search</h4>
+            <p style="font-size: 0.65em; margin: 0;">Try every combination of settings. Thorough but slow. Good when you have few parameters to tune.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Random Search</h4>
+            <p style="font-size: 0.65em; margin: 0;">Randomly sample combinations. Surprisingly effective and much faster. Often finds good settings with fewer tries.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Bayesian Optimization</h4>
+            <p style="font-size: 0.65em; margin: 0;">Learns from previous attempts to make smarter guesses. The most efficient approach. COC handles this for you.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> COC tunes the model. You decide: is the improvement worth the added complexity?</p>
+        </div>
+      </section>
+
+      <!-- Slide 7: Cross-Validation -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Cross-Validation</h2>
+        <p style="font-size: 0.7em;"><strong>Why a single train/test split isn't enough.</strong> One lucky split can make a bad model look good.</p>
+        <div class="mermaid" style="margin-top: 12px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff',
+          'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor':
+          '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Full\nDataset"] --> B["Fold 1\nTest"]
+          A --> C["Fold 2\nTest"]
+          A --> D["Fold 3\nTest"]
+          A --> E["Fold 4\nTest"]
+          A --> F["Fold 5\nTest"]
+          B --> G["Average\nScore"]
+          C --> G
+          D --> G
+          E --> G
+          F --> G
+          style A fill:#1a56db,color:#fff,stroke:#1a56db
+          style B fill:#0891b2,color:#fff,stroke:#0891b2
+          style C fill:#0891b2,color:#fff,stroke:#0891b2
+          style D fill:#0891b2,color:#fff,stroke:#0891b2
+          style E fill:#0891b2,color:#fff,stroke:#0891b2
+          style F fill:#0891b2,color:#fff,stroke:#0891b2
+          style G fill:#059669,color:#fff,stroke:#059669
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>K-Fold Cross-Validation:</strong> Split data into K parts. Train on K-1, test on 1. Repeat K times. Average the results. This gives you a reliable performance estimate.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 2: Dashboarding & Product                              -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 8: Interactive Dashboarding -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Interactive Dashboarding</h2>
+        <p style="font-size: 0.7em;"><strong>The dashboard IS the product.</strong> A model without a user interface is a science project, not a business tool.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">What a Dashboard Does</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Makes model outputs actionable</li>
+                <li>Lets users explore and filter</li>
+                <li>Turns predictions into decisions</li>
+                <li>Provides self-service analytics</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Design Principles</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Most important info at the top</li>
+                <li>Filters for drilling down</li>
+                <li>Clear labels, no jargon</li>
+                <li>Action buttons, not just charts</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9: Streamlit -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Streamlit &mdash; Self-Service Analytics</h2>
+        <p style="font-size: 0.7em;">Streamlit turns Python scripts into interactive web apps. <strong>COC builds these for you.</strong></p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">What You Get</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Interactive charts and tables</li>
+              <li>Sliders, dropdowns, filters</li>
+              <li>Real-time model predictions</li>
+              <li>Downloadable reports</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Why Streamlit?</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Fast prototyping (minutes, not days)</li>
+              <li>No frontend skills needed</li>
+              <li>Built-in data visualization</li>
+              <li>Easy to share and deploy</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> What should the dashboard show? Who uses it? What actions should it enable?</p>
+        </div>
+      </section>
+
+      <!-- Slide 10: Product Brief -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Product Brief &mdash; What You're Building</h2>
+        <p style="font-size: 0.7em;">A <strong>financial analytics platform</strong> with interactive dashboards powered by evaluated, tuned ML models.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Credit Risk Platform</h4>
+            <p style="font-size: 0.65em; margin: 0;">Score loan applicants, visualize portfolio risk, simulate threshold changes. Dashboard shows impact on defaults and revenue.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Fraud Detection Console</h4>
+            <p style="font-size: 0.65em; margin: 0;">Real-time transaction monitoring, flagged cases queue, investigation workflow. Dashboard shows catch rate and false alarm cost.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Investment Analytics</h4>
+            <p style="font-size: 0.65em; margin: 0;">Portfolio performance prediction, risk factor analysis, scenario planning. Dashboard shows projected returns and risk exposure.</p>
+          </div>
+          <div class="card" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Insurance Claims Predictor</h4>
+            <p style="font-size: 0.65em; margin: 0;">Predict claim severity, auto-triage cases, fraud flagging. Dashboard shows claims pipeline and predicted payouts.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 3: Key Decisions                                       -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 11: Key Decision — Which Metric? -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Key Decision: Which Metric?</h2>
+        <p style="font-size: 0.7em;"><strong>Precision vs. recall in lending has real dollar costs.</strong></p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Optimize for Precision</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Fewer false alarms</li>
+                <li>Only flag truly risky applicants</li>
+                <li>More defaults slip through</li>
+                <li>Cost: bad loans that default</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Optimize for Recall</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Catch all risky applicants</li>
+                <li>Reject more borderline cases</li>
+                <li>Turn away good customers</li>
+                <li>Cost: lost revenue from rejections</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Calculate it:</strong> If the average default costs $50K and the average rejected good loan earns $5K in interest &mdash; the math says optimize for recall. But customer relationships matter too.</p>
+        </div>
+      </section>
+
+      <!-- Slide 12: Key Decision — Fairness Audit -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Key Decision: Fairness Audit</h2>
+        <p style="font-size: 0.7em;"><strong>Does your model discriminate?</strong> In finance, this is both an ethical imperative and a regulatory requirement.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Check For</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Different approval rates by gender, age, race</li>
+              <li>Proxy variables that encode bias</li>
+              <li>Disparate impact in model outputs</li>
+              <li>Training data representativeness</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Regulatory Context</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li><strong>MAS:</strong> FEAT Principles (Singapore)</li>
+              <li><strong>EU AI Act:</strong> High-risk AI classification</li>
+              <li><strong>US:</strong> Fair lending laws (ECOA, FHA)</li>
+              <li>Explainability is a compliance requirement</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout warning" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Run fairness checks on your model's output. If approval rates differ significantly by demographic group, you need to understand why &mdash; before deployment.</p>
+        </div>
+      </section>
+
+      <!-- Slide 13: Key Decision — Dashboard Design -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Key Decision: Dashboard Design</h2>
+        <p style="font-size: 0.7em;"><strong>Information vs. overload.</strong> A dashboard that shows everything helps nobody.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Good Dashboard</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>3&ndash;5 key metrics visible at once</li>
+                <li>Clear hierarchy: summary then detail</li>
+                <li>Actionable: "What should I do?"</li>
+                <li>Progressive disclosure: drill down</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Bad Dashboard</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>20 charts on one screen</li>
+                <li>No clear takeaway</li>
+                <li>Informational: "Interesting, but so what?"</li>
+                <li>Requires training to understand</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The test:</strong> Can a new user look at your dashboard for 30 seconds and know what to do next? If not, redesign.</p>
+        </div>
+      </section>
+
+      <!-- Slide 14: Key Decision — Threshold Economics -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Key Decision: Threshold Economics</h2>
+        <p style="font-size: 0.7em;"><strong>The profit-maximizing threshold is not always the fairness-maximizing threshold.</strong></p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Profit-Maximizing</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Set threshold where marginal revenue = marginal cost of default</li>
+                <li>May systematically exclude certain groups</li>
+                <li>Optimizes for the company</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Fairness-Maximizing</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Equalize acceptance rates across groups</li>
+                <li>May reduce short-term profit</li>
+                <li>Builds trust and meets regulatory requirements</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Where on the profit-fairness spectrum does your product sit? This is a strategic choice that defines your brand.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 4: Modern AI & Governance                              -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 15: Modern AI — LLMs for Financial Documents -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Modern AI: LLMs for Financial Documents</h2>
+        <p style="font-size: 0.7em;">Financial services generate mountains of unstructured text. LLMs can read it all.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">LLM Use Cases</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Earnings call summarization</li>
+              <li>Contract clause extraction</li>
+              <li>Regulatory filing analysis</li>
+              <li>Customer complaint categorization</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Integration Pattern</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Classical ML: structured risk scoring</li>
+              <li>LLM: unstructured text analysis</li>
+              <li>Dashboard: combined intelligence</li>
+              <li>Human: final decision authority</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The combination:</strong> Your credit risk model scores the numbers. An LLM reads the applicant's business plan. The dashboard shows both. You decide.</p>
+        </div>
+      </section>
+
+      <!-- Slide 16: AI Governance -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>AI Governance Frameworks</h2>
+        <p style="font-size: 0.7em;">Financial AI is <strong>heavily regulated</strong>. Know the frameworks before you build.</p>
+        <div class="card-grid" style="margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Singapore AI Verify</h4>
+            <p style="font-size: 0.65em; margin: 0;">IMDA's AI governance testing framework. Tests for transparency, fairness, robustness, and accountability. Voluntary but industry-standard.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">MAS FEAT Principles</h4>
+            <p style="font-size: 0.65em; margin: 0;">Fairness, Ethics, Accountability, Transparency. Specific to financial institutions in Singapore. Your product must align.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">EU AI Act</h4>
+            <p style="font-size: 0.65em; margin: 0;">Risk-based classification. Credit scoring is "high-risk" &mdash; requires conformity assessment, documentation, and human oversight.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 5: Today's Build & Wrap-up                             -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 17: Today's Build -->
+      <section>
+        <span class="week-badge">Week 3</span>
+        <h2>Today's Build &mdash; COC Scaffolded Session</h2>
+        <div class="flow" style="margin-top: 16px;">
+          <span class="flow-step">/analyze<br><em style="color: rgba(255,255,255,0.7);">45 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/todos<br><em style="color: rgba(255,255,255,0.7);">15 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/implement<br><em style="color: rgba(255,255,255,0.7);">60 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/redteam<br><em style="color: rgba(255,255,255,0.7);">15 min</em></span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">Show &amp; Tell<br><em style="color: rgba(255,255,255,0.7);">15 min</em></span>
+        </div>
+        <div class="columns" style="margin-top: 16px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Your /analyze Focus</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>What financial problem are you solving?</li>
+                <li>Which evaluation metric matters most?</li>
+                <li>Who uses the dashboard?</li>
+                <li>What actions should it enable?</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Success Criteria</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Tuned model with documented metrics</li>
+                <li>Interactive Streamlit dashboard</li>
+                <li>Threshold decision with cost justification</li>
+                <li>Fairness check completed</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 18: Next Week Preview -->
+      <section>
+        <span class="week-badge">Next Week</span>
+        <h2>Week 4 &mdash; Logistics: Optimization + MLOps</h2>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.75em; margin: 0;"><strong>From prediction to prescription.</strong> You'll move beyond "what will happen" to "what should we do" &mdash; and learn what happens after the model is deployed.</p>
+        </div>
+        <div class="card-grid" style="margin-top: 16px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Domain</h4>
+            <p style="font-size: 0.65em; margin: 0;">Supply chain &amp; logistics &mdash; route optimization, inventory management, demand forecasting</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">ML Techniques</h4>
+            <p style="font-size: 0.65em; margin: 0;">Linear programming, constraint optimization, genetic algorithms, MLOps fundamentals</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">New Skill</h4>
+            <p style="font-size: 0.65em; margin: 0;">MLOps &mdash; deploying, monitoring, and retraining models in production</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 19: Q&A -->
+      <section class="section-divider">
+        <h2>Q&amp;A</h2>
+        <p>Ask me anything</p>
+      </section>
+
+    </div><!-- /.slides -->
+  </div><!-- /.reveal -->
+
+  <!-- Reveal.js -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#1a56db',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#1a56db',
+        lineColor: '#64748b',
+        secondaryColor: '#e8eefb',
+        tertiaryColor: '#f8fafc',
+        fontSize: '16px'
+      },
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      block: {
+        useMaxWidth: true
+      }
+    });
+
+    // Initialize Reveal.js
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      width: 1280,
+      height: 720,
+      margin: 0,
+      center: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      plugins: []
+    });
+
+    // Render Mermaid diagrams after Reveal is ready
+    Reveal.on('ready', async () => {
+      const mermaidDivs = document.querySelectorAll('.mermaid');
+      for (let i = 0; i < mermaidDivs.length; i++) {
+        const el = mermaidDivs[i];
+        const graphDef = el.textContent.trim();
+        el.textContent = '';
+        try {
+          const { svg } = await mermaid.render('mermaid-' + i, graphDef);
+          el.innerHTML = svg;
+        } catch (e) {
+          console.error('Mermaid render error:', e);
+          el.innerHTML = '<pre style="color: red; font-size: 0.6em;">' + e.message + '</pre>';
+        }
+      }
+    });
+
+    // Re-render Mermaid on slide change (for lazy rendering)
+    Reveal.on('slidechanged', () => {
+      window.dispatchEvent(new Event('resize'));
+    });
+  </script>
+</body>
+
+</html>

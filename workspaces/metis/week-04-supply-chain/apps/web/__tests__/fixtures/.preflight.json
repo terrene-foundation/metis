@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "db": true,
+  "feature_store": true,
+  "drift_wiring": true,
+  "xgb_available": false,
+  "explain_available": true,
+  "ortools_available": true,
+  "pulp_available": true
+}

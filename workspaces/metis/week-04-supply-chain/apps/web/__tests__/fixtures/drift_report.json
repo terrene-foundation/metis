@@ -1,0 +1,30 @@
+{
+  "model_id": "xgb_007",
+  "overall_severity": "moderate",
+  "checked_at": "2026-04-16T14:45:00+08:00",
+  "tests": [
+    {
+      "name": "psi",
+      "feature": "weekday_orders_lag7",
+      "statistic": 0.18,
+      "alert": true
+    },
+    {
+      "name": "ks",
+      "feature": "rolling_7d_mean",
+      "statistic": 0.11,
+      "p_value": 0.032,
+      "alert": true
+    },
+    {
+      "name": "psi",
+      "feature": "depot_distance_km",
+      "statistic": 0.04,
+      "alert": false
+    }
+  ],
+  "recommendations": [
+    "Investigate upstream weekday_orders_lag7 feature — PSI above 0.1 threshold.",
+    "Consider retraining on the post-week-78 window; baseline was trained before the drift event."
+  ]
+}

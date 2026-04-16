@@ -1,0 +1,41 @@
+{
+  "scenario_tag": null,
+  "feasibility": true,
+  "optimality_gap": 0.02,
+  "objective_value": 12840.5,
+  "solver": "ortools-cp-sat",
+  "wallclock_s": 6.4,
+  "hard_constraints_satisfied": {
+    "vehicle_capacity": true,
+    "delivery_window": true
+  },
+  "routes": [
+    {
+      "driver_id": "DR01",
+      "depot_id": "D01",
+      "stops": [
+        {
+          "customer_id": "C0001",
+          "lat": 1.2966,
+          "lon": 103.7764,
+          "eta": "09:15"
+        },
+        {
+          "customer_id": "C0042",
+          "lat": 1.3021,
+          "lon": 103.7865,
+          "eta": "09:38"
+        }
+      ],
+      "distance_km": 24.1,
+      "overtime_hours": 0.0,
+      "sla_violations": 0
+    }
+  ],
+  "kpi": {
+    "total_distance_km": 412.8,
+    "total_overtime_hours": 1.5,
+    "total_sla_violations": 2,
+    "total_cost_usd": 12840.5
+  }
+}

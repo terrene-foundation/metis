@@ -1,0 +1,634 @@
+{
+  "generated_at": "2026-04-15T22:30:00+00:00",
+  "kailash_ml_version": "pinned-by-preflight",
+  "search_strategy": "bayesian",
+  "n_trials": 30,
+  "candidate_families": [
+    "sklearn.linear_model.LinearRegression",
+    "sklearn.linear_model.Ridge",
+    "sklearn.ensemble.RandomForestRegressor",
+    "sklearn.ensemble.GradientBoostingRegressor",
+    "xgboost.XGBRegressor"
+  ],
+  "eval_spec": {
+    "split_strategy": "walk_forward",
+    "n_splits": 6,
+    "test_size": 0.2,
+    "metric_optimised": "mape"
+  },
+  "runs": [
+    {
+      "run_id": "0d1583b7-06d0-405d-9b22-4265b28a6b6f",
+      "alias": "xgb_005_20260415_225915",
+      "model_class": "xgboost.XGBRegressor",
+      "params_hash": "beeca4bf",
+      "params": {
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.056,
+        "subsample": 0.79,
+        "random_state": 2049
+      },
+      "metrics": {
+        "mape": 0.0592,
+        "rmse": 37.94,
+        "mae": 27.77,
+        "fold_variance": 0.0032
+      },
+      "training_duration_s": 18.6,
+      "tracker_run_id": "0d1583b7-06d0-405d-9b22-4265b28a6b6f",
+      "created_at": "2026-04-15T22:59:15+00:00"
+    },
+    {
+      "run_id": "bbd00abe-5547-455a-bebf-09c7daf19451",
+      "alias": "xgb_002_20260415_224354",
+      "model_class": "xgboost.XGBRegressor",
+      "params_hash": "dd14651e",
+      "params": {
+        "n_estimators": 180,
+        "max_depth": 6,
+        "learning_rate": 0.066,
+        "subsample": 0.9,
+        "random_state": 2036
+      },
+      "metrics": {
+        "mape": 0.0632,
+        "rmse": 38.33,
+        "mae": 26.26,
+        "fold_variance": 0.0032
+      },
+      "training_duration_s": 22.6,
+      "tracker_run_id": "bbd00abe-5547-455a-bebf-09c7daf19451",
+      "created_at": "2026-04-15T22:43:54+00:00"
+    },
+    {
+      "run_id": "389bbabe-a9e8-4a77-922a-b6e3d46ef810",
+      "alias": "xgb_003_20260415_230150",
+      "model_class": "xgboost.XGBRegressor",
+      "params_hash": "7026b304",
+      "params": {
+        "n_estimators": 180,
+        "max_depth": 6,
+        "learning_rate": 0.069,
+        "subsample": 0.99,
+        "random_state": 2037
+      },
+      "metrics": {
+        "mape": 0.0637,
+        "rmse": 39.72,
+        "mae": 28.59,
+        "fold_variance": 0.004
+      },
+      "training_duration_s": 19.0,
+      "tracker_run_id": "389bbabe-a9e8-4a77-922a-b6e3d46ef810",
+      "created_at": "2026-04-15T23:01:50+00:00"
+    },
+    {
+      "run_id": "6de66ba0-e22a-4c30-aaf8-af27799632bb",
+      "alias": "xgb_001_20260415_231203",
+      "model_class": "xgboost.XGBRegressor",
+      "params_hash": "c4bb9b27",
+      "params": {
+        "n_estimators": 300,
+        "max_depth": 4,
+        "learning_rate": 0.046,
+        "subsample": 0.85,
+        "random_state": 2028
+      },
+      "metrics": {
+        "mape": 0.0638,
+        "rmse": 47.15,
+        "mae": 32.95,
+        "fold_variance": 0.0023
+      },
+      "training_duration_s": 16.6,
+      "tracker_run_id": "6de66ba0-e22a-4c30-aaf8-af27799632bb",
+      "created_at": "2026-04-15T23:12:03+00:00"
+    },
+    {
+      "run_id": "526115ca-8db8-412d-aeea-ed24afde746d",
+      "alias": "gbm_005_20260415_224614",
+      "model_class": "sklearn.ensemble.GradientBoostingRegressor",
+      "params_hash": "50406b22",
+      "params": {
+        "n_estimators": 180,
+        "max_depth": 4,
+        "learning_rate": 0.094,
+        "random_state": 2047
+      },
+      "metrics": {
+        "mape": 0.0647,
+        "rmse": 44.23,
+        "mae": 30.13,
+        "fold_variance": 0.0023
+      },
+      "training_duration_s": 16.8,
+      "tracker_run_id": "526115ca-8db8-412d-aeea-ed24afde746d",
+      "created_at": "2026-04-15T22:46:14+00:00"
+    },
+    {
+      "run_id": "c71785b8-c5e9-4546-8f6a-82ceb9d2d8a0",
+      "alias": "rf_004_20260415_232101",
+      "model_class": "sklearn.ensemble.RandomForestRegressor",
+      "params_hash": "2ad61556",
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 10,
+        "min_samples_split": 2,
+        "random_state": 2043
+      },
+      "metrics": {
+        "mape": 0.0652,
+        "rmse": 49.69,
+        "mae": 34.67,
+        "fold_variance": 0.0037
+      },
+      "training_duration_s": 24.6,
+      "tracker_run_id": "c71785b8-c5e9-4546-8f6a-82ceb9d2d8a0",
+      "created_at": "2026-04-15T23:21:01+00:00"
+    },
+    {
+      "run_id": "e67f3990-78b0-4598-b589-c96ee9f5606b",
+      "alias": "rf_001_20260415_231741",
+      "model_class": "sklearn.ensemble.RandomForestRegressor",
+      "params_hash": "d0799622",
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 6,
+        "min_samples_split": 4,
+        "random_state": 2027
+      },
+      "metrics": {
+        "mape": 0.066,
+        "rmse": 51.13,
+        "mae": 37.21,
+        "fold_variance": 0.0033
+      },
+      "training_duration_s": 23.9,
+      "tracker_run_id": "e67f3990-78b0-4598-b589-c96ee9f5606b",
+      "created_at": "2026-04-15T23:17:41+00:00"
+    },
+    {
+      "run_id": "370aab00-d561-415a-a808-4c5fbbefa6f6",
+      "alias": "xgb_004_20260415_231119",
+      "model_class": "xgboost.XGBRegressor",
+      "params_hash": "b23c4922",
+      "params": {
+        "n_estimators": 180,
+        "max_depth": 8,
+        "learning_rate": 0.072,
+        "subsample": 0.82,
+        "random_state": 2038
+      },
+      "metrics": {
+        "mape": 0.0688,
+        "rmse": 51.12,
+        "mae": 37.34,
+        "fold_variance": 0.0025
+      },
+      "training_duration_s": 7.0,
+      "tracker_run_id": "370aab00-d561-415a-a808-4c5fbbefa6f6",
+      "created_at": "2026-04-15T23:11:19+00:00"
+    },
+    {
+      "run_id": "a9e7c193-6341-42f0-bdb6-906a7bc50fcc",
+      "alias": "gbm_001_20260415_231753",
+      "model_class": "sklearn.ensemble.GradientBoostingRegressor",
+      "params_hash": "08ab411e",
+      "params": {
+        "n_estimators": 240,
+        "max_depth": 4,
+        "learning_rate": 0.063,
+        "random_state": 2029
+      },
+      "metrics": {
+        "mape": 0.0699,
+        "rmse": 50.61,
+        "mae": 35.54,
+        "fold_variance": 0.0028
+      },
+      "training_duration_s": 18.5,
+      "tracker_run_id": "a9e7c193-6341-42f0-bdb6-906a7bc50fcc",
+      "created_at": "2026-04-15T23:17:53+00:00"
+    },
+    {
+      "run_id": "d121a93e-c273-48c9-9e47-4595763997a3",
+      "alias": "rf_002_20260415_224117",
+      "model_class": "sklearn.ensemble.RandomForestRegressor",
+      "params_hash": "7a5661b2",
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "min_samples_split": 2,
+        "random_state": 2033
+      },
+      "metrics": {
+        "mape": 0.0713,
+        "rmse": 51.38,
+        "mae": 36.68,
+        "fold_variance": 0.0042
+      },
+      "training_duration_s": 23.8,
+      "tracker_run_id": "d121a93e-c273-48c9-9e47-4595763997a3",
+      "created_at": "2026-04-15T22:41:17+00:00"
+    },
+    {
+      "run_id": "9b87305c-8fa7-4a03-a96a-c0d9d06fb49a",
+      "alias": "ridge_001_20260415_232649",
+      "model_class": "sklearn.linear_model.Ridge",
+      "params_hash": "05b0fbd4",
+      "params": {
+        "alpha": 4.925,
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0723,
+        "rmse": 47.71,
+        "mae": 33.25,
+        "fold_variance": 0.0035
+      },
+      "training_duration_s": 6.9,
+      "tracker_run_id": "9b87305c-8fa7-4a03-a96a-c0d9d06fb49a",
+      "created_at": "2026-04-15T23:26:49+00:00"
+    },
+    {
+      "run_id": "1bf55533-2811-4cc6-a00f-d383c2474c34",
+      "alias": "xgb_006_20260415_231834",
+      "model_class": "xgboost.XGBRegressor",
+      "params_hash": "29273b7b",
+      "params": {
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.061,
+        "subsample": 0.94,
+        "random_state": 2052
+      },
+      "metrics": {
+        "mape": 0.073,
+        "rmse": 58.06,
+        "mae": 41.42,
+        "fold_variance": 0.0045
+      },
+      "training_duration_s": 17.9,
+      "tracker_run_id": "1bf55533-2811-4cc6-a00f-d383c2474c34",
+      "created_at": "2026-04-15T23:18:34+00:00"
+    },
+    {
+      "run_id": "6ba0f59e-e559-494c-83bc-072900a2ef1a",
+      "alias": "gbm_003_20260415_232738",
+      "model_class": "sklearn.ensemble.GradientBoostingRegressor",
+      "params_hash": "ba9db3a7",
+      "params": {
+        "n_estimators": 120,
+        "max_depth": 5,
+        "learning_rate": 0.097,
+        "random_state": 2031
+      },
+      "metrics": {
+        "mape": 0.0731,
+        "rmse": 48.48,
+        "mae": 34.62,
+        "fold_variance": 0.0027
+      },
+      "training_duration_s": 22.8,
+      "tracker_run_id": "6ba0f59e-e559-494c-83bc-072900a2ef1a",
+      "created_at": "2026-04-15T23:27:38+00:00"
+    },
+    {
+      "run_id": "482f9156-0cae-4290-a0e5-28ab661b7dd1",
+      "alias": "gbm_004_20260415_230602",
+      "model_class": "sklearn.ensemble.GradientBoostingRegressor",
+      "params_hash": "c6ca8e2f",
+      "params": {
+        "n_estimators": 180,
+        "max_depth": 4,
+        "learning_rate": 0.052,
+        "random_state": 2035
+      },
+      "metrics": {
+        "mape": 0.0738,
+        "rmse": 45.27,
+        "mae": 32.43,
+        "fold_variance": 0.0041
+      },
+      "training_duration_s": 18.1,
+      "tracker_run_id": "482f9156-0cae-4290-a0e5-28ab661b7dd1",
+      "created_at": "2026-04-15T23:06:02+00:00"
+    },
+    {
+      "run_id": "2f008c13-8506-4ad5-8471-221ede6a4d3b",
+      "alias": "gbm_006_20260415_224857",
+      "model_class": "sklearn.ensemble.GradientBoostingRegressor",
+      "params_hash": "0c43cf39",
+      "params": {
+        "n_estimators": 180,
+        "max_depth": 3,
+        "learning_rate": 0.032,
+        "random_state": 2050
+      },
+      "metrics": {
+        "mape": 0.074,
+        "rmse": 58.39,
+        "mae": 43.19,
+        "fold_variance": 0.003
+      },
+      "training_duration_s": 14.9,
+      "tracker_run_id": "2f008c13-8506-4ad5-8471-221ede6a4d3b",
+      "created_at": "2026-04-15T22:48:57+00:00"
+    },
+    {
+      "run_id": "6ae63dc6-0a2e-43b8-b5e6-efa60c11bf05",
+      "alias": "rf_005_20260415_232053",
+      "model_class": "sklearn.ensemble.RandomForestRegressor",
+      "params_hash": "151fa0d9",
+      "params": {
+        "n_estimators": 200,
+        "max_depth": 12,
+        "min_samples_split": 2,
+        "random_state": 2045
+      },
+      "metrics": {
+        "mape": 0.0742,
+        "rmse": 51.92,
+        "mae": 38.12,
+        "fold_variance": 0.002
+      },
+      "training_duration_s": 12.1,
+      "tracker_run_id": "6ae63dc6-0a2e-43b8-b5e6-efa60c11bf05",
+      "created_at": "2026-04-15T23:20:53+00:00"
+    },
+    {
+      "run_id": "cb09565a-6e45-490f-8303-9741880ab55b",
+      "alias": "gbm_002_20260415_223536",
+      "model_class": "sklearn.ensemble.GradientBoostingRegressor",
+      "params_hash": "a7111035",
+      "params": {
+        "n_estimators": 120,
+        "max_depth": 3,
+        "learning_rate": 0.093,
+        "random_state": 2030
+      },
+      "metrics": {
+        "mape": 0.0743,
+        "rmse": 52.29,
+        "mae": 36.58,
+        "fold_variance": 0.003
+      },
+      "training_duration_s": 24.8,
+      "tracker_run_id": "cb09565a-6e45-490f-8303-9741880ab55b",
+      "created_at": "2026-04-15T22:35:36+00:00"
+    },
+    {
+      "run_id": "d12aeac9-44f3-419d-9a75-2f223b182067",
+      "alias": "rf_003_20260415_231851",
+      "model_class": "sklearn.ensemble.RandomForestRegressor",
+      "params_hash": "b89dccea",
+      "params": {
+        "n_estimators": 300,
+        "max_depth": 10,
+        "min_samples_split": 8,
+        "random_state": 2034
+      },
+      "metrics": {
+        "mape": 0.0745,
+        "rmse": 52.86,
+        "mae": 38.85,
+        "fold_variance": 0.0022
+      },
+      "training_duration_s": 7.7,
+      "tracker_run_id": "d12aeac9-44f3-419d-9a75-2f223b182067",
+      "created_at": "2026-04-15T23:18:51+00:00"
+    },
+    {
+      "run_id": "d6b39b51-d658-450c-b0da-fc9598b07c47",
+      "alias": "ridge_002_20260415_225134",
+      "model_class": "sklearn.linear_model.Ridge",
+      "params_hash": "bd6fe064",
+      "params": {
+        "alpha": 2.745,
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.075,
+        "rmse": 46.72,
+        "mae": 32.8,
+        "fold_variance": 0.0018
+      },
+      "training_duration_s": 23.3,
+      "tracker_run_id": "d6b39b51-d658-450c-b0da-fc9598b07c47",
+      "created_at": "2026-04-15T22:51:34+00:00"
+    },
+    {
+      "run_id": "a07522e1-0120-4b54-a168-a0346447ad45",
+      "alias": "rf_006_20260415_224210",
+      "model_class": "sklearn.ensemble.RandomForestRegressor",
+      "params_hash": "2d5531ab",
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 8,
+        "min_samples_split": 2,
+        "random_state": 2046
+      },
+      "metrics": {
+        "mape": 0.0761,
+        "rmse": 57.44,
+        "mae": 41.71,
+        "fold_variance": 0.0017
+      },
+      "training_duration_s": 22.9,
+      "tracker_run_id": "a07522e1-0120-4b54-a168-a0346447ad45",
+      "created_at": "2026-04-15T22:42:10+00:00"
+    },
+    {
+      "run_id": "aa8acc07-f936-4692-bc0f-d71e5c2030b1",
+      "alias": "ridge_003_20260415_230431",
+      "model_class": "sklearn.linear_model.Ridge",
+      "params_hash": "661df26c",
+      "params": {
+        "alpha": 0.527,
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0781,
+        "rmse": 50.64,
+        "mae": 36.81,
+        "fold_variance": 0.0026
+      },
+      "training_duration_s": 24.3,
+      "tracker_run_id": "aa8acc07-f936-4692-bc0f-d71e5c2030b1",
+      "created_at": "2026-04-15T23:04:31+00:00"
+    },
+    {
+      "run_id": "56f2b42b-d56f-4171-bc0a-b91dd0b93bb3",
+      "alias": "lr_006_20260415_232359",
+      "model_class": "sklearn.linear_model.LinearRegression",
+      "params_hash": "6a746978",
+      "params": {
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0781,
+        "rmse": 48.58,
+        "mae": 34.0,
+        "fold_variance": 0.0027
+      },
+      "training_duration_s": 20.1,
+      "tracker_run_id": "56f2b42b-d56f-4171-bc0a-b91dd0b93bb3",
+      "created_at": "2026-04-15T23:23:59+00:00"
+    },
+    {
+      "run_id": "7920d0f9-8b9b-4227-bf8d-908d11207b4f",
+      "alias": "ridge_004_20260415_223620",
+      "model_class": "sklearn.linear_model.Ridge",
+      "params_hash": "099eefe4",
+      "params": {
+        "alpha": 3.177,
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0789,
+        "rmse": 57.4,
+        "mae": 40.86,
+        "fold_variance": 0.0028
+      },
+      "training_duration_s": 16.5,
+      "tracker_run_id": "7920d0f9-8b9b-4227-bf8d-908d11207b4f",
+      "created_at": "2026-04-15T22:36:20+00:00"
+    },
+    {
+      "run_id": "79c9b08f-bfd8-4a12-960e-ecdd86c372da",
+      "alias": "lr_003_20260415_225756",
+      "model_class": "sklearn.linear_model.LinearRegression",
+      "params_hash": "6a746978",
+      "params": {
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0809,
+        "rmse": 53.97,
+        "mae": 38.54,
+        "fold_variance": 0.0044
+      },
+      "training_duration_s": 23.7,
+      "tracker_run_id": "79c9b08f-bfd8-4a12-960e-ecdd86c372da",
+      "created_at": "2026-04-15T22:57:56+00:00"
+    },
+    {
+      "run_id": "a652561b-c036-4b6e-bb53-32900a416797",
+      "alias": "ridge_005_20260415_223059",
+      "model_class": "sklearn.linear_model.Ridge",
+      "params_hash": "9a8c8326",
+      "params": {
+        "alpha": 9.994,
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0843,
+        "rmse": 59.7,
+        "mae": 40.76,
+        "fold_variance": 0.0043
+      },
+      "training_duration_s": 19.7,
+      "tracker_run_id": "a652561b-c036-4b6e-bb53-32900a416797",
+      "created_at": "2026-04-15T22:30:59+00:00"
+    },
+    {
+      "run_id": "05057753-ed23-4c6a-8e89-a17985f66e5a",
+      "alias": "ridge_006_20260415_231150",
+      "model_class": "sklearn.linear_model.Ridge",
+      "params_hash": "a3174c91",
+      "params": {
+        "alpha": 5.269,
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0844,
+        "rmse": 65.51,
+        "mae": 47.47,
+        "fold_variance": 0.0045
+      },
+      "training_duration_s": 20.5,
+      "tracker_run_id": "05057753-ed23-4c6a-8e89-a17985f66e5a",
+      "created_at": "2026-04-15T23:11:50+00:00"
+    },
+    {
+      "run_id": "35214998-e9d9-4953-98ae-706f06b8cca9",
+      "alias": "lr_001_20260415_225839",
+      "model_class": "sklearn.linear_model.LinearRegression",
+      "params_hash": "6a746978",
+      "params": {
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0873,
+        "rmse": 52.59,
+        "mae": 37.18,
+        "fold_variance": 0.0026
+      },
+      "training_duration_s": 8.9,
+      "tracker_run_id": "35214998-e9d9-4953-98ae-706f06b8cca9",
+      "created_at": "2026-04-15T22:58:39+00:00"
+    },
+    {
+      "run_id": "880f9eaa-bea4-4cc2-b9a7-a5dde175e58d",
+      "alias": "lr_002_20260415_224419",
+      "model_class": "sklearn.linear_model.LinearRegression",
+      "params_hash": "6a746978",
+      "params": {
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0874,
+        "rmse": 54.64,
+        "mae": 39.75,
+        "fold_variance": 0.0028
+      },
+      "training_duration_s": 8.7,
+      "tracker_run_id": "880f9eaa-bea4-4cc2-b9a7-a5dde175e58d",
+      "created_at": "2026-04-15T22:44:19+00:00"
+    },
+    {
+      "run_id": "022baa8c-8964-4a01-a000-3e7652d672be",
+      "alias": "lr_004_20260415_232856",
+      "model_class": "sklearn.linear_model.LinearRegression",
+      "params_hash": "6a746978",
+      "params": {
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0883,
+        "rmse": 54.42,
+        "mae": 39.17,
+        "fold_variance": 0.0025
+      },
+      "training_duration_s": 8.2,
+      "tracker_run_id": "022baa8c-8964-4a01-a000-3e7652d672be",
+      "created_at": "2026-04-15T23:28:56+00:00"
+    },
+    {
+      "run_id": "f27060e2-e621-4abd-8a62-d30acecfcf5a",
+      "alias": "lr_005_20260415_224405",
+      "model_class": "sklearn.linear_model.LinearRegression",
+      "params_hash": "6a746978",
+      "params": {
+        "fit_intercept": true
+      },
+      "metrics": {
+        "mape": 0.0919,
+        "rmse": 58.11,
+        "mae": 39.9,
+        "fold_variance": 0.0042
+      },
+      "training_duration_s": 17.4,
+      "tracker_run_id": "f27060e2-e621-4abd-8a62-d30acecfcf5a",
+      "created_at": "2026-04-15T22:44:05+00:00"
+    }
+  ],
+  "best_by_family": {
+    "sklearn.linear_model.LinearRegression": "lr_006_20260415_232359",
+    "sklearn.linear_model.Ridge": "ridge_001_20260415_232649",
+    "sklearn.ensemble.RandomForestRegressor": "rf_004_20260415_232101",
+    "sklearn.ensemble.GradientBoostingRegressor": "gbm_005_20260415_224614",
+    "xgboost.XGBRegressor": "xgb_005_20260415_225915"
+  }
+}
