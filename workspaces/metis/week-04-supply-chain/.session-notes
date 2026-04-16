@@ -1,0 +1,26 @@
+# Session Notes — 2026-04-16
+
+## Where we are
+
+Week 4 Supply Chain workshop ships tomorrow (3.5 hrs, MBA cohort). Full scaffold committed and pushed to terrene-foundation/metis. Backend boots with FeatureStore preloaded, viewer builds clean, all 3 endpoint stubs return 501 with TODO-STUDENT banners, scenario CLI fires/undoes/logs correctly, preflight reports all-green. Specs updated with plain-language prompt templates and delegation-skill teaching section. Students launch `claude` from project root (`~/repos/training/metis`), paste the opening prompt, and CC handles everything.
+
+## Read first
+
+1. `workspaces/metis/week-04-supply-chain/PLAYBOOK.md` — the lesson plan; students follow this phase by phase; "How to prompt" section teaches delegation discipline
+2. `workspaces/metis/week-04-supply-chain/START_HERE.md` §9 — the opening prompt students paste; drives CC to boot backend + viewer + preflight
+3. `workspaces/metis/week-04-supply-chain/specs/canonical-values.md` — single source of truth for every enum, number, endpoint schema
+4. `workspaces/metis/week-04-supply-chain/04-validate/redteam-implementation.md` — current gap inventory with MUST-FIX vs REPIVOT-IN-CLASS classification
+5. `workspaces/metis/week-04-supply-chain/todos/active/` — 11 shards; 5 implemented (01,05a,07,08,09), 6 deferred for students to COC out live
+
+## Traps
+
+- `.env` had `METIS_WORKSPACE_ROOT=../../` which broke FeatureStore preload — fixed and committed, but if students copy `.env.example` from an old source it'll recur. The fix: leave METIS_WORKSPACE_ROOT unset (auto-detect works).
+- `specs/schemas/demand.py` uses `dtype=` not `type=`, `entity_id_column=` not `entity_id=` — kailash-ml FeatureField/FeatureSchema API differs from SKILL.md prose. Source is authoritative.
+- Scenario inject requires `data/route_plan.json` to exist before `union-cap` fires (exit code 3 otherwise). Students must have run Phase 12 first. If they haven't, instructor waits or creates a dummy plan.
+- Raw FastAPI used instead of kailash-nexus — acknowledged as Week-5 migration task; instructor frames it as "today FastAPI, next week we upgrade to Nexus."
+- `scripts/grade_product.py` does not exist — instructor grades by reading journals manually at 3:20pm.
+
+## Open questions for the human
+
+- Do students each get their own copy of the workspace, or share one repo with branches?
+- Should the Nexus migration happen before Week 5's session, or as a live exercise during Week 5?
