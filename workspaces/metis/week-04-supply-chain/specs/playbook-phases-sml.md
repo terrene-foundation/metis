@@ -15,7 +15,7 @@ Trust Plane / Execution Plane capitalisation follows `terrene-naming.md`. Librar
 - **Sprints**: Sprint 1 (first ~7 min).
 - **Trust-plane question**: What is the target, the population, the horizon, the cost of being wrong?
 - **Prompt template**:
-  > _"Read `PRODUCT_BRIEF.md` and produce a one-paragraph ML problem statement for the Forecast module. Include: target variable (precise name + unit), unit of prediction (per what, per when), population scope (all depots? active customers only? peak season?), prediction horizon in days, and cost asymmetry in dollars with units attached (e.g. `$40 per unit short of demand` vs `$12 per unit of excess capacity deployed`) using the numbers in `specs/business-costs.md`. No silent assumptions — if anything is ambiguous, ask me."_
+  > _"Read the product brief. I need a clear problem statement for the forecasting module. Tell me: what exactly are we predicting, for which locations, how far ahead, and what it costs when we get it wrong in each direction. A missed delivery costs us $40; excess capacity costs $12. Don't assume anything — if the brief is vague on scope, ask me."_
 - **Evaluation checklist**:
   - [ ] Target variable precise (not "demand" but "orders per depot-day").
   - [ ] Population scope explicit.
@@ -44,7 +44,7 @@ Trust Plane / Execution Plane capitalisation follows `terrene-naming.md`. Librar
 - **Sprints**: Sprint 1 (~10 min).
 - **Trust-plane question**: Is this data trustworthy? Which features are available at prediction time, leaky, or ethically loaded?
 - **Prompt template**:
-  > _"Audit `data/northwind_demand.csv` with `kailash_ml.DataExplorer`. For each of six categories — label quality, temporal leakage, survivorship bias, distribution shift, missingness pattern, proxy variables — report specific findings with row indexes and column names. Then list every candidate feature and classify each as: (a) available at prediction time, (b) leaky with evidence, (c) ethically loaded, (d) engineered or raw. Recommend an initial feature set; I will decide."_
+  > _"Audit the Northwind demand dataset before we train anything. I need to know: is the data trustworthy? Check for label errors, time leakage, missing values, bias in which customers appear, and any features that look suspiciously perfect. Then list every feature and tell me which ones are safe to use, which ones leak future info, and which ones might be ethically loaded. Recommend a feature set — I'll make the final call."_
 - **Evaluation checklist**:
   - [ ] All 6 audit categories addressed with specifics (row X, col Y).
   - [ ] Every candidate feature classified on all four axes (available / leaky / ethically-loaded / engineered).
@@ -82,7 +82,7 @@ Retained in the universal Playbook for generality — Weeks 5–8 may split it o
 - **Sprints**: Sprint 1 (~12 min). AutoML live-run uses `search_n_trials=5`, a `candidate_families` list of size 3, `search_strategy="random"` to stay under 90 s wall-clock. If `KAILASH_ML_AUTOML_QUICK=1` is set, the cap is defence-in-depth.
 - **Trust-plane question**: Which 3–5 models are reasonable candidates for this problem?
 - **Prompt template**:
-  > _"Load `data/northwind_demand.csv` into a Polars DataFrame. Build the `FeatureSchema` imported from `specs/schemas/demand.py`. Populate the FeatureStore exactly once (idempotent; `fs_preload.py` runs the same calls on Nexus startup) by awaiting `fs.register_features(schema)` followed by `fs.store(schema, df)` — NOT a non-existent `fs.ingest()`. Construct `TrainingPipeline(feature_store=fs, registry=registry)` and `HyperparameterSearch(pipeline=pipeline, registry=registry)`. Build `AutoMLConfig(task_type='regression', metric_to_optimize='mape', candidate_families=['sklearn.linear_model.Ridge', 'sklearn.ensemble.RandomForestRegressor', 'sklearn.ensemble.GradientBoostingRegressor'], search_strategy='random', search_n_trials=5, auto_approve=False)` — note the field name is `candidate_families`, NOT `families`. Build `EvalSpec(metrics=['mape','rmse'], split_strategy='walk_forward', test_size=0.2)` — `split_strategy='walk_forward'` is the library's supported name for time-series rolling-origin evaluation; `cv_strategy='rolling_origin'` is NOT a valid EvalSpec value. Instantiate `AutoMLEngine(pipeline, search, registry=registry)` — positional `pipeline` + `search`, keyword-only `registry`; `feature_store`/`model_registry`/`config` are NOT constructor kwargs. Call `result = await engine.run(data=df, schema=schema, config=config, eval_spec=eval_spec, experiment_name='forecast_sprint1', tracker=tracker)`. Only add `XGBoostRegressor` to `candidate_families` if `preflight.json.xgb_available` is true; otherwise omit it (do NOT silently substitute). Write the resulting per-family leaderboard to `data/leaderboard.json` and render in the Viewer."_
+  > _"Train 3 to 5 different forecasting models on the Northwind demand data using kailash-ml. I want a range of complexity — something simple and interpretable, something mid-range, and something powerful. Use time-series cross-validation so the comparison is fair. Keep it quick — 5 trials max. Show me a leaderboard comparing them all on the same metrics. Also compare against the pre-baked leaderboard in the data folder so I can see if my live run is in the right ballpark."_
 - **Evaluation checklist**:
   - [ ] Candidates span a complexity range (Ridge + RandomForest + GradientBoosting; optionally XGBoost if preflight-verified).
   - [ ] Each candidate has a distinct reason for inclusion + a stated risk.
@@ -104,7 +104,7 @@ Retained in the universal Playbook for generality — Weeks 5–8 may split it o
 - **Sprints**: Sprint 1 (~10 min). Also re-run in Sprint 3 on post-drift data.
 - **Trust-plane question**: Given the leaderboard, which model do I stake my career on and why?
 - **Prompt template**:
-  > _"Compare the leaderboard in `data/leaderboard.json` against the pre-baked leaderboard in `data/leaderboard_prebaked.json`. For each candidate, surface: headline MAPE, fold-to-fold variance, complexity class, training time, and `ExperimentTracker` run ID. Then recommend one model as the deployment candidate. Frame the trade-offs as if briefing a non-technical executive in 90 seconds of speech."_
+  > _"Compare the models on the leaderboard. For each one, tell me: how accurate is it, how stable is it across different time periods, how complex is it, and how long did it take to train. Then recommend one — but explain the trade-offs as if you're briefing someone who doesn't know what a random forest is. I'll make the final pick."_
 - **Evaluation checklist**:
   - [ ] All candidates compared on identical metrics.
   - [ ] Headline advantage assessed as meaningful (multiple percent) vs noise (< 1%).
@@ -132,7 +132,7 @@ Retained in the universal Playbook for generality — Weeks 5–8 may split it o
 - **Sprints**: Sprint 1 (~10 min). Re-run in Sprint 3 on post-drift data.
 - **Trust-plane question**: Which metric, which threshold, tied to what costs?
 - **Prompt template**:
-  > _"For Northwind demand forecasting, propose an evaluation metric grounded in the business costs in `specs/business-costs.md` (stockout $40 per unit short of demand, overstock $12 per unit of excess capacity deployed). Then propose a prediction interval (50th / 80th / 95th percentile) and compute expected stockout + overstock cost at each width across the holdout. Include a sensitivity analysis ('at peak season costs shift; recommend re-tune weekly'). I will decide."_
+  > _"Given that a missed delivery costs us $40 and excess capacity costs $12, which accuracy metric should we optimise for? Show me three different confidence levels for the forecast — conservative, moderate, aggressive — and compute the expected cost of each in dollars. If peak season changes these economics, flag that. I will pick the level."_
 - **Evaluation checklist**:
   - [ ] Metric choice tied to dollars, not aesthetics (MAPE vs RMSE resolved with cost logic).
   - [ ] Threshold/interval presented as a cost curve, not a single number.
@@ -159,7 +159,7 @@ Retained in the universal Playbook for generality — Weeks 5–8 may split it o
 - **Sprints**: Sprint 1 (~10 min). Partially re-run in Sprint 3 (adversarial drift test).
 - **Trust-plane question**: How does this model fail? What breaks it?
 - **Prompt template**:
-  > _"Red-team the chosen forecast model across three AI Verify dimensions. (1) **Transparency**: run `ModelExplainer` — which feature does the model rely on most? If that feature were removed, how does headline MAPE change? Explain to the Ops Manager in one sentence why the model predicted last Tuesday's orders. If `ModelExplainer` raises `ImportError` because the `[explain]` extra (SHAP) is not installed, fall back to sklearn's `permutation_importance` via `kailash_ml.engines.model_visualizer` (no SHAP dependency) AND record the fallback explicitly in the journal entry as a cited limitation; preflight should have caught this pre-class, so treat the fallback as a recovery path, not a silent substitute. (2) **Robustness**: name the 3 worst customer segments by MAPE and the 3 worst calendar weeks; quantify behaviour on the week-78 drift event. (3) **Safety**: cost of the worst 1% of predictions in dollars; behaviour on zero-demand days and on days missing upstream features; who is harmed if this model silently fails for a week. Rank every finding by severity. Note: Fairness (AI Verify's 4th dimension) is deferred to Week 7 per the Playbook."_
+  > _"Try to break this model. I want to know three things: (1) Transparency — what is the model relying on most heavily? Could you explain to a non-technical ops manager why it made a specific prediction? (2) Robustness — where does it fail worst? Which customer segments, which weeks, which conditions? What happens when the data drifts? (3) Safety — if this model silently went wrong for a week, what's the dollar damage and who gets hurt? Rank every finding by severity. Fairness will be covered in Week 7."_
 - **Evaluation checklist**:
   - [ ] **Transparency**: top feature named; ablation impact in MAPE; one-sentence plain-language explanation of a single prediction; if SHAP unavailable, `permutation_importance` fallback cited as a limitation.
   - [ ] **Robustness**: 3 worst segments with MAPE; 3 worst weeks; week-78 drift quantified.
@@ -189,7 +189,7 @@ Retained in the universal Playbook for generality — Weeks 5–8 may split it o
 - **Sprints**: Sprint 1 (~8 min). Re-run in Sprint 2 after the union-cap injection changes the plan.
 - **Trust-plane question**: Ship or don't ship, and on what monitoring?
 - **Prompt template**:
-  > _"Write the go/no-go gate for model `<model_name>` version `<N>` (the `{model_name}_v{N}` derivation is the surface form used by `/forecast/predict`; internally it resolves to `ModelRegistry.get_model(name, version=N)` — see `wiring-contracts.md`). Include: (1) go criteria — named metric thresholds from Phase 6 + no open HIGH red-team finding, (2) monitoring plan — specific metrics with alert thresholds, (3) rollback trigger — an automatable signal, not 'if things look bad'. Then call `await registry.promote_model(name, version, to_stage='shadow', reason='Phase 8 gate passed')` to transition from `staging → shadow`. Only the transitions in the table below are legal."_
+  > _"Write the go/no-go gate for deploying this model. Include: (1) what metric thresholds must hold for it to ship — tie them to the numbers from Phase 6, (2) what we monitor on day one — name the specific signals and when they should fire an alert, (3) what triggers an automatic rollback — a specific measurable signal, not 'if things look bad'. Then promote the model from staging to shadow in the registry so it's ready for production."_
 - **Evaluation checklist**:
   - [ ] Go / no-go criteria are measurable (named metric thresholds).
   - [ ] Monitoring plan names specific metrics and alert thresholds.
@@ -227,7 +227,7 @@ archived ──→ {staging}
 - **Sprints**: Close block (last ~8 min of class).
 - **Trust-plane question**: What transfers to the next domain?
 - **Prompt template**:
-  > _"`/codify` — For today's Forecast + Optimize + Monitor sprints, what 3 lessons transfer to any ML-powered product? What 2 lessons are specific to demand forecasting + VRP? Append a `Week 4 delta` section to `PLAYBOOK.md` and produce `journal/phase_9_codify.md`."_
+  > _"Looking back at today's three sprints — what did we learn that applies to ANY ML product we build next week? Give me 3 transferable lessons. And what 2 things were specific to demand forecasting and route optimization that won't transfer? Add a 'Week 4 lessons' section to the Playbook."_
 - **Evaluation checklist**:
   - [ ] 3 transferable lessons (domain-agnostic).
   - [ ] 2 domain-specific lessons (demand forecasting + VRP).

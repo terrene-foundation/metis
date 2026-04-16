@@ -13,7 +13,7 @@ Trust Plane / Execution Plane capitalisation follows `terrene-naming.md`.
 - **Sprints**: Sprint 2 (~12 min).
 - **Trust-plane question**: Single or multi-objective? What are the weights?
 - **Prompt template**:
-  > _"Propose an objective function for the Northwind route optimiser using the business costs in `specs/business-costs.md` (fuel $0.35/km, late delivery $220, overtime $45/hr, carbon $8/kg CO₂). Show a single-objective version (sum of costs) AND a multi-objective version (cost, SLA, carbon with defended weights). Recommend one. Discuss the trade-off honestly — e.g. 'carbon weight of $8/kg is below social cost of carbon; revise next year.'"_
+  > _"Design the objective for tomorrow's route plan. The costs are: fuel $0.35 per km, late delivery $220 per violation, overtime $45 per hour, carbon $8 per kg CO2. Show me two versions — one that lumps everything into a single cost, and one that treats cost, service level, and carbon as separate goals with weights. Recommend one and tell me honestly what each version sacrifices."_
 - **Evaluation checklist**:
   - [ ] Every term has a cost in real money or a justified proxy.
   - [ ] Single-objective AND multi-objective both presented.
@@ -40,9 +40,9 @@ Trust Plane / Execution Plane capitalisation follows `terrene-naming.md`.
 - **Sprints**: Sprint 2 (~10 min). Re-run after union-cap injection.
 - **Trust-plane question**: Hard or soft for each rule? Penalty for soft?
 - **Prompt template (first pass)**:
-  > _"List every constraint the optimiser will face (vehicle capacity, driver hours, time windows, carbon targets, service levels). For each: (a) hard or soft, (b) if soft, penalty per unit violated, (c) justification grounded in the business rule it encodes (law, physics, contract, preference)."_
+  > _"List every rule the route optimizer must respect — vehicle capacity, driver working hours, delivery time windows, anything else from the business brief. For each one, tell me: is it a hard line that can never be crossed (law or physics), or a preference we'd rather not violate but will if the cost is right? For preferences, propose a penalty in dollars. Justify each classification."_
 - **Prompt template (post-injection re-run)**:
-  > _"The instructor fired the union-cap scenario: driver overtime is now capped at 5 h/week. Re-classify the relevant constraint. The prior classification is already saved as `journal/phase_11_constraints.md`; write the new one as `journal/phase_11_postunion.md`. Be explicit about which constraint changed from soft to hard and why."_
+  > _"MOM just capped driver overtime at 5 hours per week — this is now law, not a preference. Update the constraint classification: which one changed from soft to hard? Re-justify it. Save this as a separate journal entry so we can compare before and after."_
 - **Evaluation checklist**:
   - [ ] Every constraint classified with explicit rationale (law / physics / contract / preference).
   - [ ] Soft constraints have defensible penalty values.
@@ -68,7 +68,7 @@ Trust Plane / Execution Plane capitalisation follows `terrene-naming.md`.
 - **Sprints**: Sprint 2 (~10 min). Re-run after union-cap injection.
 - **Trust-plane question**: Is the solution feasible, optimal, edge-case safe?
 - **Prompt template**:
-  > _"Run the OR-Tools VRP solver on `data/forecast_output.json` with the objective from Phase 10 and constraints from Phase 11. Time budget 30 s. Report: (a) every hard constraint satisfied — yes/no table (at minimum `vehicle_capacity` and `driver_hours_max`), (b) objective value + optimality gap, (c) top 3 pathological patterns (driver imbalance, geographic zigzags, underutilised vehicles). Recommend accept / re-solve / re-design. Save plan to `data/route_plan.json`. After the scenario injection, save pre-injection plan as `data/route_plan_preunion.json` and post-injection plan as `data/route_plan_postunion.json`."_
+  > _"Run the route optimizer with the objective and constraints from the previous phases. Show me: did every hard constraint hold? How close to optimal is the plan? Are there any weird patterns — one truck doing all the work, routes that zigzag, vehicles sitting idle? Recommend whether I should accept this plan, re-solve with different settings, or redesign the problem. Save the plan so the dashboard can show it."_
 - **Evaluation checklist**:
   - [ ] Every hard constraint confirmed satisfied — `hard_constraints_satisfied` response dict contains at least `vehicle_capacity` and `driver_hours_max` with value `true`.
   - [ ] Optimality gap reported numerically (OR-Tools produces this).

@@ -10,6 +10,37 @@ The 14-phase Universal ML Decision Playbook is authored across three sibling spe
 
 `PLAYBOOK.md` is a generated view that concatenates the three detail files in phase order and injects the summary table below. When a phase's truth changes, update the relevant detail spec; `_index.md` and `PLAYBOOK.md` regenerate automatically.
 
+## How to prompt — the delegation skill
+
+This is the single most important skill the course teaches. You are a **commissioner**, not a coder. Your prompts should sound like a founder briefing a team — not like a developer dictating implementation.
+
+**Every prompt you write should contain these 5 elements:**
+
+1. **Objective** — what business outcome you want, in plain language. _"I need a forecast that tells us how many orders each depot will get tomorrow."_
+2. **Boundaries** — what matters, what doesn't, what costs what. _"A missed delivery costs $40; excess capacity costs $12. Stability across time periods matters more than squeezing an extra 0.5% accuracy."_
+3. **Expected output** — what deliverable you want back. _"Show me a comparison table. Recommend one. I decide."_
+4. **Checks** — what could go wrong, what would make you change your mind. _"Flag anything that looks like it's relying too heavily on one feature — that could be data leakage."_
+5. **Decision authority** — make clear what YOU will decide vs. what CC executes. _"You train and compare. I pick the model and set the threshold."_
+
+**What your prompt should NEVER contain:**
+
+- Library names, class names, function signatures, import paths
+- Python code or code snippets
+- API parameter names or configuration objects
+- File paths to source code (data file paths are fine — that's context, not implementation)
+
+Claude Code has the specs, the skills, and the framework documentation. It knows which libraries to use and how to call them. **If you tell it how, you're doing its job. If you tell it what and why, you're doing yours.**
+
+**Bad prompt** (doing CC's job):
+
+> _"Using kailash_ml.AutoMLEngine with AutoMLConfig(candidate_families=['sklearn.ensemble.GradientBoostingRegressor'...], search_strategy='random')..."_
+
+**Good prompt** (doing YOUR job):
+
+> _"Train 3-5 forecasting models ranging from simple to complex. Compare them fairly using time-series validation. Show me which one wins and why — in business terms, not algorithm terms. I'll pick."_
+
+The prompt templates below model this style. Adapt them to your own words — the templates are starting points, not scripts.
+
 ## Week 4 phase membership
 
 Week 4 runs phases 1, 2, 4, 5, 6, 7, 8 in Sprint 1, phases 10, 11, 12 in Sprint 2, phase 13 in Sprint 3, and phase 9 in the Close block. Phase 3 is folded into Phase 2 for Week 4. Phase 14 is deferred to Week 7. The Playbook itself retains all 14 phases so Weeks 5–8 can re-use any combination.
