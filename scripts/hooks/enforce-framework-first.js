@@ -216,6 +216,20 @@ function isExcluded(filePath) {
   )
     return true;
 
+  // Metis training project: per-week teaching scaffolds intentionally use
+  // raw fastapi + sklearn for pedagogical minimalism. The SDK primitives
+  // (Nexus, kailash-ml) are what students commission VIA the Playbook, not
+  // what backs the scaffold itself. See workspaces/metis/<week>/PLAYBOOK.md
+  // "Common failure modes" for the explicit justification per week.
+  if (
+    /[\\/]src[\\/]retail[\\/]/.test(filePath) ||
+    /[\\/]src[\\/]supply_chain[\\/]/.test(filePath) ||
+    /[\\/]src[\\/][^\\/]+[\\/](backend|scripts|data)[\\/]/.test(filePath) ||
+    /[\\/]workspaces[\\/]metis[\\/]/.test(filePath) ||
+    /[\\/]apps[\\/]/.test(filePath)
+  )
+    return true;
+
   // BUILD repo — only the adapter/backend/transport/store layer uses raw imports.
   // Engines, features, API, servers MUST use the SDK's own primitives.
   if (

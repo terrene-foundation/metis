@@ -4,559 +4,1633 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
 https://creativecommons.org/licenses/by/4.0/
 -->
 
-# The ML Decision Playbook — Week 5 (Retail, Unsupervised + Recommender)
+# The ML Decision Playbook — Universal Edition (Week 5 instantiation: Arcadia Retail)
 
 **Version:** 2026-04-23 · **License:** CC BY 4.0
 
-## How to use this Playbook
+---
 
-This is the student-facing procedure for tonight's retail workshop. It is the same 14-phase universal procedure as Week 4 — same shape, same rubric — applied to a **new domain** (retail customer intelligence) with a **new ML family** (unsupervised segmentation plus a recommender-strategy choice).
+## 0. How to read this Playbook
 
-**Tonight skips the build, not the routine.** The retail backend, viewer, data generator, baseline K=3 clustering run, baseline content-based recommender, and the drift monitor with reference data already registered are all pre-provisioned before class starts — you do not scaffold or wire anything. What you DO still run is the COC routine you know: `/analyze` (short — inventory what's pre-built and what remains to decide), `/todos` (draft the 14 Playbook phases as todos; instructor gate), `/implement` (the Playbook phases), `/redteam`, `/codify`. The Playbook phases are the CONTENT of `/implement`. See the table in the "The Playbook runs inside `/implement`" section below.
+This is the same 14-phase procedure you run on **every** ML product you commission — tonight, next week, and in your career after this course. The body of each phase reads as **universal**: it names the decisions, the levers, the failure modes, and the vocabulary that apply to any ML paradigm. Retail examples live in `> For tonight's product` sidebars and illustrate how the universal body instantiates for Arcadia.
 
-Read this document once end-to-end before class so the shape is familiar. During class, keep it open; jump to the phase you are running.
+Read it cold: skim sections 1–8 before class. During class, jump to the phase you are running. After the course, take this file into your next project and swap the sidebars for your domain.
 
-Every phase follows the same shape:
+Every phase has the same shape:
 
-- **Trust-plane question** — the single decision you own for this phase.
-- **Prompt template** — what you type to Claude Code to execute the phase.
-- **Evaluation checklist** — how you judge whether the output is good.
-- **Journal schema** — what you record when you decide.
-- **Common failure modes** — the 2–3 ways this phase usually goes wrong.
-- **Artefact** — the file on disk that proves the phase happened.
-
-Two planes are at work. The **Trust Plane** is you: framing, judging, approving. The **Execution Plane** is Claude Code plus the retail datasets and the pre-provisioned backend: code, trained models, segment assignments, recommender leaderboards, dashboards. If the answer is "what" or "how", Execution owns it. If the answer is "which", "whether", "who wins and who loses", or "is it good enough to ship" — Trust owns it, which means you own it.
-
-## How to prompt — the delegation skill
-
-This is the single most important skill the course teaches. You are a **commissioner**, not a coder. Your prompts should sound like a founder briefing a team — not like a developer dictating implementation.
-
-**Every prompt you write should contain these 5 elements:**
-
-1. **Objective** — what business outcome you want, in plain language. _"I need a small set of customer segments my marketing team can build campaigns around."_
-2. **Boundaries** — what matters, what doesn't, what costs what. _"A converted recommendation is worth $18; a wasted impression costs $14. Stability across months matters more than squeezing an extra 0.02 silhouette."_
-3. **Expected output** — what deliverable you want back. _"Show me a comparison of the clustering approaches. Recommend one. I decide."_
-4. **Checks** — what could go wrong, what would make you change your mind. _"Flag any segment that disappears when you re-run on a different month — that means the segment isn't real."_
-5. **Decision authority** — make clear what YOU will decide vs. what CC executes. _"You cluster, profile, and compare. I pick the segment count and approve the campaign map."_
-
-**What your prompt should NEVER contain:**
-
-- Library names, class names, function signatures, import paths
-- Python code or code snippets
-- API parameter names or configuration objects
-- File paths to source code (data file paths are fine — that's context, not implementation)
-
-Claude Code has the specs, the skills, and the framework documentation. It knows which libraries to use and how to call them. **If you tell it how, you're doing its job. If you tell it what and why, you're doing yours.**
-
-**Bad prompt** (doing CC's job):
-
-> _"Using sklearn.cluster.KMeans with n_clusters=5, fit on the RFM feature matrix and then UMAP-reduce to 2D for visualization..."_
-
-**Good prompt** (doing YOUR job):
-
-> _"Cluster Arcadia's active customers into behavioural segments. Try three different approaches — one that expects round blobs, one that finds dense pockets, one that builds a nested tree — and compare them on stability and on how interpretable the resulting segments are. Show me the leaderboard in business terms. I'll pick the count and the approach."_
-
-The prompt templates below model this style. Adapt them to your own words — the templates are starting points, not scripts.
-
-## The Playbook runs inside `/implement`
-
-The 14-phase Playbook is not a replacement for the COC phases you already know — it is the **content** of your `/implement` phase. Before you run Playbook Phase 1, you run `/analyze` (inventory what the pre-built Arcadia baseline commits to, and name the ML decisions that are still yours). Before you start Playbook Phase 4, you run `/todos` (draft all 14 Playbook phases as explicit tasks and clear them with the instructor — this is the human gate). During `/implement`, each Playbook phase completes one todo. After Playbook Phase 13, you run `/redteam` (sweep stability / proxy-leakage / operational-collapse) and `/codify` (write the transferable lessons into `.claude/skills/project/`).
-
-Routine is the scaffold; decisions are the content. The ML Decision Playbook is the decision content that lives inside the COC routine you already run for every product.
-
-| Clock     | COC phase                 | Playbook phases inside        | Output                                                            |
-| --------- | ------------------------- | ----------------------------- | ----------------------------------------------------------------- |
-| 2:00–2:10 | `/analyze`                | (pre-phase inventory)         | `01-analysis/failure-points.md`, `01-analysis/assumptions.md`     |
-| 2:10–2:15 | `/todos`                  | —                             | `todos/active/phase_N_*.md` (14 phases as todos; instructor gate) |
-| 2:15–3:15 | `/implement` — Sprint 1   | Phases 1, 2, 3, 4, 5, 6, 7, 8 | `journal/phase_{1..8}_*.md`                                       |
-| 3:15–3:45 | `/implement` — Sprint 2   | Phases 10, 11, 12             | `journal/phase_{10..12}_*.md`                                     |
-| 3:45–4:00 | `/implement` — mid-sprint | scenario inject: PDPA         | `journal/phase_11_postpdpa.md`, `journal/phase_12_postpdpa.md`    |
-| 4:00–5:00 | `/implement` — Sprint 3   | Phase 13                      | `journal/phase_13_*.md` + drift report                            |
-| 5:00–5:20 | `/redteam`                | Phase 7 final sweep           | `04-validate/redteam.md`                                          |
-| 5:20–5:30 | `/codify` + `/wrapup`     | Phase 9                       | `.claude/skills/project/week-05-lessons.md`, `.session-notes`     |
-
-`/analyze` and `/todos` take 15 minutes together and are not busywork: they force you to declare, in writing, what the pre-built baseline already commits to (K=3, content-based recommender, reference data already registered) and what remains open for you to decide (K, strategy, cold-start disposition, PDPA constraint classification, drift thresholds). Week 4's students often felt scaffolding ate their lifecycle; Week 5 fixes the lifecycle without dropping the routine.
-
-## The five Trust Plane decision moments
-
-Tonight collapses into five high-pressure decision moments. These are where the rubric has teeth — the places where a lazy prompt ships a demo that _looks_ identical to a careful student's demo but collapses under any real scrutiny. Know them before you start.
-
-1. **Pick K and defend in dollars** (Phase 6). Not "silhouette said 5". Rather: "5 because marketing can run 5 parallel campaigns; 7 costs $X in setup with no realistic chance of uplift, and segment-stability drops from 88% to 72% at K=7 on the hold-out month." Stability and actionability have floors, not just targets.
-2. **Name each segment and declare a differentiated action per segment** (Phase 5 + 6). If two segments get the same action, they are one segment with noise between them. Either collapse them, or defend the difference in dollars.
-3. **Choose the recommender strategy with an explicit cold-start disposition** (Phase 10 + 12). Collaborative, content-based, or hybrid — and for new customers with no history, say what happens: segment modal basket (uses Sprint 1's output), catalogue popularity, or editorial curation. "Default fallback" is not an answer.
-4. **Declare what goes into the RAG corpus and what stays out** (Advisor stretch, Phase 11 analogue). PDPA, legal exposure, data staleness — every exclusion has a reason.
-5. **Set the grounding-failure fallback** (Advisor stretch). When the knowledge base cannot support an answer, does the Advisor say "I don't know", fall back to the popular item, or escalate to a human? This is a product decision.
-
-Decision moments 4 and 5 only apply if you reach the Advisor stretch in Sprint 3. The first three are non-negotiable for every student tonight.
-
-## Phase summary
-
-| #   | Phase                            | Sprint  | Artefact                                                                    | Rubric dimensions pressured       |
-| --- | -------------------------------- | ------- | --------------------------------------------------------------------------- | --------------------------------- |
-| 1   | Frame                            | S1      | `journal/phase_1_frame.md`                                                  | Harm framing, metric-cost linkage |
-| 2   | Data audit                       | S1      | `journal/phase_2_data_audit.md`                                             | Trade-off honesty                 |
-| 3   | Feature framing (UNFOLDED)       | S1      | `journal/phase_3_features.md`                                               | Constraint, trade-off honesty     |
-| 4   | Candidates (algorithm × K sweep) | S1      | `data/segment_leaderboard.json`                                             | (no journal — decision in 5)      |
-| 5   | Implications (named segments)    | S1      | `journal/phase_5_segment_selection.md`                                      | Trade-off honesty, reversal       |
-| 6   | Metric + threshold (K + floors)  | S1      | `journal/phase_6_segment_count.md`                                          | Metric-cost linkage, reversal     |
-| 7   | Red-team (3 new dimensions)      | S1 + S2 | `journal/phase_7_red_team.md`                                               | All 5 dimensions                  |
-| 8   | Deployment gate                  | S1 + S2 | `journal/phase_8_gate.md` + `phase_8_postpdpa.md` + registry record         | Reversal, constraint              |
-| 9   | Codify                           | Close   | `journal/phase_9_codify.md` + `PLAYBOOK.md` delta                           | (meta — not scored on rubric)     |
-| 10  | Objective (rec four-signal)      | S2      | `journal/phase_10_rec_objective.md`                                         | Metric-cost linkage, trade-off    |
-| 11  | Constraints                      | S2 × 2  | `journal/phase_11_constraints.md` + `phase_11_postpdpa.md`                  | Constraint classification         |
-| 12  | Recommender offline eval         | S2 × 2  | `data/recommender_plan_*.json` + `journal/phase_12_rec.md` + `_postpdpa.md` | Trade-off honesty, constraint     |
-| 13  | Drift triggers (segment churn)   | S3      | `data/drift_report.json` + `journal/phase_13_retrain.md`                    | Reversal condition                |
-| 14  | Fairness                         | Week 7  | (deferred)                                                                  | —                                 |
-
-Week 5 runs phases **1, 2, 3, 4, 5, 6, 7, 8** in Sprint 1 (segmentation), **10, 11, 12** in Sprint 2 (recommender), **13** in Sprint 3, and **9** in the Close block. **Phase 3 is unfolded this week** (Week 4 folded it into Phase 2) — pre-cluster feature selection has higher stakes than pre-model feature selection, because an ethically loaded feature does not just bias a model, it _creates a segment_ that is really a proxy for a protected class. Phase 14 (Fairness) is deferred to Week 7.
+- **Orientation frame** — where you are in the value chain, the sprint, the clock
+- **Concept** — the ML idea this phase teaches in one sentence
+- **Why it matters (SML lens / USML lens / Optimization lens)** — vocabulary you bring back into any future project
+- **Your levers this phase** — what to pull, what to ignore; the orchestrator's toolkit
+- **Trust-plane question** — the single decision you own
+- **Prompt template** — universal first, retail-flavoured sidebar second
+- **Evaluation checklist** — how you judge the output
+- **Journal schema** — what you record
+- **Common failure modes** — the 2–3 ways this phase usually goes wrong
+- **Artefact** — the file on disk that proves the phase happened
+- **Instructor pause point** — what your instructor stops to discuss live in class
+- **Transfer to your next project** — three questions you ask when you open this Playbook on a non-retail product
 
 ---
 
-# Sprint 1 — Unsupervised ML: Customer Segmentation (Phases 1–9)
+## 1. The ML Value Chain — one product, four paradigms, one Playbook
 
-The hardest shift from Week 4 lands in Phase 6. Unsupervised learning has no label — there is no "accuracy" to optimise. The metric conversation changes shape entirely. Read Phase 6 carefully before Sprint 1 begins.
+Tonight is the whole traditional ML value chain in one product. Four paradigms, composed:
+
+```
+                    THE ML VALUE CHAIN
+
+  STAKEHOLDER  │ QUESTION                       │ PARADIGM      │ SPRINT  │ PHASES     │ ARTEFACT
+  ─────────────┼────────────────────────────────┼───────────────┼─────────┼────────────┼──────────────────────
+  CMO          │ Who are my customers, really?  │ USML          │ 1 (45m) │ 1→8        │ Segmentation (K, named)
+  CX Lead      │ Which SKU for which customer?  │ SML           │ 2 (45m) │ 4→8 (×2)   │ Churn + Conversion models
+  CMO + Ops    │ How to allocate fixed budget?  │ Optimization  │ 3 (40m) │ 10→12      │ Campaign allocator
+  Ops Lead     │ When does any of this lie?     │ MLOps         │ 4 (20m) │ 13         │ Drift × 3 models
+
+  Discover ──▶ Predict ──▶ Decide ──▶ Monitor
+     │            │           │           │
+     └── segments feed cold-start of the recommender;
+         recommender feeds response probs into allocator;
+         allocator output is what MLOps monitors.
+
+  Skip a link, the chain breaks at your weakest stakeholder.
+```
+
+**Why this structure.** In the real world ML is not a model, it is a value chain. Unsupervised learning discovers structure; supervised learning predicts behaviour; optimization decides actions under constraints; MLOps catches drift. Any product you build in your career will touch at least two of these four. Tonight you touch all four, end to end, in one sitting — and the Playbook is what you take to the next project.
+
+---
+
+## 2. How to use this Playbook
+
+You are a **commissioner, not a coder.** Your Playbook fires inside the COC `/implement` phase (see §5). During each Playbook phase, you prompt Claude Code in plain language, evaluate the output against the phase's checklist, make the Trust-plane decision, and write a journal entry.
+
+- **Trust Plane** is you: framing, judging, approving. The decisions.
+- **Execution Plane** is Claude Code plus the scaffold: code, trained models, leaderboards, dashboards. The execution.
+
+If a question is _what_ or _how_, route it to Execution. If it is _which_, _whether_, _who wins_, or _is it good enough to ship_, it stays with you.
+
+---
+
+## 3. How to prompt — the delegation skill
+
+This is the single most important skill the course teaches. Every prompt you write contains these 5 elements:
+
+1. **Objective** — business outcome in plain language
+2. **Boundaries** — what matters, what doesn't, what costs what
+3. **Expected output** — what deliverable you want back
+4. **Checks** — what could go wrong, what would flip your decision
+5. **Decision authority** — what YOU will decide vs. what Claude Code executes
+
+**What your prompt should NEVER contain:** library names, class names, function signatures, import paths, code snippets, API parameter objects.
+
+Claude Code has the frameworks, the skills, the documentation. It knows which library to call and how. **If you tell it how, you're doing its job. If you tell it what and why, you're doing yours.**
+
+> **Bad prompt** (doing CC's job): _"Using sklearn.cluster.KMeans with n_clusters=5, fit on the RFM feature matrix..."_
+>
+> **Good prompt** (doing yours): _"Cluster Arcadia's active customers into behavioural segments. Try three different approaches — one that expects round blobs, one that finds dense pockets, one that builds a nested tree — and compare them on stability and on how interpretable the resulting segments are. I'll pick the count."_
+
+---
+
+## 4. The ML Vocabulary Menu (one-page orchestrator reference)
+
+You do not write code. You do speak ML. Here is the vocabulary an orchestrator needs — enough for comfort and assurance, not implementation depth.
+
+### 4.1 Supervised families (you have labels)
+
+| Family                              | When to reach for it                                                                                    | Cost                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **Linear**                          | Fast, interpretable, strong baseline. Always include one.                                               | Misses non-linear interactions.                              |
+| **Tree**                            | Handles non-linear without feature engineering. Single tree = cheap explanation.                        | Single tree overfits; use bags or boosts.                    |
+| **Ensemble (the king for tabular)** | Gradient-boosted trees (XGBoost, LightGBM, sklearn GBM) or random forests. Default-winning for tabular. | Slower to train; less interpretable; watch for overfitting.  |
+| **Neural**                          | Only for very large data, complex interactions, or heterogeneous inputs (text + image + tabular).       | Opaque, expensive, unnecessary most of the time for tabular. |
+
+> **Default pick for any new tabular classification/regression**: logistic/linear as a baseline + random forest as a tree check + a gradient-boosted model as the serious contender. Unless you have a specific reason, the gradient-boosted family wins.
+
+### 4.2 Unsupervised families (no labels)
+
+| Family               | What it assumes                                       | When it fails                                                |
+| -------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| **K-means**          | Round blobs of similar size around a centre           | Elongated, nested, or unequal-sized shapes                   |
+| **DBSCAN / HDBSCAN** | Dense pockets with gaps; flags outliers as unassigned | Sensitive to density parameters; can leave 10–25% unassigned |
+| **Hierarchical**     | A nested tree you can cut at any level                | Slow on large data; cut decision is arbitrary                |
+| **Spectral**         | Connectivity / graph-affinity structure               | Expensive (eigendecomp); needs good similarity measure       |
+| **GMM**              | Soft membership; probabilistic assignments            | Slow convergence; can find spurious components               |
+
+### 4.3 Optimization families
+
+| Family                      | When to reach for it                                       | Watch out for                                      |
+| --------------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
+| **Linear programming (LP)** | Linear objective, linear constraints, continuous decisions | Integer decisions need rounding or a harder solver |
+| **Integer / Mixed-integer** | Yes/no decisions (which customer to touch)                 | Can be NP-hard; use MIP solver or heuristics       |
+| **Constraint satisfaction** | Feasibility first, optimality second                       | Infeasibility requires you to demote a constraint  |
+| **Greedy heuristic**        | When LP is overkill; cheap, defensible default             | Can be 10–30% off optimum; good enough often wins  |
+
+### 4.4 Evaluation instruments — read them, don't compute them
+
+- **Confusion matrix** — TP / FP / TN / FN at a chosen threshold. Read precision = TP/(TP+FP) and recall = TP/(TP+FN).
+- **ROC curve** — how well does the score rank? AUC = area under the curve, 0.5 = random, 1.0 = perfect. Insensitive to class imbalance.
+- **PR curve** — precision vs recall across thresholds. Use this for rare positives (fraud, churn, conversion).
+- **Calibration plot** — if the model says 30% probability, do 30% of those cases actually happen? A well-calibrated model lines up along the diagonal.
+- **Brier score** — mean squared error of predicted probabilities. Lower = better calibration.
+- **Silhouette score** (USML) — how crisp are the clusters? Near 1 is tight/separated, near 0 is overlapping, negative is wrong cluster assignment.
+- **Bootstrap Jaccard** (USML) — re-cluster on a different sample; what fraction of customer pairs stay in the same pair? ≥0.80 is shippable.
+- **Precision@k** (rec) — of the top-k you recommended, how many did the customer engage with?
+- **PSI (Population Stability Index)** (drift) — how far has this feature's distribution moved since training? >0.25 is severe.
+
+### 4.5 Common diagnoses you should recognise
+
+| You see...                                                    | You are looking at...                                                    |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Train-test gap (train AUC much higher than test)              | **Overfitting**                                                          |
+| Good AUC but bad Brier / bad calibration                      | Model **ranks right, probabilities are miscalibrated**                   |
+| One feature importance dominates 80%                          | Likely **leakage** — that feature is the label in disguise               |
+| High precision, low recall                                    | Threshold set too high; catching few but catching them right             |
+| High recall, low precision                                    | Threshold set too low; catching most but also many false positives       |
+| Silhouette high but stability (bootstrap Jaccard) low         | Pattern exists in this sample but doesn't hold up on new samples         |
+| Clusters explain a demographic variable better than behaviour | **Proxy leakage** — the segmentation is income/age/postcode in disguise  |
+| Solver returns feasible but one segment gets 90% of the plan  | **Pathology**: feasible ≠ shippable                                      |
+| Drift severity high for one feature but segment-churn low     | Distributional shift without behavioural shift — may not need retraining |
+
+### 4.6 The lever taxonomy — what you pull each phase
+
+| Phase                | Levers (big one first)                                                              |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| 1 Frame              | scope · horizon · operational ceiling · cost asymmetry                              |
+| 2 Data Audit         | outlier handling · missingness · contamination filters · sampling                   |
+| 3 Feature Framing    | availability · leakage · proxy-for-protected-class · engineered derivation          |
+| 4 Candidates         | model family mix · sweep breadth · cross-validation · baseline inclusion            |
+| 5 Implications       | complexity-vs-interpretability · stability-vs-accuracy · speed-vs-performance       |
+| 6 Metric + Threshold | primary metric · threshold · class imbalance · calibration                          |
+| 7 Red-team           | subgroups · adversarial perturbations · proxy tests · acceptance                    |
+| 8 Deployment Gate    | monitoring cadence · rollback channel · alert thresholds · promotion criteria       |
+| 10 Objective         | single-vs-multi · weight assignment · proxy metrics · coverage / diversity floors   |
+| 11 Constraints       | hard-vs-soft · penalty calibration · demotion rules · regulatory triggers           |
+| 12 Solver Acceptance | held-out choice · pathology detection · accept/retune/redesign · rollback readiness |
+| 13 Drift             | signal choice · threshold grounding · duration window · HITL-vs-auto                |
+
+---
+
+## 5. The Playbook runs inside `/implement` (COC wrap)
+
+The 14-phase Playbook is not a replacement for the COC phases you already know — it is the **content** of your `/implement` phase. Routine is the scaffold; decisions are the content.
+
+| Clock     | COC phase             | Sprint / paradigm                        | Playbook phases inside          | Output                                                                 |
+| --------- | --------------------- | ---------------------------------------- | ------------------------------- | ---------------------------------------------------------------------- |
+| 2:00–2:10 | (opening)             | narrative + preflight                    | —                               | green viewer banner                                                    |
+| 2:10–2:25 | `/analyze`            | frame the 4-module cascade               | (pre-phase)                     | `01-analysis/failure-points.md`, `assumptions.md`, `decisions-open.md` |
+| 2:25–2:30 | `/todos`              | draft phases · instructor gate           | —                               | `todos/active/phase_N_*.md` (13 phases; Phase 14 deferred)             |
+| 2:30–3:15 | `/implement` Sprint 1 | **USML — Discover**                      | Phases 1, 2, 3, 4, 5, 6, 7, 8   | Segmentation; `journal/phase_{1..8}_usml.md`                           |
+| 3:15–4:00 | `/implement` Sprint 2 | **SML — Predict**                        | Phases 4, 5, 6, 7, 8 (replayed) | Churn + Conversion classifiers; `journal/phase_{4..8}_sml.md`          |
+| 4:00–4:30 | `/implement` Sprint 3 | **Optimization — Decide**                | Phases 10, 11, 12               | Campaign allocator; `journal/phase_{10..12}_*.md`                      |
+| 4:30–4:40 | mid-sprint injection  | PDPA red-line                            | Phase 11 + 12 re-run            | `journal/phase_11_postpdpa.md`, `phase_12_postpdpa.md`                 |
+| 4:40–5:00 | `/implement` Sprint 4 | **MLOps — Monitor**                      | Phase 13                        | Drift × 3 models; `journal/phase_13_*.md`                              |
+| 5:00–5:15 | `/redteam`            | stability · proxy · operational collapse | —                               | `04-validate/redteam.md`                                               |
+| 5:15–5:30 | `/codify` + `/wrapup` | Phase 9                                  | Phase 9                         | `.claude/skills/project/week-05-lessons.md`, `.session-notes`          |
+
+`/analyze` and `/todos` are short (15 minutes together) and not busywork: they force you to declare what the pre-built baseline commits to (K=3, content recommender, drift reference registered) and what remains open. Week 4's students lost the lifecycle to scaffolding; Week 5 keeps both.
+
+---
+
+## 6. The five Trust-Plane decision moments (universalized)
+
+Tonight collapses into five high-pressure decisions. These are where the rubric has teeth. The universal shape first; the retail instantiation in the sidebar.
+
+1. **Pick the primary operating point and defend it in the declared unit of harm.**
+
+   > _Retail instantiation: pick K for segmentation and defend in $ of wrong-campaign cost + marketing capacity. Not "silhouette said 5"; "5 because marketing runs 5 campaigns; 7 costs $X in setup with no realistic lift; stability drops below 0.80 at K=7."_
+
+2. **Commit to a distinct downstream action per output class; collapse duplicates.**
+
+   > _Retail instantiation: if two segments get the same marketing campaign, they are one segment with noise. Collapse to lower K or defend the difference in dollars._
+
+3. **Choose the model strategy with an explicit fallback for the cold / low-confidence / no-signal regime.**
+
+   > _Retail instantiation: collaborative / content-based / hybrid for the recommender — AND for new customers with no history, say what happens: segment modal basket, catalogue popularity, or editorial curation._
+
+4. **Classify hard-vs-soft constraints under regulatory pressure and justify the penalty.**
+
+   > _Retail instantiation: mid-Sprint-2, Legal flags PDPA exposure on under-18 browsing history. Re-run Phase 11 (re-classify as hard) AND Phase 12 (re-solve with the new constraint). Not just the journal entry._
+
+5. **Set the retrain rule: signal + threshold grounded in historical variance + duration window + human-in-the-loop on first trigger.**
+   > _Retail instantiation: three separate rules, one per model (segmentation churn, churn predictor calibration decay, allocator constraint-violation rate)._
+
+Decision moments 4 and 5 are where Week 4 students hit the wall. They are the parts the rubric scores hardest.
+
+---
+
+## 7. Workshop clock (4 sprints, 3.5 hours)
+
+```
+2:00  opening narrative + preflight green
+2:10  /analyze  (10m)
+2:25  /todos    (5m)   ── instructor gate ──
+2:30  ┌───────────────────────────────────────────────────┐
+      │ SPRINT 1 · USML · Discover · Phases 1→8           │ 45m
+3:15  ├───────────────────────────────────────────────────┤
+      │ SPRINT 2 · SML · Predict · Phases 4→8 (×2)        │ 45m
+4:00  ├───────────────────────────────────────────────────┤
+      │ SPRINT 3 · Opt · Decide · Phases 10→12            │ 30m
+4:30  │    PDPA injection fires (re-run Phase 11 + 12)    │ 10m
+4:40  ├───────────────────────────────────────────────────┤
+      │ SPRINT 4 · MLOps · Monitor · Phase 13             │ 20m
+5:00  ├───────────────────────────────────────────────────┤
+      │ /redteam                                           │ 15m
+5:15  │ /codify + /wrapup                                  │ 15m
+5:30  └───────────────────────────────────────────────────┘
+```
+
+---
+
+## 8. Phase summary & disposition
+
+Which phases **keep** as-is across ML problems, which **adapt** to the paradigm, which are **replaced** for USML/recommender vs SML, which **defer**:
+
+| #   | Phase                      | Disposition                     | Sprint | Artefact                                                   |
+| --- | -------------------------- | ------------------------------- | ------ | ---------------------------------------------------------- |
+| 1   | Frame                      | KEEP                            | 1      | `journal/phase_1_frame.md`                                 |
+| 2   | Data audit                 | KEEP (+ proxy chk)              | 1      | `journal/phase_2_data_audit.md`                            |
+| 3   | Feature framing (UNFOLDED) | KEEP (live this wk)             | 1      | `journal/phase_3_features.md`                              |
+| 4   | Candidates                 | ADAPT (USML/SML)                | 1, 2   | `data/segment_leaderboard.json`, `predict/leaderboard/*`   |
+| 5   | Implications               | ADAPT                           | 1, 2   | `journal/phase_5_*.md`                                     |
+| 6   | Metric + Threshold         | **REPLACE** (USML three floors) | 1, 2   | `journal/phase_6_usml.md`, `phase_6_sml.md`                |
+| 7   | Red-team                   | ADAPT                           | 1, 2   | `journal/phase_7_*.md`                                     |
+| 8   | Deployment Gate            | KEEP                            | 1, 2   | `journal/phase_8_*.md` + registry transition               |
+| 9   | Codify                     | KEEP                            | close  | `.claude/skills/project/week-05-lessons.md`                |
+| 10  | Objective                  | **REPLACE** (optimization)      | 3      | `journal/phase_10_objective.md`                            |
+| 11  | Constraints                | ADAPT                           | 3      | `journal/phase_11_constraints.md` + `phase_11_postpdpa.md` |
+| 12  | Solver Acceptance          | **REPLACE** (LP)                | 3      | `data/allocator_last_plan.json` + `journal/phase_12_*.md`  |
+| 13  | Drift                      | ADAPT (× 3 models)              | 4      | `data/drift_report_*.json` + `journal/phase_13_*.md`       |
+| 14  | Fairness                   | DEFER to Week 7                 | —      | (deferred)                                                 |
+
+**Phases 10–12 are deferrable** when your product has no secondary optimization or ranking layer (e.g., a pure clustering or pure classification product). Tonight Arcadia has both — USML segments feed SML predictors feed the optimization allocator — so all three phases run. On your next project, ask: is there a decision to optimize given the model's output? If no, skip 10–12.
+
+---
+
+# SPRINT 1 — USML · Discover · Phases 1–9
 
 ---
 
 ## Phase 1 — Frame
 
-- **Sprints**: Sprint 1 (first ~7 min).
-- **Trust-plane question**: What are we trying to discover, for which customers, on what time window, and what is the cost of drawing the wrong segments?
-- **Prompt template**:
-  > _"Read the product brief. I need a clear problem statement for the Customer Segmentation module. Tell me: which customers are in scope, which are out, what behavioural window we look at, how many segments we will commit to using even before we see the data, and what it costs when the segmentation is wrong — both the wasted-campaign cost when a customer is sent the wrong offer ($45 per customer), and the touch-cost of contacting them at all ($3). Don't assume anything — if the brief is vague on scope, ask me."_
-- **Evaluation checklist**:
-  - [ ] Customer scope precise (not "customers" but e.g. "18,000 customers active in the last 90 days, excluding staff accounts and bot traffic").
-  - [ ] Behavioural window named in days or months (not "recent activity").
-  - [ ] Commitment stated on the operational segment ceiling ("marketing can run at most 6 parallel campaigns") BEFORE the clustering runs.
-  - [ ] Cost framing names both the wrong-segment cost ($45 per customer) and the touch cost ($3 per contact), and ties them to a realistic volume ("if we misclassify 5% of 18,000 active customers, that is $40,500 of wasted campaign spend plus damage to open rates").
-  - [ ] No silent assumptions.
-- **Journal schema**:
-  ```
-  Phase 1 — Frame
-  Customer scope: ____
-  Behavioural window: ____
-  Operational segment ceiling: ____ (who set it, why)
-  Cost framing: $__ per wrong-segment assignment × __ customers = $__ at risk
-  What I would change my mind on: ____
-  ```
-- **Common failure modes**:
-  - Target drifts into fuzzy language ("segment our customers") — downstream phases lose grounding.
-  - Operational ceiling set after seeing the elbow plot — the algorithm now dictates the business, not the reverse.
-  - Cost framing stated as "segments matter" without dollars — scores 2/4 on Harm framing rubric.
-- **Artefact**: `journal/phase_1_frame.md`.
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 1 · Phase 1 of 8 — Frame
+ LEVERS:        scope · horizon · operational ceiling · cost asymmetry
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+Declaring — in writing, before any code runs — exactly who is in scope, over what window, how many outputs the business can act on, and what it costs when the answer is wrong. Frame is the single sentence the whole downstream stack gets built on. If Frame is fuzzy, every later phase fails gracefully in your journal and catastrophically in production.
+
+### Why it matters (SML lens)
+
+- Reinforces Week 2 healthcare: "predict readmission" only became useful once scope narrowed to "patients discharged to home within 30 days of an inpatient stay."
+- Reinforces Week 3 fraud: cost asymmetry ($40 missed-fraud vs $1 false-alarm) only meant something once volume was attached.
+- Reinforces Week 4 forecasting: horizon has to be named in days — "forecast demand" is not a target; "forecast orders per depot per day for the next 14 days" is.
+- The dollar cost of being wrong is the anchor every later phase refers back to. No anchor, no grounding.
+
+### Why it matters (USML lens)
+
+- With no label, there is no "accuracy" to fall back on if scope is fuzzy — a bad scope makes every segment unactionable and you won't notice until campaigns ship.
+- You must commit to an **operational ceiling** BEFORE the data speaks. _"Marketing can run at most 6 parallel campaigns"_ — declared now, enforced in Phase 6. Waiting until after the elbow plot is how you end up with K=12 and a paralysed marketing team.
+- The cost of wrongness has two faces in USML: the wrong-cohort cost AND the cost of touching them at all. SML usually has one cost per direction; USML has two because you're both choosing a cohort AND deciding to contact it.
+- Peak seasonality changes the wrong-cohort math — the same 5% misclassification rate costs double when volume doubles.
+
+### Your levers this phase — what to pull, what to ignore
+
+- **Lever 1 (the big one): scope.** Inclusions AND explicit exclusions. "18,000 active customers in last 90 days, excluding staff + bot accounts" is a scope. "All customers" is not. Pulled by telling Claude Code what counts and what doesn't.
+- **Lever 2 (usually matters): operational ceiling.** How many outputs can your business _act on_? The answer caps model complexity. A 4-person marketing team cannot run 12 segments.
+- **Lever 3 (the anchor): cost asymmetry in dollars.** Two directions, two numbers, with units. "$40 per missed event, $12 per false alarm" lets every later phase do math.
+- **Lever 4 (rarely adjusted): horizon.** Days, not "near-term." Forces precision.
+- **Skip unless specific:** population segmentation at this phase (that's Sprint 1's output, not its input); peak-season adjustments (Phase 13's problem).
+
+### Trust-plane question
+
+What is the target, the population, the horizon, the cost of being wrong?
+
+### Prompt template — universal
+
+> _"Read the product brief. I need a clear problem statement for [module]. Tell me: what exactly are we [predicting/discovering/deciding], for which population, over what window, and what it costs when we get it wrong in each direction. [Cost asymmetry]. Don't assume anything — if the brief is vague on scope, ask me."_
+
+> **For tonight's product (Arcadia Retail, Sprint 1):** _"I need the segmentation problem statement. Who are we segmenting (18,000 active customers in last 90 days), how many segments can marketing actually run (the ceiling), and what it costs when we place a customer in the wrong segment ($45) vs run redundant campaigns ($3 per touch). Flag anything ambiguous."_
+
+### Evaluation checklist
+
+- [ ] Target / output precise (not "segments" but "behavioural segments over 90-day window, at most 6, distinct marketing action per segment").
+- [ ] Population scope explicit — inclusions AND exclusions.
+- [ ] Horizon / window named in units (days, months).
+- [ ] Cost asymmetry quantified with dollars and units attached.
+- [ ] Operational ceiling declared and sourced (who owns it?).
+
+### Journal schema — universal
+
+```
+Phase 1 — Frame
+Target / output: ____
+Population: ____ (inclusions: ____; exclusions: ____)
+Horizon / window: ____
+Primary cost term: $__ per ____ (the side that loses more)
+Secondary cost term: $__ per ____
+Operational ceiling: ____ (owned by ____)
+What would flip my mind: ____
+```
+
+> **Retail instantiation:** Target = "behavioural segment per active customer, max 6 segments"; Population = "18,000 customers active in last 90 days, excl. staff/bots"; Horizon = "6-month rolling"; Primary cost = $45 per wrong-segment campaign; Secondary = $3 per touch; Ceiling = 6 (owned by CMO); Flip = "if marketing restructures to run >6 campaigns".
+
+### Common failure modes
+
+- Target drifts into fuzzy language ("discover patterns") — downstream phases lose grounding.
+- Horizon left implicit — the model learns behaviour across seasons that should not be averaged.
+- Cost asymmetry stated as "X:Y ratio" without dollars — scores 2/4 on rubric D1.
+- Operational ceiling omitted — student ends up with a statistically brilliant K=12 that marketing silently ignores.
+
+### Artefact
+
+`workspaces/.../journal/phase_1_frame.md`
+
+### Instructor pause point
+
+- Write the Sprint 1 frame on the whiteboard. Ask the class: which three numbers would change if Arcadia were a 2,000-customer boutique? Which would change if it were Lazada?
+- Ask: what's the smallest operational ceiling that still ships a useful product? Why isn't "premium vs mass" always the right answer?
+- Demonstrate: show $45 × 18,000 × 5% = $40,500/month on the board. Ask: does the CMO care at this number? What number flips her from "nice to have" to "must ship"?
+
+### Transfer to your next project
+
+1. Who is explicitly in scope and who is explicitly OUT? (Scope is a list of exclusions, not just inclusions.)
+2. What is the operational ceiling on how many outputs your business can act on — and who, not the model, owns that ceiling?
+3. What does it cost, in dollars, when a single unit is wrong — and is there a volume that turns that unit cost into a monthly number your executive will care about?
 
 ---
 
 ## Phase 2 — Data Audit
 
-- **Sprints**: Sprint 1 (~8 min).
-- **Trust-plane question**: Is the customer data trustworthy enough to cluster on at all?
-- **Prompt template**:
-  > _"Audit Arcadia's customer data before we cluster anything. I need to know: is the data trustworthy? Check for duplicate customer records, staff and bot contamination, customers with only one observation (too sparse to segment), missing values across the key behavioural columns, outliers that will dominate the clustering, and any field that is really a derived label in disguise. Recommend conditions under which the data is safe to cluster. I'll make the final call."_
-- **Evaluation checklist**:
-  - [ ] Duplicate / staff / bot / singleton-observation checks reported with specific counts, not generalities.
-  - [ ] Outlier behaviour characterised (the top 1% of spenders will dominate any distance-based clustering — flagged, not hidden).
-  - [ ] Missingness pattern per behavioural column named.
-  - [ ] Any suspected label-in-disguise field surfaced (e.g. a pre-existing "tier" column that would cause the clustering to rediscover an old rule).
-  - [ ] Recommendation offered (accept / accept-with-conditions / reject) — you decide.
-- **Journal schema**:
-  ```
-  Phase 2 — Data Audit
-  Accepted? Yes / Conditional / No
-  Conditions applied: ____
-  Known risks I am accepting: ____
-  Label-in-disguise columns found: ____
-  ```
-- **Common failure modes**:
-  - Data accepted as-is; no call made on duplicates or singletons — drives noisy segments later.
-  - Top-1% spenders not flagged — they dominate every K-means result and the segmentation reduces to "rich vs not rich".
-  - A pre-existing tier column left in the feature set — the clustering "discovers" the 2020 hand-authored segmentation and the CMO sees no value.
-- **Artefact**: `journal/phase_2_data_audit.md`.
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 1 · Phase 2 of 8 — Data Audit
+ LEVERS:        outlier handling · missingness · contamination filters · sampling
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+Before you point any algorithm at the data, challenge whether the data is trustworthy enough to carry the decision. Six categories: duplicates, contaminated populations, sparsity that makes rows unusable, outliers that will dominate the result, fields that are labels in disguise, missingness with unknown behaviour.
+
+### Why it matters (SML lens)
+
+- Reinforces Week 2's leakage lesson — a diagnosis code recorded at discharge is a perfect predictor of readmission because it encodes the answer.
+- Reinforces Week 3's outlier finding — a single merchant's 0.1% of transactions drove 14% of the fraud score.
+- Reinforces Week 4's missingness rule — you don't know what your model does with a NaN until you look.
+- Dollar framing: skipping the audit in Week 3 would have cost $22,000/month in false alarms. Same logic here: accepting the top-1% spenders silently means every customer segment becomes "rich vs not rich."
+
+### Why it matters (USML lens)
+
+- Outliers dominate distance-based clustering more than they bias a supervised model — one customer who spends 30× the median can form their own cluster and shift every other boundary. Decide NOW: cap, log-transform, or exclude.
+- A **label-in-disguise** in SML is a leakage bug. In USML it's worse: a pre-existing tier column or a 2020 hand-authored segment flag will cause the clustering to rediscover that old rule, and the CMO will correctly ask "why did I pay for this."
+- Singleton customers (one transaction ever) cannot be clustered honestly — inventing behaviour from noise. Decide NOW: exclude, or route to a cold-start branch.
+- Bots and staff don't just inflate error; they form their own segment. Ship a "4AM high-frequency buyer" segment and you've shipped your own QA team.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): outlier handling.** Cap / log-transform / exclude / own-branch. This decision changes every downstream result. Retail default: log-transform spend variables; cap visits-per-week at 95th percentile.
+- **Lever 2 (the sneaky one): contamination filters.** Bots, staff, test accounts, integration partners. Quantify BEFORE you fit.
+- **Lever 3 (usually matters): missingness disposition.** Impute / drop / leave-as-NaN / flag with a mask feature. Each choice has different failure modes.
+- **Lever 4 (only if large data): sampling.** Keep all / stratified subsample / weight by class. For tabular data <100k rows, usually keep all.
+- **Skip unless specific:** schema normalisation (Phase 3's problem); feature derivation (Phase 3's problem).
+
+### Trust-plane question
+
+Is this data trustworthy? Which features are available at prediction time, leaky, or ethically loaded?
+
+### Prompt template — universal
+
+> _"Audit the [dataset] before we train anything. I need to know: is the data trustworthy? Check for duplicates, staff/bot contamination, singleton observations, outliers, label-in-disguise columns, and missingness. For each finding, tell me the row or column affected and the count. Recommend a disposition — cap, log, exclude, flag — for each outlier pattern and each contamination. I'll approve the dispositions."_
+
+> **For tonight's product (Arcadia Retail):** _"Audit the Arcadia customer dataset — 5,000 customers, 14 features. Flag the six audit categories with specifics: row X, column Y, count Z. Pay special attention to (a) customers with <3 transactions who cannot be honestly clustered, (b) the top-1% spenders who will dominate distance-based clustering, (c) any column that is really a pre-existing segment label. Recommend; I decide."_
+
+### Evaluation checklist
+
+- [ ] All 6 audit categories addressed with specifics (row X, col Y, count Z).
+- [ ] Outlier dispositions proposed (cap / log / exclude / own-branch) with a reason each.
+- [ ] Singleton / low-observation customers flagged with a disposition.
+- [ ] Label-in-disguise check run explicitly on every column that looks categorical or "tier"-shaped.
+- [ ] Missingness disposition proposed per feature, not blanket.
+
+### Journal schema — universal
+
+```
+Phase 2 — Data Audit
+Accepted? Yes / Conditional / No
+Conditions applied: ____
+Known risks I am accepting: ____
+Dispositions:
+  Outliers: ____
+  Singletons: ____
+  Missingness: ____
+  Contamination: ____
+  Label-in-disguise candidates: ____
+```
+
+### Common failure modes
+
+- Audit output accepted as-is; no call made on any of the six categories — scores 1/4 on D3.
+- "Everything looks fine" without specifics — the phase did not happen.
+- Singleton customers left in for clustering — they become a noise cluster that pollutes every segment's boundary.
+
+### Artefact
+
+`workspaces/.../journal/phase_2_data_audit.md`
+
+### Instructor pause point
+
+- Show a scatter of two RFM features with top-1% left in vs removed. Ask: which picture is the segmentation going to be _about_?
+- Raise-hands: who would exclude the top 1% of spenders from the segmentation? Who would keep them _in_ but in their own segment? Debate 2 minutes.
+- Ask: what's a label-in-disguise column in your industry? (Credit: "risk tier." Hospital: "DRG code." Retail: "loyalty tier.") If you can't answer, you haven't audited.
+
+### Transfer to your next project
+
+1. Which populations are contaminating the dataset (bots, staff, test, integration) and have I quantified them BEFORE I fit anything?
+2. Is there a field that is a leftover label from an older rule-based system — and if I leave it in, will my model simply re-derive the thing my buyer is paying me to replace?
+3. What is my plan for rare-but-real outliers — cap, log, exclude, or own-branch — and have I written the plan down BEFORE I saw the model output?
 
 ---
 
-## Phase 3 — Feature Framing (UNFOLDED THIS WEEK)
+## Phase 3 — Feature Framing (UNFOLDED this week)
 
-Week 4 folded this phase into the Data Audit. Week 5 unfolds it. Pre-cluster feature selection has higher stakes than pre-model feature selection: an ethically loaded feature does not merely bias a model, it _creates a segment_ that is really a proxy for a protected class — and the segment then looks like a legitimate behavioural pattern to the marketing team. Phase 3 gets its own pass this week.
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 1 · Phase 3 of 8 — Feature Framing
+ LEVERS:        availability · leakage · proxy check · engineered derivation
+──────────────────────────────────────────────────────────────────
+```
 
-- **Sprints**: Sprint 1 (~10 min).
-- **Trust-plane question**: Which features do we cluster on, which do we hold out, and for each held-out feature, is it held out because it is unavailable, leaky, or ethically loaded?
-- **Prompt template**:
-  > _"List every candidate feature for segmentation — transaction frequency, recency, average basket, channel mix, category mix, browsing depth, day-of-week pattern, promo responsiveness, and any demographic fields we hold. For each one, classify it on four axes: (a) available at segmentation time — yes/no, (b) leaky or label-in-disguise — yes/no with evidence (a pre-existing loyalty tier would rediscover the old rule), (c) ethically loaded or PDPA-sensitive — yes/no with rationale (postcode is a proxy for income; under-18 flag is PDPA-sensitive; inferred sensitive attributes like health or religion are red lines), (d) engineered or raw (if engineered, explain the derivation). Also run a proxy-check: for each demographic-like feature, test whether it is highly correlated with a cluster assignment produced without it — if dropping postcode changes 30% of cluster assignments, that means postcode was acting as a proxy. Recommend a feature set. I'll make the final call."_
-- **Evaluation checklist**:
-  - [ ] Every candidate feature classified on all four axes.
-  - [ ] Proxy-for-protected-class check reported — for each demographic-like feature, a paragraph naming whether it is acting as a proxy for a cluster that would form anyway.
-  - [ ] Ethically loaded features have a defensible rationale for inclusion or exclusion — not a drive-by "OK".
-  - [ ] Engineered features (RFM, tenure decile, channel-mix entropy) have a derivation explanation.
-  - [ ] Recommendation offered but not auto-applied.
-- **Journal schema**:
-  ```
-  Phase 3 — Features
-  Included: ____
-  Excluded (with reason per feature): ____
-  PDPA-sensitive features flagged: ____
-  Proxy-for-protected-class concerns: ____
-  ```
-- **Common failure modes**:
-  - Postcode or neighbourhood-derived feature included without a proxy check — the resulting segmentation is a PDPA/fairness problem dressed up as behavioural clustering.
-  - Under-18 flag left in "because it's just a field" — the mid-Sprint 2 PDPA injection will punish this.
-  - Engineered feature added without derivation — becomes a hidden label-leakage vector.
-- **Artefact**: `journal/phase_3_features.md`.
+### Concept
 
----
+Every candidate input column classified on four independent axes: (a) available at prediction time? (b) leaky? (c) ethically loaded or regulatorily sensitive? (d) raw or engineered? Week 4 folded this into Data Audit because a supervised regressor with one leaky feature produces a bad prediction you can measure. Week 5 unfolds it because in unsupervised learning, an ethically loaded feature doesn't bias a model — it _creates a segment that is really a protected-class proxy_, and no accuracy metric will flag it.
 
-## Phase 4 — Candidates (Algorithm × K sweep)
+### Why it matters (SML lens)
 
-- **Sprints**: Sprint 1 (~10 min). Keep the sweep quick — the retail scaffold runs it in under 90 seconds against the preloaded active-customer feature set.
-- **Trust-plane question**: Which clustering approaches and which K values are reasonable candidates for this problem?
-- **Prompt template**:
-  > _"Run a clustering sweep on Arcadia's active customers. Try three different approaches across a range of K values: a K-means-style approach at K = 3, 5, and 7 (different cluster counts), a density-based approach with tuned density (which picks its own cluster count and may leave some customers unassigned), and a hierarchical tree cut at 5. Also apply one pass of dimensionality reduction for preprocessing and one for visualisation. For each approach, use a stability protocol: run it twice on two different months of behaviour and report the percentage of customers who stay in the same cluster across runs. Show me a leaderboard comparing them all on: how well-separated the clusters are, how stable they are month over month, how many customers are unassigned or in tiny segments, and a one-paragraph plain-language profile per resulting segment so I can judge interpretability. I'll pick the count and the approach in the next phase."_
-- **Evaluation checklist**:
-  - [ ] Candidate sweep spans three algorithmic shapes (blob-expecting at three K values, density-based, hierarchical).
-  - [ ] Each candidate has a stated risk ("density-based can leave 20% of customers unassigned — is that acceptable?").
-  - [ ] The current rule-based five-segment system is cited as the naive baseline to beat.
-  - [ ] Stability protocol executed on two windows — the output names a percentage of customers who stayed in the same cluster, per candidate.
-  - [ ] Dimensionality reduction used as a pre-step AND as a visualisation aid — both purposes surfaced separately.
-- **Journal schema**: _(no journal entry — decision happens in Phase 5)_
-- **Common failure modes**:
-  - Student prompts for "AutoML the clustering candidates" in the Week 4 style — the retail scaffold does NOT offer an AutoML path for clustering (clustering is not a supported AutoML task type in the framework we use). The scaffold provides a pre-wired algorithm × K sweep endpoint. If Claude Code returns a ValueError about AutoML, re-prompt in terms of "try three clustering approaches across K values" and let Claude Code hit the scaffold's sweep endpoint.
-  - Only one clustering family tried ("I'll do K-means at K=5") — loses the fair comparison, and in particular loses the density-based "some customers are outliers" option.
-  - Stability protocol skipped — you ship a segmentation that re-shuffles 30% of customers next month, destroying campaign continuity.
-  - Dimensionality reduction treated as optional — on ~40 behavioural features, un-reduced clustering usually finds noise. At least one candidate must run with reduction.
-  - Cluster count picked inside Phase 4 ("let me pick K=5") — the decision belongs in Phase 6, not here.
-- **Artefact**: `data/segment_leaderboard.json`.
+- Reinforces Week 2's rule: a feature fails leakage review if it wasn't available at the moment of prediction (discharge date for readmission: no).
+- Reinforces Week 3's engineered-feature discipline: RFM, tenure decile, channel-mix entropy — every derived feature has a one-line derivation or it is a hidden bug.
+- Reinforces Week 4's feature importance ladder: if one feature dominates 80% of the signal, it's a leakage candidate until proven otherwise.
+- Dollar framing: leaving a single leaky feature in Week 4's forecast meant the $40/$12 cost-asymmetry logic was against a self-fulfilling prophecy. The fix prevented a live-production disaster.
 
----
+### Why it matters (USML lens)
 
-## Phase 5 — Model Implications (Segment Selection)
+- **Postcode is not a neutral feature.** In Singapore it's a strong proxy for income, ethnicity, and school catchment. Cluster on it → a segmentation that looks behavioural and is actually demographic.
+- **Under-18 status is a PDPA red line** (in Singapore; GDPR's under-16 in the EU). Including it is not bad manners; it's $220/record exposure.
+- **The proxy check is the new tool:** cluster once with the demographic feature in, cluster once with it out, count how many customers change segments. If 30% move, the demographic was doing the work — the "behavioural" segmentation was demographic all along.
+- Inferred sensitive attributes (purchases that imply health conditions, religion, sexual orientation) are equally loaded even when never named.
 
-- **Sprints**: Sprint 1 (~10 min).
-- **Trust-plane question**: Given the leaderboard, which clustering approach — and at what cluster count — do I stake my career on, and why?
-- **Prompt template**:
-  > _"Compare the clustering approaches on the leaderboard. For each one, tell me: how well-separated the resulting segments are, how stable they are month-over-month, how many customers are unassigned or in tiny clusters, and whether the segments tell a business story a non-technical CMO can recognise — for each segment, write a one-paragraph profile in plain language ("high-frequency weekend browser who converts on promo"). Then recommend one approach, but explain the trade-offs as if you're briefing the CMO who cares about stability and campaign actionability above statistical purity. I'll make the final pick."_
-- **Evaluation checklist**:
-  - [ ] All candidates compared on the same diagnostic numbers.
-  - [ ] Stability is reported month-over-month as a percentage, and the recommendation factors it in.
-  - [ ] Recommendation explicitly mentions how many customers would be left unassigned, and whether that is acceptable (density-based approaches may leave 10–25% unassigned).
-  - [ ] Segment profiles are in plain business language, not "Cluster 3: high RFM low entropy".
-  - [ ] Recommendation is defensible in 30 seconds to a non-technical CMO.
-- **Journal schema**:
-  ```
-  Phase 5 — Segment Selection
-  Picked approach: ____ (run ID: ____)
-  Rejected alternatives: ____
-  Why not the statistically "best" approach, if applicable: ____
-  Unassigned customers tolerated: ____% (rationale: ____)
-  What I would re-cluster with: ____
-  ```
-- **Common failure modes**:
-  - Student picks the highest silhouette score without checking stability — ships a segmentation that collapses in two months.
-  - Student accepts Claude Code's recommendation verbatim — no Trust Plane decision happened.
-  - Segment profiles written in statistical language ("Cluster 3 has high_freq=0.81, low_promo_resp=0.22") — the CMO cannot act on that.
-- **Artefact**: `journal/phase_5_segment_selection.md`.
+### Your levers this phase
 
----
+- **Lever 1 (the big one): proxy-for-protected-class check.** On every demographic or demographic-adjacent feature, run the cluster-with / cluster-without swap and count reassignment. >30% reassignment → the feature was doing the demographic work.
+- **Lever 2 (the discipline): availability audit.** Was this feature knowable at the moment the decision gets made? A feature that is only known retrospectively is a leakage bug wearing a pretty dress.
+- **Lever 3 (the hygiene): engineered-feature derivation.** Every derived column has a one-line derivation recorded. No exceptions.
+- **Lever 4 (the boundary): regulatory classification.** Name the regime (PDPA §13, GDPR Art. 9, HIPAA, ECOA) for each sensitive feature.
+- **Skip unless specific:** feature scaling (standardization is universal for distance-based clustering — the scaffold handles it); encoding cardinality (handled by the scaffold's one-hot/frequency logic).
 
-## Phase 6 — Metric + Threshold (K + three floors)
+### Trust-plane question
 
-**This is the big one for Week 5 — read it twice.** Unsupervised learning has no ground-truth label. There is no "accuracy", no RMSE, no MAPE. The metric conversation changes shape: instead of optimising a single number, you commit to three _floors_ — minimum thresholds any shippable segmentation must clear. Then you pick the K that clears all three floors AND maximises business value.
+Which features are safe, which are leaky, which are ethically loaded?
 
-- **Sprints**: Sprint 1 (~12 min).
-- **Trust-plane question**: What are the three floors (separation, stability, actionability) any shippable segmentation must clear — and at what K do we clear all three?
-- **Prompt template**:
-  > _"I need to decide how many segments to ship. There's no label to score against, so I want to judge this on three floors, not a single number — a shippable segmentation must clear all three or we ship nothing: (1) a **separation floor** — how well-separated the clusters are in plain terms, with a minimum acceptable value I commit to before seeing any results; (2) a **stability floor** — using a re-sampling protocol, what fraction of customers stay in the same segment if we re-cluster on a different month of behaviour, with a minimum acceptable value (conventionally 0.80 or above on the overlap measure); (3) a **business-actionability floor** — for each proposed K (try 3, 4, 5, 6, 7, 8), write me a one-paragraph profile of each segment and tell me whether the marketing team could plausibly build a \_distinct_ campaign for each one. If two segments get the same action, they are one segment with noise; collapse them. Now tie all three floors back to dollars with a counterfactual lift estimate: for each K, estimate the expected lift over the current rule-based five-segment system. Use the $45 wrong-segment campaign cost and the $18 average basket lift from a converted recommendation as the two sides of the ledger — a better segmentation sends fewer customers to the wrong campaign (saving $45 per customer on avoided waste) and surfaces more convertible recommendations (gaining $18 per additional converted click). Show me a table of K vs separation vs stability vs actionability vs dollar-lift-vs-baseline. I will pick the K."\_
-- **Evaluation checklist**:
-  - [ ] All three floors declared with numeric thresholds BEFORE the student sees the leaderboard (pre-commitment matters — seeing the results first and then reverse-engineering the floor is cheating).
-  - [ ] Stability floor uses a re-sampling protocol (bootstrap, two-month split, or similar); the threshold is a specific number (e.g. 0.80 on the overlap measure).
-  - [ ] Actionability floor tested by writing a one-line distinct action per segment; if two segments share an action, either one is collapsed or the difference is defended in dollars.
-  - [ ] Dollar-lift-vs-baseline computed for each K using a counterfactual — "at this K, the segmentation would send N fewer customers to the wrong campaign ($45 each saved) and surface M more convertible recommendations ($18 each gained) vs the current rule-based system" — rather than a raw cost-of-error calculation.
-  - [ ] Sensitivity / reversal condition names a signal, a threshold, and a duration window (e.g. "if stability drops below 0.80 on two consecutive monthly re-clusters, drop to a smaller K").
-- **Journal schema**:
-  ```
-  Phase 6 — Metric + K
-  Separation floor: ____ (threshold: ____)
-  Stability floor: ____ (protocol: ____; threshold: ____)
-  Actionability floor: per-segment distinct action table below
-  | Segment | One-line action |
-  |---|---|
-  | 1 | ____ |
-  | ... | ____ |
-  Chosen K: ____
-  Counterfactual lift vs current rule-based system: $____ per month
-    (sources: $45 × __ customers avoided-wrong-campaign + $18 × __ additional converted recs)
-  Sensitivity flip point (signal + threshold + duration): ____
-  ```
-- **Common failure modes**:
-  - Student asks for a single "accuracy" number — there isn't one. The prompt must surface three floors.
-  - K picked on separation alone — ignores stability (ships a segmentation that reshuffles next month) and actionability (produces two segments that earn the same campaign), scores 1/4 on metric-cost linkage.
-  - Floors set _after_ seeing the leaderboard — the pre-commitment principle is the whole point; post-hoc floors are always exactly where the leaderboard winner landed. Grader checks timestamps.
-  - Dollar-lift stated as raw cost-of-error with no baseline comparison — scores 2/4 on metric-cost linkage. The counterfactual ("vs current rule-based system") is what turns a number into a business case.
-  - Two segments with identical one-line actions shipped without collapsing — scores 1/4 on trade-off honesty. If marketing would treat two segments the same, they are one segment.
-- **Artefact**: `journal/phase_6_segment_count.md`.
+### Prompt template — universal
+
+> _"Classify every candidate feature on four axes: (1) available at prediction time? (2) leaky from the label or from future data? (3) ethically loaded, regulatorily sensitive, or a proxy for a protected class — name the regime? (4) raw or engineered, and if engineered, what's the one-line derivation? Run a proxy-drop test on every demographic feature: re-cluster with and without, report the reassignment rate. I'll approve which features go in."_
+
+> **For tonight's product (Arcadia Retail):** _"Classify Arcadia's 14 customer features on the four axes. Pay special attention to: postal_district (proxy for income?), age_band (proxy for under-18 under PDPA?), and any column you wouldn't defend to the CMO if asked. Run the proxy-drop reassignment rate for the two strongest candidates. Recommend in / out; I approve."_
+
+### Evaluation checklist
+
+- [ ] Every candidate feature classified on all four axes — no hand-waving.
+- [ ] Ethically-loaded features have a named rationale (which regime) AND a proxy-drop reassignment number.
+- [ ] Engineered features have a derivation explanation (one sentence).
+- [ ] Recommendation offered per feature, not bulk; you decide per feature.
+
+### Journal schema — universal
+
+```
+Phase 3 — Feature Framing
+Features IN: ____
+Features OUT (with reason): ____
+Ethically-loaded features kept IN with rationale: ____ (regime: ____)
+Proxy-drop reassignment rate (if demographic feature kept): __%
+Engineered feature derivations: ____
+```
+
+### Common failure modes
+
+- "Ethically loaded" classified as "OK" with no rationale — scores 1/4 on D4.
+- Proxy-drop test skipped because Claude Code "says postcode is fine" — student has outsourced their judgment.
+- Engineered feature added without a one-line derivation — becomes a leakage vector six weeks later.
+
+### Artefact
+
+`workspaces/.../journal/phase_3_features.md`
+
+### Instructor pause point
+
+- Whiteboard the 4 axes as a 2×2 table (available × leaky, loaded × engineered). Place 10 Arcadia features into cells. Which cells ship? Which are show-stoppers?
+- Ask: if a feature is both engineered AND loaded (e.g., "neighbourhood affluence index"), is it acceptable? Defensible rationale?
+- Demonstrate: run the proxy-drop check live on postal_district. Report reassignment rate. Above what % does the segmentation stop being "behavioural"?
+
+### Transfer to your next project
+
+1. For each feature, can I defend its inclusion on all four axes, or am I hoping no one asks about (c)?
+2. What are the protected-class features in MY domain (health condition, immigration status, language, age band, neighbourhood) — and have I run the proxy check?
+3. Does every engineered feature have a one-line derivation recorded somewhere a future auditor can find — not in my head, on disk?
 
 ---
 
-## Phase 7 — Red-Team (AI Verify: Transparency, Robustness, Safety)
+## Phase 4 — Candidates (Sprint 1 = clustering sweep; replayed in Sprint 2 for SML)
 
-Week 5 keeps the AI Verify frame (Transparency, Robustness, Safety) but adds three unsupervised-specific failure modes under Robustness and Safety: **re-seed churn** (does the clustering produce different segments just from a different random seed?), **proxy leakage** (is a segment actually a demographic proxy dressed up as behaviour?), and **operational collapse** (does one segment shrink to fewer than 2% of customers in a single month?).
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 1 · Phase 4 of 8 — Candidates
+ LEVERS:        model family mix · sweep breadth · cross-validation · baseline inclusion
+──────────────────────────────────────────────────────────────────
+```
 
-- **Sprints**: Sprint 1 (~10 min).
-- **Trust-plane question**: How does this segmentation fail? Who is harmed when it silently goes wrong?
-- **Prompt template**:
-  > _"Try to break this segmentation. I want to know three things: (1) **Transparency** — for a given customer, can you explain in one plain sentence which segment they ended up in and why? Name the top 2 behavioural features driving each segment. If we cannot explain it, marketing cannot trust it. (2) **Robustness** — where is this segmentation fragile? Run the clustering three more times with different random seeds and report how much segment membership churns ('re-seed churn' — if 20% of customers change segment just from reseeding, the segmentation is unstable by construction). Check if any segment is really a demographic proxy: for each segment, does dropping a demographic feature (postcode, age band) collapse the segment? That would mean it was a proxy, not a behavioural pattern. What happens to the smallest segment on post-Black-Friday data (operational collapse — does it shrink to less than 2% of customers)? (3) **Safety** — if this segmentation silently mis-grouped 20% of customers for a month, what is the dollar damage ($45 per wrong campaign × expected mis-grouped volume), and are the small segments the ones most likely to represent vulnerable groups (new-to-Singapore, low-income, under-18, first-language-not-English)? Rank every finding by severity. Fairness will be covered in Week 7 — note the deferral explicitly."_
-- **Evaluation checklist**:
-  - [ ] **Transparency**: top 2 features per segment named; a one-sentence plain explanation exists for a sample customer; if feature importance is unavailable for this clustering approach, the limitation is stated.
-  - [ ] **Robustness / re-seed churn**: segment churn across different random seeds reported as a percentage; a finding is raised if it exceeds a stated threshold.
-  - [ ] **Robustness / proxy leakage**: for each segment, the effect of dropping a demographic feature is reported; a finding is raised if any segment collapses when postcode / age band / tenure band is removed.
-  - [ ] **Robustness / operational collapse**: smallest segment's size on post-Black-Friday data reported; a finding is raised if any segment drops below 2% of the customer base.
-  - [ ] **Safety**: worst-case mis-grouping cost in dollars (using the $45 wrong-campaign cost × customer volume); small-segment vulnerable-population check surfaced even if inconclusive.
-  - [ ] Fairness row ends with "deferred to Week 7 per Playbook" — explicit, not silent.
-  - [ ] Findings ranked by severity with proposed mitigation per finding.
-- **Journal schema**:
-  ```
-  Phase 7 — Red-Team (AI Verify)
-  Transparency: top features per segment ____; one-sentence explanation ____
-  Robustness — re-seed churn: ____%
-  Robustness — proxy leakage: segments that collapse when demographic dropped: ____
-  Robustness — operational collapse: smallest segment size on peak data: ____%
-  Safety: worst-case mis-grouping cost $____; small-segment vulnerable-population check ____
-  Fairness: deferred to Week 7 per Playbook
-  Blockers: ____
-  Accepted risks: ____
-  Mitigations to ship with: ____
-  ```
-- **Common failure modes**:
-  - Re-seed churn skipped — ships a segmentation that is literally a function of the random seed, with no acknowledgement.
-  - Proxy leakage check skipped because the result is uncomfortable ("segment 3 really is just 'customers in the east region'") — the whole point of the check is to force that admission.
-  - Operational collapse check treated as a "nice to have" — but it IS the Phase 13 drift signal. If a segment can collapse to < 2% in one month, the drift retrain rule must fire on that.
-  - Transparency skipped because the clustering approach doesn't have built-in feature importance — the limitation itself is the finding, not a pass.
-  - Safety dimension skipped because "segments can't really hurt anyone" — the $45 × 18,000 active customers forces it concrete.
-- **Artefact**: `journal/phase_7_red_team.md`.
+### Concept
+
+Trying a fair range of approaches before committing — not to find "the best," but to make the eventual choice _defensible as a choice among alternatives_. Every candidate runs on the same features with the same stability protocol. A multi-family sweep against a naive baseline is what makes Phase 5's pick defensible.
+
+### Why it matters (SML lens)
+
+- Reinforces Week 4's AutoML candidate sweep: the leaderboard only means something if every model was trained on the same schema and same folds.
+- Reinforces Week 2's "naive baseline" discipline — in Week 5, beat the CMO's hand-authored 5-segment rulebook, or don't ship.
+- Reinforces Week 3's "complexity for its own sake is overfit" rule: a hierarchical clustering with 12 branches is usually a 5-segment result in a costume.
+- Dollar framing: Week 4's leaderboard turned into a dollar decision because every model was comparable. Same here — incomparable candidates waste the whole phase.
+
+### Why it matters (USML lens)
+
+- **Clustering families make different shape assumptions.** K-means expects round blobs around a centre. DBSCAN expects dense pockets with gaps. Hierarchical builds a nested tree. If your data's real structure doesn't match the family's assumptions, the algorithm still produces clusters — they are just wrong in a way no plot reveals.
+- **K-selection methods disagree.** Elbow, silhouette, gap statistic each answer a slightly different question. They frequently point to different K. None of them settles the K decision alone.
+- **Dimensionality reduction has two purposes.** PCA as preprocessing (de-noise ~40 features before clustering). UMAP/t-SNE as visualisation (see whether clusters look like clusters on a 2D map). You need both.
+- **Density-based approaches leave some customers unassigned** — that is the algorithm admitting "these customers don't fit any clear pattern." Whether 20% unassigned is acceptable is a product call, not an algorithm call.
+
+> **Scaffold reality (tonight):** `AutoMLEngine` in kailash-ml 0.17.0 does NOT support clustering (task_type raises ValueError). The scaffold provides `/segment/fit` which runs the multi-family sweep directly. Your prompt asks for the sweep in business language; don't name AutoML.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): model family mix.** USML: K-means + DBSCAN + spectral + hierarchical spans the assumption space. SML: linear + random forest + gradient-boosted ensemble. Always include ≥3 families spanning the bias-variance range.
+- **Lever 2 (usually matters): sweep breadth.** How many K values? How many hyperparameters? For tonight's clock: K ∈ {3, 5, 7} for K-means + DBSCAN with 2 densities + spectral at 5. Five candidates, not twenty.
+- **Lever 3 (the protocol): stability.** Same features, same test-set, same stability probe (seed, time, resample) across all candidates. Without this the leaderboard is uninterpretable.
+- **Lever 4 (the floor): naive baseline.** Current rule-based segmentation (the 5-segment 2020 rulebook) is the baseline. If your best candidate doesn't clearly beat it, ship the baseline and save the money.
+- **Skip unless specific:** extensive hyperparameter grids within a family (save for Phase 5 if a winner emerges); neural-net exotica (tabular data doesn't need it).
+
+### Trust-plane question
+
+Which 3–5 approaches are reasonable for this problem, and does the sweep produce comparable numbers?
+
+### Prompt template — universal
+
+> _"Run a candidate sweep for the [module]. Three families spanning different assumptions — one [linear/blob-expecting], one [tree-based/density-based], one [ensemble/hierarchical]. Use the same features, same stability protocol, same held-out set across all candidates. Include a naive baseline. Produce a leaderboard comparing them on the 3–5 signals I care about. Don't optimise hyperparameters yet — that's Phase 5 if one wins."_
+
+> **For tonight's product (Sprint 1 USML):** _"Run a clustering sweep on Arcadia's active-customer behavioural features. Three algorithm shapes: K-Means at K=3, 5, 7; DBSCAN with two densities; one spectral approach. Same 7 features across all. Compare on silhouette, stability (re-seed Jaccard), and segment-size distribution. Also compare against the pre-baked K-sweep reference on disk. I'll pick the count and algorithm in Phase 5."_
+
+### Evaluation checklist
+
+- [ ] Candidates span an assumption range (not three variants of K-means).
+- [ ] Each candidate has a stated reason for inclusion and a stated risk.
+- [ ] A naive baseline is present on the leaderboard.
+- [ ] All candidates on identical features + identical stability protocol.
+- [ ] Comparison table uses the same signals for every row.
+
+### Journal schema — universal
+
+```
+Phase 4 — Candidates
+Candidates ran: ____
+Shared protocol: features = ____, stability = ____, baseline = ____
+Observations (numeric): ____
+(Decision happens in Phase 5 — no journal decision here)
+```
+
+### Common failure modes
+
+- AutoML-style prompt for clustering — the scaffold returns an error; student loses 10 minutes.
+- Candidates on different features / different hold-outs — leaderboard is meaningless.
+- Baseline omitted; student can't defend "beating the incumbent."
+
+### Artefact
+
+`data/segment_leaderboard.json` (live) + `data/segment_candidates.json` (pre-baked reference).
+
+### Instructor pause point
+
+- Show the leaderboard side by side. Ask: which candidate has the highest silhouette? Highest stability? Are they the same candidate? If not, what does that tell you about Phase 6?
+- Draw three blob patterns on the whiteboard (concentric rings, two moons, four ellipses). Which family can find each? Why does K-means fail on concentric rings?
+- Ask: if the density-based candidate leaves 22% of customers unassigned, is that better or worse than K-means putting 22% into a "misfit" cluster? Defend in business terms.
+
+### Transfer to your next project
+
+1. Have I tried at least three approaches that make genuinely different assumptions — or three variants of the same family?
+2. Is my stability protocol comparable across candidates (same hold-out, same perturbation, same measurement)?
+3. Is there a naive baseline on the leaderboard so the winner is defensibly better than doing nothing sophisticated?
+
+---
+
+## Phase 5 — Implications (Segment Selection)
+
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 1 · Phase 5 of 8 — Implications
+ LEVERS:        complexity-vs-interpretability · stability-vs-accuracy · speed-vs-performance
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+Look at the Phase 4 leaderboard and make the human call: which approach, at which setting, do you stake your name on, and can you explain the trade-off in 30 seconds to someone who has never heard of silhouette. Every alternative gets rejected with a reason. "Claude Code recommended it" with no paragraph underneath is not a Phase 5.
+
+### Why it matters (SML lens)
+
+- Reinforces Week 4's model-selection discipline: top of the leaderboard is NOT automatically the pick. A Ridge that's 0.3% worse than XGBoost but trains in 2 seconds and is interpretable is often the right call for production.
+- Reinforces Week 2's "defend in non-technical language" rule — if you can't explain it to the clinician/CMO/buyer, you can't ship it.
+- Reinforces Week 3's fold-variance check: 82% mean precision with 15% fold-variance is more dangerous than 78% mean with 3% variance.
+
+### Why it matters (USML lens)
+
+- The "most statistically separated" clustering is often the **least actionable** — the algorithm finds a genuine pattern that marketing cannot build a campaign around ("customers who browse between 2–4 AM on Tuesdays").
+- Each segment needs a **plain-language profile** — a paragraph a non-technical CMO can read. "Cluster 3: high_freq=0.81, low_promo_resp=0.22" is a statistical artefact; "customers who shop weekly on weekends and ignore promos" is a segment.
+- **Stability trumps separation** in USML almost always. 0.62 silhouette with 88% stability beats 0.71 silhouette with 62% stability — the second one reshuffles 38% of customers each month, destroying every campaign plan.
+- If a density-based approach leaves customers unassigned, the question isn't "is that OK" but "what is the cold-start fallback for those unassigned customers?" This cascades straight into Sprint 2.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): complexity-vs-interpretability.** Complex model that wins by 0.02 silhouette but nobody can name the segments = lose. Simple model with slightly worse stats but named segments = win.
+- **Lever 2 (usually matters): stability-vs-accuracy trade.** Always weight stability heavily; a "best" model that reshuffles monthly is unusable.
+- **Lever 3 (only if scaling): speed-vs-performance.** If one candidate takes 10× to train for 2% gain, that only matters if you retrain often.
+- **Skip unless specific:** hyperparameter micro-tuning (if you need to, do it here; don't leave it for Phase 8).
+
+### Trust-plane question
+
+Given the leaderboard, which approach do I stake my name on and why?
+
+### Prompt template — universal
+
+> _"Compare the candidates on the leaderboard. For each, tell me: how [accurate / well-separated], how stable across [time / seed / resample], how complex, and how long to train. Profile each cluster/class in plain business language — one paragraph each. Then recommend one — explain the trade-offs as if briefing someone who doesn't know what [silhouette / AUC / gini] is. I make the final pick."_
+
+> **For tonight's product (Sprint 1):** _"Compare the five candidates on silhouette + stability + segment-size balance. For the winning candidate at each K value, profile each cluster in one paragraph of plain English ('these customers shop...') — no column names. Then recommend K and algorithm. Rank K=3 (the baseline) against K=5 and K=7 on all three signals. I'll pick."_
+
+### Evaluation checklist
+
+- [ ] Every candidate compared on the same metrics.
+- [ ] Headline advantage classified as meaningful (multiple %) vs noise (<1%).
+- [ ] Stability examined explicitly (not assumed).
+- [ ] Each cluster / class has a one-paragraph plain-language profile.
+- [ ] Recommendation defensible in 30 seconds to a non-technical executive.
+
+### Journal schema — universal
+
+```
+Phase 5 — Implications (Chosen)
+Picked: ____ (family × hyperparameters)
+Named outputs (one line each): ____
+Rejected alternatives + why: ____
+Why not the top of the leaderboard, if applicable: ____
+```
+
+### Common failure modes
+
+- Student picks top of leaderboard without checking stability — scores 2/4 on D3.
+- Student accepts Claude Code's recommendation verbatim — no Trust-plane decision happened.
+- Cluster names read like column dumps ("segment with high RFM_R, low RFM_F") — CMO can't act on them.
+
+### Artefact
+
+`workspaces/.../journal/phase_5_segment_selection.md`
+
+### Instructor pause point
+
+- Pick the winning candidate. Read one segment's profile aloud. Ask the class: would you build a campaign for this? What would it be called? If nobody has a name within 30 seconds, the segment is weak.
+- Show two candidates — one with higher silhouette, one with higher stability. Ask: which do you ship? Whose career is on the line?
+- Ask: if 18% of customers are unassigned in the winning candidate, what do you tell the CMO? Is "they get the default campaign" acceptable?
+
+### Transfer to your next project
+
+1. For every output class, can I write a one-paragraph plain-language profile a non-technical executive could act on tomorrow?
+2. Am I picking on the single most impressive metric, or have I weighted stability and actionability at least as heavily as separation/accuracy?
+3. What is my explicit rejection reason for every alternative on the leaderboard — and does it hold up to "you're just lazy" pushback?
+
+---
+
+## Phase 6 — Metric + Threshold (REPLACED for USML)
+
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 1 · Phase 6 of 8 — Metric + Threshold (USML)
+ LEVERS:        primary metric · threshold · class imbalance · calibration
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+When there is no label, there is no single accuracy number to optimise. This phase replaces Week 4's "pick the metric, pick the threshold, tie to dollars" with a **three-floor commitment**: separation floor, stability floor, business-actionability floor. All three declared BEFORE you see the leaderboard. You pick the K that clears all three and maximises dollar lift versus the incumbent rule-based system.
+
+**What's different from Week 4.** Week 4 asked "which accuracy metric, which threshold, tied to what costs?" and the answer was MAPE plus a conservative/moderate/aggressive interval with dollar cost per bucket. Week 5 has no MAPE. The conversation becomes **commit to floors** (pre-registration), not **optimise one number**. Dollar linkage is a **counterfactual vs the current rule-based system**, not raw cost-of-error.
+
+### Why it matters (SML lens)
+
+- Reinforces Week 4's metric-cost linkage: the leaderboard number only earns its keep when translated to dollars per month.
+- Reinforces Week 3's cost-asymmetry logic — $45 wrong-segment and $18 converted-recommendation are the two sides of retail's ledger, mirroring $40/$1 fraud asymmetry.
+- Reinforces Week 2/3's pre-registration rule: thresholds set AFTER seeing results are always conveniently where the leader landed. Cheating yourself.
+
+### Why it matters (USML lens)
+
+- **Separation** (silhouette or Davies-Bouldin) = how crisp are the clusters. Ship-by-separation-alone → segmentations that dissolve in two months.
+- **Stability** (bootstrap Jaccard) = what fraction of customers stay in the same pair when you re-cluster on a different month or a different seed. Convention: 0.80 floor.
+- **Actionability** = can marketing build a DISTINCT campaign for each segment? Not a number, a test. If two segments get the same one-line action, they are one segment with noise — collapse them.
+- **Dollar lift via counterfactual** — not "how much does each error cost" but "how many fewer customers does this K send to the wrong campaign ($45 saved each) and how many more convertible clicks ($18 gained each) vs the 2020 rulebook." That's what turns a floor into a business case.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): the three floors, pre-registered.** Separation floor (silhouette ≥ 0.25 is a typical minimum for real data), stability floor (Jaccard ≥ 0.80), actionability floor (one distinct campaign per segment — tested by naming). Declare BEFORE you see Phase 4 leaderboard.
+- **Lever 2 (the business anchor): dollar counterfactual.** How many customers does this K re-route to a better campaign vs the rulebook? Multiply by $45.
+- **Lever 3 (the reversal condition): what drops you back to the baseline?** "If stability drops below 0.80 on next month's re-cluster for two consecutive re-clusters, drop back to K-1."
+- **Lever 4 (only for SML replay): class imbalance + calibration.** Not applicable to USML (no class).
+
+### Trust-plane question
+
+Which floors, at what values, tied to what dollar lift versus the incumbent?
+
+### Prompt template — universal
+
+> _"Given [cost asymmetry], which [metric / floors] should we commit to BEFORE seeing the leaderboard? Propose [three / one] pre-registration floor(s) with defensible values. Then compute the dollar lift counterfactual against the incumbent system. If peak season changes the economics, flag that. I pre-register the floors, then you compare against the leaderboard. I pick."_
+
+> **For tonight's product (Sprint 1 USML):** _"Given $45 wrong-segment × 18,000 customers, propose the three USML floors (separation, stability, actionability) pre-registration. Set silhouette at 0.25, Jaccard at 0.80, actionability at 'one distinct marketing action per segment, tested by naming each'. Compute dollar lift of each K candidate vs the 2020 rulebook assuming a 5% mis-segmentation rate in the rulebook. I'll pick the K that clears all three floors AND maximises lift."_
+
+### Evaluation checklist
+
+- [ ] Three floors declared AT VALUES (not "high silhouette").
+- [ ] Floors committed BEFORE seeing the leaderboard (timestamp in journal).
+- [ ] Dollar lift computed as counterfactual vs incumbent.
+- [ ] Reversal condition named (specific signal + threshold + duration).
+- [ ] Chosen K passes all three floors, not just the best one.
+
+### Journal schema — universal
+
+```
+Phase 6 — Metric + Threshold
+Primary metric: ____ (reason: ____)
+Floor 1: ____ at ____ (committed at timestamp ____)
+Floor 2: ____ at ____
+Floor 3: ____ at ____  (USML only)
+Chosen operating point: K = ____  /  threshold = ____
+Counterfactual lift vs incumbent (in declared unit): ____
+Reversal condition: signal ____ + threshold ____ + duration ____
+```
+
+> **Retail instantiation:** Separation floor = silhouette ≥ 0.25; Stability floor = bootstrap Jaccard ≥ 0.80; Actionability floor = one distinct campaign per segment. Chosen K = 5; lift = $14,800/month vs 2020 rulebook. Reversal: stability < 0.80 for 2 consecutive monthly re-clusters → drop to K=4.
+
+### Common failure modes
+
+- Floors set AFTER seeing the leaderboard — 0/4 on D2.
+- Dollar lift stated as "higher is better" without counterfactual — 1/4 on D2.
+- Reversal condition stated as "if data changes" — 0/4 on D5.
+- "Actionability" floor skipped because it's not a number — scores 1/4 on D3; this is the single biggest Sprint 1 rubric trap.
+
+### Artefact
+
+`workspaces/.../journal/phase_6_usml.md` (and `phase_6_sml.md` when replayed in Sprint 2).
+
+### Instructor pause point
+
+- Sketch a silhouette curve that peaks at K=2 and drops off. Ask: why isn't K=2 the answer? (Because the actionability floor rejects it.)
+- Ask every student to write separation and stability floors silently, then compare. Spread is usually 0.55–0.75 for separation, 0.70–0.85 for stability. Ask: how did you pick?
+- Demonstrate: take two segments from K=7 that got nearly identical one-line actions. Collapse, keep, or defend the difference in dollars?
+
+### Transfer to your next project
+
+1. What are my three analogues of separation / stability / actionability — whatever "signal quality," "time-robustness," and "business-action-distinctness" mean in my domain?
+2. Did I commit to numeric floors BEFORE seeing the leaderboard, and can I prove it (timestamps, journal order)?
+3. Is my dollar-lift a counterfactual against the _current_ system being replaced, or a raw cost-of-error floating in a vacuum?
+
+---
+
+## Phase 7 — Red-Team
+
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 1 · Phase 7 of 8 — Red-team
+ LEVERS:        subgroups · adversarial perturbations · proxy tests · acceptance
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+Actively try to break the model before deployment does it for you. AI Verify frame — Transparency, Robustness, Safety — stays across weeks. Week 5 adds three USML-specific failure modes: **re-seed churn** (did the random seed, not the data, produce the segments?), **proxy leakage** (is a segment actually a demographic shadow?), **operational collapse** (does any segment shrink below 2% in one month, breaking the campaign it was built for?).
+
+### Why it matters (SML lens)
+
+- Reinforces Week 4's adversarial-drift dimension — "what does the model do on data it wasn't trained on" is universal.
+- Reinforces Week 3's Safety dimension: the $220 PDPA breach and $45 wrong-segment are the concrete dollar handles for "who gets hurt when this silently fails."
+- Reinforces Week 2's blast-radius rule — name the population that gets harmed, not "users."
+- Reinforces the rule that Transparency failing is a finding, not a pass: if the algorithm doesn't expose feature importance, the limitation goes in the journal.
+
+### Why it matters (USML lens)
+
+- **Re-seed churn** has no SML analogue. If you re-run K-means with a different seed and 20% of customers move, the segmentation is a function of the seed, not a discovery.
+- **Proxy leakage in USML is worse than SML.** In SML, the label forces you to notice when a protected attribute is doing the work. In USML, with no label, a demographic proxy masquerades indefinitely. Drop-one-demographic test: if the segment collapses, it was a proxy.
+- **Operational collapse** — a small segment shrinks below your ability to run a campaign (e.g., below 2% of customers). This is also the Phase 13 drift signal; Phases 7 and 13 must use consistent thresholds.
+- Small segments disproportionately contain vulnerable groups (new-to-market, under-18, low-income).
+
+### Your levers this phase
+
+- **Lever 1 (the big one): proxy-leakage audit.** For every apparent behavioural segment, run the drop-one-demographic test. If the segment dissolves when postcode/age is removed, the segment WAS demographics.
+- **Lever 2 (the stability probe): re-seed / re-sample Jaccard.** Multiple seeds, multiple resamples. Report the distribution, not the mean.
+- **Lever 3 (the operational stress): worst-subgroup severity.** Where does the model fail WORST — which customer segment, which month, which condition?
+- **Lever 4 (the Safety frame): blast radius in dollars.** If this model silently went wrong for a week, what's the dollar damage AND who gets hurt?
+- **Skip unless specific:** Fairness dimension (deferred to Week 7 — named in the journal explicitly so the deferral is not silent).
+
+### Trust-plane question
+
+How does this fail? What breaks it?
+
+### Prompt template — universal
+
+> _"Try to break this [model]. Three dimensions: (1) Transparency — what is it relying on most? Can you explain one prediction / one segment to a non-technical manager? (2) Robustness — where does it fail worst? Which subgroups, which months, which conditions? (3) Safety — if this silently went wrong for a week, what's the dollar damage and who gets hurt? Name every finding with severity. Fairness is deferred to Week 7 — flag any concerns and move on."_
+
+> **For tonight's product (Sprint 1 USML):** _"Red-team the segmentation on three unsupervised-specific sweeps: (a) re-seed with 3 different random seeds and report the distribution of per-segment Jaccard stability, (b) drop-one-demographic proxy test on postal_district and age_band, (c) operational-collapse simulation: on Black-Friday-shaped data, does any segment shrink below 2%? Rank findings by severity in $."_
+
+### Evaluation checklist
+
+- [ ] **Transparency:** top 3 features per segment / class named; one-sentence plain-language explanation of one output.
+- [ ] **Robustness:** 3 worst subgroups with metrics; 3 worst months / conditions; adversarial perturbation behaviour.
+- [ ] **Safety:** tail-risk in dollars; degenerate-input behaviour; blast-radius memo naming who is harmed.
+- [ ] Fairness row ends with "deferred to Week 7 per Playbook" — explicit, not silent.
+
+### Journal schema — universal
+
+```
+Phase 7 — Red-Team
+Transparency: top features ____; one-sentence explanation ____
+Robustness: worst subgroups ____; worst conditions ____
+Safety: worst-1% cost $____; degenerate-input behaviour ____; blast radius ____
+USML-specific: re-seed Jaccard distribution ____; proxy collapse test ____; operational collapse ____
+Fairness: deferred to Week 7 per Playbook
+Blockers: ____
+Accepted risks: ____
+Mitigations to ship with: ____
+```
+
+### Common failure modes
+
+- Red-team stops at "the model sometimes gets confused" — no specifics.
+- Explainability output produced (feature importance) but not surfaced as a Transparency finding (orphaned call).
+- Safety dimension skipped because it "feels abstract" — grounding in $220 and $45 forces it concrete.
+
+### Artefact
+
+`workspaces/.../journal/phase_7_red_team.md`
+
+### Instructor pause point
+
+- Re-run the winning clustering with three seeds. Students compute churn by hand. Above what threshold is the segmentation unshippable?
+- Ask: if segment 3 collapses when postcode is dropped, what do you tell the CMO — "ship anyway" or "re-cluster"? Make the dollar trade-off explicit.
+- Demonstrate: filter to post-Black-Friday data and re-cluster. Smallest segment? If below 2%, which campaign is now uneconomical?
+
+### Transfer to your next project
+
+1. What is my domain's analogue of re-seed churn (any source of randomness that could be driving the output rather than the data)?
+2. What is my domain's analogue of proxy leakage (any protected-class feature that could be silently doing the work of an apparently-neutral output)?
+3. What is the smallest population my product can act on economically, and what signal tells me when a population dropped below it?
 
 ---
 
 ## Phase 8 — Deployment Gate
 
-- **Sprints**: Sprint 1 (~8 min). Re-run in Sprint 2 after the PDPA injection changes the recommender constraint set.
-- **Trust-plane question**: Ship or don't ship the segmentation, and on what monitoring?
-- **Prompt template**:
-  > _"Write the go / no-go gate for deploying this segmentation. Include: (1) what thresholds must hold for it to ship — tie them to the three signals from Phase 6 (separation, stability, actionability), (2) what we monitor on day one — name the specific signals and when they should fire an alert, (3) what triggers a rollback to the old rule-based five-segment system — a specific measurable signal, not 'if things look bad'. Then promote the segmentation from a trial stage to a pre-production stage so it is ready to go live."_
-- **Evaluation checklist**:
-  - [ ] Go / no-go criteria are measurable (named signal thresholds).
-  - [ ] Monitoring plan names specific signals (segment-size stability, monthly reassignment rate, campaign open-rate-by-segment) and alert thresholds.
-  - [ ] Rollback trigger is automatable (a specific signal the monitoring system can watch).
-  - [ ] Registry stage transition executed in a legal direction (e.g. trial → pre-production), no illegal jumps.
-- **Journal schema**:
-  ```
-  Phase 8 — Deployment Gate
-  Go / No-Go: ____
-  Monitoring (signal + threshold): ____
-  Rollback trigger (signal): ____
-  Registry transition: ____ → ____
-  ```
-- **Common failure modes**:
-  - Monitoring plan written as prose, no signal names — grader cannot verify.
-  - Rollback trigger tied to a non-existent signal.
-  - No rollback path at all — "we'll just retrain if there's a problem" is not a rollback.
-- **Artefact**: `journal/phase_8_gate.md`. Post-PDPA Sprint 2 re-run: `journal/phase_8_postpdpa.md`.
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 1 · Phase 8 of 8 — Deployment Gate
+ LEVERS:        monitoring cadence · rollback channel · alert thresholds · promotion criteria
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+The go/no-go. Write the criteria that must hold for this artefact to ship, the signals you monitor on day one, the specific measurable condition that triggers rollback. Then move the artefact from trial to shadow (or staging to production) in the registry. Every criterion is a signal and a threshold — no vibes.
+
+### Why it matters (SML lens)
+
+- Reinforces Week 4's ModelRegistry state-machine: illegal transitions blocked by the framework so you don't jump staging → production by accident.
+- Reinforces Week 3's monitoring rule: "monitor production" means nothing; "monitor precision@50 weekly and alert when it drops below 0.62 for 2 consecutive weeks" is the point.
+- Reinforces Week 2's "rollback is a path, not a wish" — you cannot roll back to a state that was never preserved.
+
+### Why it matters (USML lens)
+
+- The go signals are the **three floors from Phase 6**, not a single accuracy cutoff — the pre-commitment follows through.
+- Monitoring signals include **segment-size stability**, **monthly reassignment rate**, and (where the segmentation feeds a recommender) **campaign open-rate-by-segment**. None of these exist in SML.
+- **Rollback target is the previous rule-based system**, not a previous version of the same model — in USML "previous version" is a different random seed and isn't necessarily better. Rolling back to the 2020 rulebook is the honest fallback.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): monitoring cadence.** Segmentation re-scores monthly; recommender drifts weekly; allocator daily. One alarm cannot watch all three.
+- **Lever 2 (the rollback channel): shadow deployment.** Always promote to shadow before production. Production is the rollback channel's rollback channel.
+- **Lever 3 (the alert thresholds): variance-grounded, not round numbers.** "15% drift" because it feels right is 1/4 on D5. "15% drift because the historical rolling variance has 95th percentile at 12%" is 4/4.
+- **Lever 4 (the promotion criteria): the three floors re-tested, not re-declared.** The floors from Phase 6 must still hold on the deployment hold-out.
+
+### Trust-plane question
+
+Ship or don't ship, and on what monitoring?
+
+### Prompt template — universal
+
+> _"Write the go/no-go gate for deploying this [model]. Include: (1) what [metric thresholds / three floors] must hold, tied to the numbers from Phase 6, (2) what we monitor on day one — specific signals + alert thresholds + cadence, (3) what triggers automatic rollback — specific measurable signal, not 'if things look bad'. Then promote the model from trial to shadow via the registry."_
+
+> **For tonight's product (Sprint 1):** _"Write the deployment gate for the chosen K=5 segmentation. Go/no-go on the three Phase-6 floors (0.25 / 0.80 / actionability). Monitoring: segment-size distribution weekly + per-segment reassignment monthly. Rollback trigger: any segment drops below 2% in one month. Promote K=5 from staging to shadow via /segment/promote."_
+
+### Evaluation checklist
+
+- [ ] Go/no-go criteria are measurable (named metric thresholds, not "it looks good").
+- [ ] Monitoring plan names specific signals + alert thresholds + cadence.
+- [ ] Rollback trigger is automatable (specific signal, not "if things go bad").
+- [ ] Registry stage transition executed (shadow minimum).
+- [ ] Rollback target is known to work today (not "a prior version we'd roll back to").
+
+### Journal schema — universal
+
+```
+Phase 8 — Deployment Gate
+Go / No-Go: ____
+Monitoring (signal + threshold + cadence + owner): ____
+Rollback trigger (specific signal): ____
+Rollback target (known-working): ____
+Registry transition: staging → ____
+```
+
+### Common failure modes
+
+- Monitoring written as prose, no signals — grader cannot verify.
+- Rollback trigger tied to non-existent signal.
+- Rollback target is "a previous model" that doesn't exist / is worse than the baseline.
+- Illegal registry transition attempted (production → staging directly).
+
+### Artefact
+
+`workspaces/.../journal/phase_8_gate.md` + registry record at shadow or higher.
+
+### Instructor pause point
+
+- Ask: what signal fires the rollback this week? Can the monitoring system actually watch it? If "someone would notice" — it is not a signal.
+- Walk through registry states on the board. Why can trial → pre-production but not trial → production directly?
+- Demonstrate: show a monitoring plan as prose. Ask the class to rewrite as signal + threshold + cadence + owner. Count missing fields.
+
+### Transfer to your next project
+
+1. What specific signal — nameable by a monitoring system — fires my rollback, and have I verified the signal is actually collectable in my pipeline?
+2. What is my rollback _target_ — a prior model version, a rule-based system, or a no-op default — and is it known to work today?
+3. Have I executed the registry/artefact transition so the deployment is a recorded event, not an implicit understanding?
 
 ---
 
-## Phase 9 — Codify
+## Phase 9 — Codify (Close block)
 
-- **Sprints**: Close block (last ~8 min of class).
-- **Trust-plane question**: What transfers from retail + unsupervised ML + recommender-strategy-selection to the next domain?
-- **Prompt template**:
-  > _"Looking back at tonight's three sprints — what did we learn that applies to ANY ML product we build next week? Give me 3 transferable lessons. And what 2 things were specific to unsupervised segmentation and recommender-strategy selection that won't transfer directly? Add a 'Week 5 lessons' section to the Playbook."_
-- **Evaluation checklist**:
-  - [ ] 3 transferable lessons (domain-agnostic, e.g. "when there is no label, invent three signals and commit to all three before seeing results").
-  - [ ] 2 domain-specific lessons (e.g. PDPA hard-line pattern for any personal-data product; cold-start as product decision, not fallback).
-  - [ ] Lessons are actionable in Week 6 (not platitudes).
-  - [ ] Playbook delta appended.
-- **Journal schema**:
-  ```
-  Phase 9 — Codify
-  Transferable:
-  1. ____
-  2. ____
-  3. ____
-  Domain-specific:
-  1. ____
-  2. ____
-  ```
-- **Common failure modes**:
-  - Codify skipped because time ran out — the knowledge capture is the course's entire point.
-  - Lessons written as generic platitudes ("data quality matters").
-- **Artefact**: `journal/phase_9_codify.md` + `Week 5 delta` section in `PLAYBOOK.md`.
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ USML ✓ ▸ SML ✓ ▸ Opt ✓ ▸ MLOps ✓ ▸ **Codify ◉**
+ THIS PHASE:    Close · Phase 9 of 14 — Codify
+ LEVERS:        transferable lessons · domain-specific lessons
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+Before you close the laptop, separate the lessons that transfer to any future ML product from the lessons that only apply to this domain. Three transferable, two domain-specific. Domain goes in the domain folder; transferable lessons append to the Playbook so future students inherit them.
+
+### Why it matters (SML + USML + Opt + MLOps lenses)
+
+- "Data quality matters" is not a lesson. "AutoML trials above 10 blow the Sprint-1 budget and add no discovery value" IS a lesson.
+- Transfer test: would this apply if the product were a forecaster, classifier, recommender, or allocator next week?
+- The best lessons are _things you almost got wrong tonight_ — not things that went smoothly.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): separate transferable from domain-specific.** Five lessons total, three transferable + two domain-specific is the Codify budget.
+- **Lever 2 (the discipline): name the near-miss.** Every transferable lesson pairs with a sentence that starts "the failure mode this prevents is \_\_\_\_".
+- **Lever 3 (the persistence): append to the right place.** Transferable → update the Playbook's appendix OR write to `.claude/skills/project/`. Domain-specific → domain folder only.
+
+### Trust-plane question
+
+What transfers to the next domain?
+
+### Prompt template — universal
+
+> _"Looking back at all four sprints — what did we learn that applies to ANY ML product we build next week? Give me 3 transferable lessons. And 2 things that are specific to [this paradigm / domain] that won't transfer. Each lesson names the near-miss that motivated it. Append transferables to the Playbook appendix; write domain-specific to the domain's skill file."_
+
+### Evaluation checklist
+
+- [ ] 3 transferable lessons (domain-agnostic, paradigm-agnostic).
+- [ ] 2 domain-specific lessons (retail + USML + recommender + allocator).
+- [ ] Each lesson includes the near-miss it prevents.
+- [ ] Transferable lessons appended to the Playbook appendix (not just the session journal).
+
+### Journal schema — universal
+
+```
+Phase 9 — Codify
+Transferable:
+1. ____ (near-miss prevented: ____)
+2. ____ (near-miss prevented: ____)
+3. ____ (near-miss prevented: ____)
+Domain-specific:
+1. ____
+2. ____
+```
+
+### Common failure modes
+
+- Codify skipped because time ran out — systemic knowledge capture lost.
+- Lessons written as platitudes ("be careful") — no near-miss, no transfer.
+- Transferable lessons saved only to the session journal — Week 6 students never see them.
+
+### Artefact
+
+`workspaces/.../journal/phase_9_codify.md` + `.claude/skills/project/week-05-lessons.md` + Playbook appendix update.
+
+### Instructor pause point
+
+- Ask: of the five decision moments tonight, which one felt least confident? That is the transferable lesson.
+- Ask: which piece was hard _because retail_, and which was hard _because USML+SML+Opt_? Second transfers; first doesn't.
+- Demonstrate: read two students' lesson lists. Interchangeable = both too generic. Sharpen with the class.
+
+### Transfer to your next project
+
+1. What did I almost get wrong tonight, and what signal would tell me I'm about to repeat it on a different product?
+2. Of my lessons, which would still be true if the product were a classifier / forecaster / recommender / allocator instead of this week's shape?
+3. Have I written the domain-specific ones somewhere a future me or a teammate picking up this domain can find, not buried in a chat log?
 
 ---
 
-# Sprint 2 — Recommender Strategy (Phases 10–12)
+# SPRINT 2 — SML · Predict · Phases 4–8 (replayed)
 
-Sprint 2's shape mirrors Week 4's optimization sprint: Phase 10 defines what "good" means in dollars and in competing signals, Phase 11 classifies the rules as hard or soft, Phase 12 accepts or redesigns against offline metrics. The optimisation target is different — it is not a route, it is a recommender strategy — but the decision shape is identical.
+**What changes in the replay.** Phases 1–3 are shared — the frame, the data audit, the feature classification all apply across Sprints 1 and 2. You RE-RUN Phases 4–8 for the SML classifiers (churn + conversion), producing `journal/phase_{4..8}_sml.md` alongside Sprint 1's `phase_{4..8}_usml.md`. Two artefacts this sprint: churn classifier + conversion classifier. Same family sweep (LR + RF + GBM) and same levers.
 
-**Scaffold note**: the retail backend ships three pre-wired recommender variants — content-based (product-to-product similarity on catalogue embeddings), collaborative (customer-to-customer similarity via a matrix-factorisation pass), and hybrid (a weighted blend plus segment-aware cold-start). There is no framework-level recommender primitive to auto-discover; Claude Code hits the pre-provided recommender endpoints. If your Sprint 2 prompt asks Claude Code to "find a recommender library and use it", the session will stall — re-prompt in terms of "evaluate the three recommender variants against the held-out session data" and let Claude Code call the scaffold's evaluation path.
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ USML ✓ ▸ **SML ◉** ▸ Opt ▸ MLOps ▸ Close
+ THIS SPRINT:   Predict · Phases 4→8 on churn + conversion
+ LEVERS:        ensemble-is-the-king · class imbalance · PR curve · calibration
+──────────────────────────────────────────────────────────────────
+```
 
-Mid-sprint injection (fires at roughly T+02:05): a PDPA notice lands. Re-run Phases 11 and 12.
+## Phase 4 (SML replay) — SML Candidates
+
+### Concept
+
+Same structure as Phase 4 USML — multi-family sweep — but now with labels. Three families spanning the bias-variance range: linear (logistic regression), tree bag (random forest), ensemble (gradient-boosted — **the king for tabular**).
+
+### Why it matters (SML lens — the DEPTH Week 4 skipped)
+
+- **Logistic regression** is your floor and your sanity check. Interpretable, fast, small variance. Not including it is a tell that you don't know what a baseline is.
+- **Random forest** is the cheap tree-based default. Handles non-linearity without feature engineering. Variance comes from the bagging, bias from the tree depth.
+- **Gradient-boosted trees (XGBoost / LightGBM / sklearn GBM) is the ensemble that usually wins.** It builds trees sequentially, each correcting the previous one's residual errors. The loss function can be mean-squared error (for regression) or log-loss (for classification). Regularization via learning rate + tree depth + number of estimators. **For tabular data this is the default-winning family unless you have a specific reason.**
+- **Neural nets** are almost always overkill for tabular data <1M rows. Reach for them only when you have heterogeneous inputs (text + image + tabular) or very large data. If you find yourself reaching for neural, first check that your GBM is properly regularized.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): include an ensemble.** If your sweep doesn't have GBM / XGBoost / LightGBM, your leaderboard is incomplete.
+- **Lever 2 (the cross-validation protocol):** for time-series-like data use temporal CV (train on past, test on future). For i.i.d. data use stratified k-fold. For imbalanced classes use stratified sampling (preserves base rate in each fold).
+- **Lever 3 (the sweep breadth):** three families; each with 1–2 hyperparameter settings. Not twenty candidates with random hyperparameters.
+- **Lever 4 (the naive baseline):** majority class prediction. Beat it or don't ship.
+
+### Trust-plane question
+
+Which 3 model families give me a fair leaderboard for this SML task?
+
+### Prompt template — universal
+
+> _"Run an SML candidate sweep for [target]. Three family-diverse candidates: linear (e.g., logistic regression), tree bag (e.g., random forest), ensemble gradient-boosted (the usual winner for tabular). Same features, same stratified CV, same held-out test set. Report AUC, precision and recall at a default threshold, Brier score (calibration), and feature importance. Include a majority-class baseline. I'll pick."_
+
+> **For tonight's product (Sprint 2 SML):** _"Run the sweep for CHURN (label = days_since_last_visit > 90) on the 7 non-leakage behavioural features. Then re-run for CONVERSION (label = customer-category interaction in last 90 days). Same three families each time: logistic regression + random forest + gradient-boosted. I'll compare Sprint 2's ensembles vs linear baseline."_
+
+### Evaluation checklist
+
+- [ ] At least one ensemble family on the leaderboard.
+- [ ] Linear baseline present.
+- [ ] Identical features, identical CV split, identical test set across candidates.
+- [ ] AUC + precision + recall + Brier score reported for each.
+- [ ] Feature importance exposed (top 5 features per model).
+
+### Journal schema — universal
+
+```
+Phase 4 SML — Candidates
+Target: ____ (label definition: ____)
+Candidates: linear ____ | tree bag ____ | ensemble ____ | baseline ____
+Protocol: CV = ____, stratification = ____, test size = ____
+Observations: AUC range ____; Brier range ____; top features ____
+```
+
+### Common failure modes
+
+- No ensemble in the sweep — the "the king" is absent and you can't justify your pick.
+- Features that include the label (data leakage) — AUC will be suspiciously close to 1.0.
+- Test-set bleed into the CV (same rows in both) — leaderboard overstated.
+
+### Artefact
+
+`GET /predict/leaderboard/churn` and `GET /predict/leaderboard/conversion` responses + `journal/phase_4_sml.md`.
+
+### Instructor pause point
+
+- Show the churn leaderboard. Ask: which family wins? By how much? Is the advantage "worth the complexity"?
+- Ask: if the linear model is within 1% AUC of the GBM, which do you ship and why?
+- Demonstrate: look at feature importance — is one feature doing 80%? Leakage suspect?
+
+### Transfer to your next project
+
+1. Does my sweep include at least one ensemble (GBM / XGBoost / LightGBM)? If no, why not?
+2. Is my CV protocol appropriate for the data's temporal / hierarchical structure?
+3. Have I run a naive baseline so my winner is defensibly better than no ML?
 
 ---
 
-## Phase 10 — Objective Function (four competing signals)
+## Phase 6 (SML replay) — SML Metric + Threshold
 
-- **Sprints**: Sprint 2 (~12 min).
-- **Trust-plane question**: What does "good recommendation" mean — CTR, revenue, diversity, serendipity — and with what weighting?
-- **Prompt template**:
-  > _"Design the objective for the recommender. 'Good' is not one thing; it is four, and they compete. (1) **Click-through** — the operational signal the CX team watches daily. The current rule-based recommender sits at 12%; anything below that and we have regressed. (2) **Revenue** — each converted click is worth $18 in basket lift; each wasted impression costs $14. (3) **Diversity** — does the recommender show the same five hero SKUs to everyone, or does it cover the catalogue? Out of 2,000 SKUs, only ~200 will ever convert well on recommendations, but concentrating on the top 50 means the other 1,950 never sell through. Set a minimum on catalogue coverage. (4) **Serendipity** — does the recommender only surface things the customer would have bought anyway (a content-based approach is prone to this), or does it sometimes surface a relevant item the customer would not have found on their own? Serendipity lifts cross-category conversion but is the hardest to score. Show me two framings: (a) single-objective — lump all four into an 'expected profit per session' with a coverage penalty; (b) multi-objective — keep CTR, revenue-per-session, coverage, and a serendipity proxy as separate scores with weights. Recommend one, defend the weights with business reasoning from the table above, and tell me honestly what each framing sacrifices."_
-- **Evaluation checklist**:
-  - [ ] All four signals (CTR, revenue, diversity/coverage, serendipity) addressed — not just CTR.
-  - [ ] Single-objective AND multi-objective framings both presented.
-  - [ ] Weights defended with business reasoning, tied to the $18 / $14 / 12% baseline — not pulled from thin air.
-  - [ ] Trade-off discussed honestly ("multi-objective protects the long tail; single-objective is cleaner but may lose $3 per session on diversity-sensitive customer segments").
-  - [ ] Coverage explicitly named with a minimum threshold — coverage is the ESG-analogue of Week 4's carbon term; dropping it ships a recommender that kills the long tail.
-- **Journal schema**:
-  ```
-  Phase 10 — Rec Objective
-  Chosen: single / multi
-  Terms + weights: CTR ____ | revenue ____ | coverage (min ____) | serendipity ____
-  Business justification: ____
-  Known limitation (which signal am I least confident in): ____
-  ```
-- **Common failure modes**:
-  - Objective written as "maximise click-through rate" alone — ignores the other three signals; scores 2/4 on metric-cost linkage. CTR is a proxy for revenue, not a substitute.
-  - Diversity / coverage dropped because "the CMO didn't ask for it this week" — the deck and the brief both call it out, and dropping it ships a recommender that kills the long tail.
-  - Serendipity treated as undefinable and quietly removed — use a plain proxy ("percentage of clicks that came from a category the customer had not bought from in the past 90 days"). Something measurable beats nothing.
-  - Weights pulled from thin air — 0/4 on trade-off honesty.
-- **Artefact**: `journal/phase_10_rec_objective.md`.
+### Concept
+
+The SML variant that Week 4 couldn't go deep on. This is the classifier's threshold-selection phase. Read the PR curve, pick the operating point, tie it to dollars.
+
+### Why it matters (SML lens — the DEPTH Week 4 skipped)
+
+- **ROC curve** shows the classifier's ranking ability across all thresholds. AUC summarises it. **Use AUC when classes are balanced OR you care about ranking, not decisions.**
+- **PR curve** shows precision vs recall across thresholds. **Use PR when positives are rare (churn, fraud, conversion) — ROC is overly optimistic on imbalanced data.**
+- **Cost-based threshold selection.** For each threshold, compute expected cost = (P(FP) × cost_FP) + (P(FN) × cost_FN). Pick the threshold that minimises expected cost. This is what turns your leaderboard into a dollar decision.
+- **Calibration** (Brier score, reliability diagram) — if the model says 30% probability, do 30% of those cases actually happen? A well-calibrated model's probabilities are trustworthy; a miscalibrated model's rankings are fine but its probabilities are not. If you use probabilities directly (e.g., expected-revenue allocator), calibration matters. Platt scaling and isotonic regression are the two standard fixes.
+- **Class imbalance handling.** When positives are <10%: stratified sampling in CV, class weights in the loss, or SMOTE-style resampling. The threshold selection needs to happen AFTER rebalancing.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): threshold on the PR curve.** For rare positives, find the threshold that maximises F1 or meets a precision target (e.g., "precision ≥ 0.6 at minimum recall 0.5").
+- **Lever 2 (the cost-asymmetry):** if FN cost is 5× FP cost, push threshold LOWER (more alarms, catch more positives). If FP cost is 5× FN cost, push threshold HIGHER (fewer alarms, only confident positives).
+- **Lever 3 (the calibration):** if you use the probability directly (not just rank), run calibration (Platt / isotonic). Raw GBM probabilities are usually miscalibrated.
+- **Lever 4 (the imbalance):** stratified sampling, class weights, or resampling.
+
+### Trust-plane question
+
+At what threshold does this classifier earn its dollars?
+
+### Prompt template — universal
+
+> _"Given [cost_FN] per false negative and [cost_FP] per false positive, pick the decision threshold for [target]. Show me the PR curve. Compute expected cost across threshold values from 0.1 to 0.9 in 0.05 steps. Recommend the cost-minimising threshold. If the model is miscalibrated (Brier > [floor]), run calibration and redo. I set the threshold; you set the operating point."_
+
+> **For tonight's product (Sprint 2 SML churn):** _"Churn cost structure: $120 CAC to reacquire a churned customer vs $3 to send them a retention touch. Pick the threshold on the PR curve that minimises expected cost. If Brier score is > 0.04, run isotonic calibration. Default to 0.30 if calibration is already good."_
+
+### Evaluation checklist
+
+- [ ] PR curve read + operating point named (not "I chose 0.5 because default").
+- [ ] Threshold tied to cost asymmetry (dollar math shown).
+- [ ] Calibration checked (Brier); re-calibrated if needed.
+- [ ] Class imbalance addressed (stratification / weights / resampling noted).
+- [ ] Reversal condition named (what signal flips this threshold decision).
+
+### Journal schema — universal
+
+```
+Phase 6 SML — Metric + Threshold
+Primary metric: ____ (ROC-AUC / PR-AUC / F1 / precision@recall-X / calibrated-Brier)
+Cost asymmetry: FN = $____, FP = $____, ratio = ____
+Chosen threshold: ____ (expected cost = $____ per 1,000 predictions)
+Calibration: Brier = ____ (adjusted? ____)
+Class imbalance handling: ____
+Reversal condition: signal ____ + threshold ____ + duration ____
+```
+
+> **Retail instantiation (churn):** CAC = $120, touch cost = $3 → ratio 40:1. Pick threshold at 0.22 (per PR curve); expected cost ≈ $1,800 per 1,000 predictions. Brier = 0.03 — no recalibration needed. Reversal: if 7-day calibration error > 0.05 for 2 weeks, re-train.
+
+### Common failure modes
+
+- Threshold at 0.5 because "that's the default" — 0/4 on D2.
+- ROC used for rare-positive problem — threshold looks good but product is miscalibrated for imbalanced reality.
+- Calibration skipped when probabilities feed downstream (allocator) — the downstream allocator optimizes against bad numbers.
+- Reversal condition = "if model does poorly" — 0/4 on D5.
+
+### Artefact
+
+`POST /predict/threshold` with justification + `journal/phase_6_sml.md`.
+
+### Instructor pause point
+
+- Draw the PR curve on the whiteboard. Ask: why do we care about PR, not ROC, for churn?
+- Ask: if touching everyone costs $3 and re-acquiring a churned customer costs $120, at what threshold do you send a retention offer? Compute live.
+- Show a miscalibrated output (30% predicted → 50% actual). Ask: if the allocator uses this probability, what goes wrong?
+
+### Transfer to your next project
+
+1. Which curve applies to MY problem — ROC (balanced) or PR (rare positives)?
+2. What is my cost asymmetry in dollars, and did my chosen threshold actually minimise expected cost (not just "feel right")?
+3. Are my probabilities calibrated? If a downstream system uses them, calibration is not optional.
+
+---
+
+## Phase 5, 7, 8 (SML replay)
+
+Same shape as Sprint 1 phases, applied to the classifiers. The levers and failure modes transfer. Key differences:
+
+**Phase 5 SML — Implications.** Pick between logistic regression, random forest, GBM. Ensemble usually wins but not by enough to justify complexity over LR + domain features. Profile each model: "LR picks up weekend_browse_fraction and visits_per_week most; GBM picks up interactions between them." Name the winning family in one paragraph a non-technical executive could act on.
+
+**Phase 7 SML — Red-team.** Re-seed the split, report variance. Drop-one-feature proxy tests: does any classifier rely on age_band (PDPA)? Worst-subgroup severity: which customer segment does the classifier most mispredict? Calibration per subgroup — are probabilities equally reliable across segments?
+
+**Phase 8 SML — Gate.** Promote churn classifier + conversion classifier to shadow. Monitoring: calibration drift weekly, AUC decay monthly, per-subgroup performance gaps. Rollback: calibration error > 0.08 for 2 weeks OR AUC drop > 3 points.
+
+All three journal entries (`phase_5_sml.md`, `phase_7_sml.md`, `phase_8_sml.md`) follow the same schema as Sprint 1.
+
+---
+
+# SPRINT 3 — OPTIMIZATION · Decide · Phases 10–12
+
+**Why these are separate phases.** Phases 10–12 apply when your product has a **secondary optimization layer** on top of the models (allocator, scheduler, solver). Arcadia has one: given segments × predicted responses × budget × constraints, allocate campaigns optimally. Week 4's route planner was the Sprint 3 equivalent. **Deferrable** if your next project has no secondary layer (pure classification, pure clustering).
+
+---
+
+## Phase 10 — Objective Function
+
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ USML ✓ ▸ SML ✓ ▸ **Opt ◉** ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 3 · Phase 10 of 12 — Objective
+ LEVERS:        single-vs-multi · weight assignment · proxy metrics · coverage floors
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+Defining "good" for a product that has a secondary optimization layer. "Good" is almost never one number — it's 3–5 competing signals (revenue, reach, diversity, touches, cost, fairness). You present both a single-objective framing (weighted sum) and a multi-objective framing (separate scores with a Pareto frontier). Recommend one; defend weights; name honestly what each framing sacrifices.
+
+### Why it matters (SML + Optimization lens — the DEPTH Week 4 skipped)
+
+- **Loss functions in SML ARE objective functions.** Cross-entropy (classification), MSE (regression), hinge (SVM). The choice shapes what the model optimizes.
+- **Linear programming objective.** `minimise c^T x` where `c` is the cost vector, `x` is the decision. Every LP has an objective; choosing it IS the job.
+- **Dual variables and shadow prices.** When an LP solves, each constraint has a **shadow price** = the marginal improvement in the objective if the constraint were relaxed by one unit. "What's it worth to add one more touch to the budget?" = shadow price of the touch-budget constraint.
+- **Pareto frontier.** For multi-objective problems, a Pareto-optimal point is one where you can't improve one objective without worsening another. The frontier is the set of all Pareto-optimal points. You pick on it by declaring weights.
+- **Coverage / fairness floors as constraints, not as objectives.** If you optimize revenue and _hope_ for diverse coverage, you'll get a monoculture. Coverage belongs in the constraint set (Phase 11), not in the objective (Phase 10). The objective is what you _maximise_; the constraint is what you _respect_.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): single vs multi-objective.** Single-objective = everything in one weighted sum → simpler, may hide trade-offs. Multi-objective = separate scores → honest, harder to action. Default to single WITH coverage/fairness in constraints; go multi when stakeholders explicitly disagree on trade-offs.
+- **Lever 2 (the weight-assignment): defend in dollars.** Each term in the objective has a dollar interpretation: revenue is $, reach is $/customer, diversity is $/category-covered (via long-tail protection). Weights come from stakeholder conversation + dollar math.
+- **Lever 3 (the proxy-metrics rule):** some signals (serendipity, customer-happiness) are proxies for long-term revenue. Name them as proxies; don't pretend they're direct.
+- **Lever 4 (the skip):** coverage/fairness/diversity BELONGS in Phase 11 constraints, not Phase 10 objective.
+
+### Trust-plane question
+
+Single-objective (revenue only, with coverage as constraint) or multi-objective (revenue AND reach AND diversity with weights)? What are the weights, and what does each framing sacrifice?
+
+### Prompt template — universal
+
+> _"Design the objective for [secondary layer]. Name the competing signals (expect 3–5). Show me two framings: single-objective (weighted sum, with secondary signals as constraint floors) and multi-objective (separate scores, Pareto frontier). For each, state what it sacrifices. Recommend one with defensible weights; I approve."_
+
+> **For tonight's product (Sprint 3):** _"Objective for campaign allocator: expected revenue ($18 per converted click, $14 per wasted impression) + reach (customers touched) + diversity (cross-segment coverage). Single-objective with diversity as a coverage floor (Phase 11) is the default; propose multi-objective framings only if single loses more than 10% revenue. Show me shadow prices on the touch budget + PDPA constraint."_
+
+### Evaluation checklist
+
+- [ ] Every term has a dollar value or a named proxy.
+- [ ] Single-objective AND multi-objective both presented.
+- [ ] Weights defended with stakeholder reasoning (not "they feel right").
+- [ ] Shadow prices shown for main constraints (touch budget, PDPA).
+- [ ] Trade-off discussed honestly ("X weighting sacrifices Y").
+
+### Journal schema — universal
+
+```
+Phase 10 — Objective
+Mode: single | multi
+Terms + weights: ____
+Business justification: ____
+Shadow price of key constraint: ____
+Known limitation (what this framing sacrifices): ____
+Reversal: if ____ changes, switch to ____
+```
+
+### Common failure modes
+
+- Objective written in math-y language with no business grounding.
+- Coverage / diversity in objective, not constraints → monoculture output.
+- Weights pulled from thin air — 0/4 on D3.
+- Shadow prices not surfaced — student doesn't learn what relaxing each constraint is worth.
+
+### Artefact
+
+`POST /allocate/objective` with justification + `journal/phase_10_objective.md`.
+
+### Instructor pause point
+
+- Whiteboard a 2×2: revenue high/low × reach high/low. Where does "hero SKU to everyone" land? Where's "long-tail showcase"? Where's Arcadia's target?
+- Have students write weights silently on sticky notes. Compare. 2× differences = class disagrees on "good."
+- Ask: the allocator's shadow price on the touch budget is $12 per extra touch. Do we raise the budget? How much?
+
+### Transfer to your next project
+
+1. What are the 3–5 competing signals "good" actually means in MY domain — and am I pretending one doesn't exist because it's hard to measure?
+2. Does each signal have a dollar value or a named proxy? Am I willing to defend the weights in front of a sceptical executive?
+3. Is coverage / fairness / diversity in my objective (where it will get sacrificed) or in my constraints (where it will be enforced)?
 
 ---
 
 ## Phase 11 — Constraint Classification
 
-- **Sprints**: Sprint 2 (~10 min). Re-run after PDPA injection.
-- **Trust-plane question**: Hard or soft for each rule? Penalty for soft?
-- **Prompt template (first pass)**:
-  > _"List every rule the recommender must respect — inventory availability (can't recommend what's out of stock), product-page relevance (no random SKU on an unrelated page), segment-consistency (recommend within the customer's segment where possible), cold-start behaviour for new users and new SKUs, catalogue-coverage targets, the touch-budget ceiling (we do not spam), and any PDPA surfaces — minor-status, inferred sensitive attributes, cross-session tracking consent. For each one, tell me: is it a hard line that can never be crossed (law, physics, contract), or a preference we'd rather not violate but will if the cost is right? For preferences, propose a penalty in dollars. Justify each classification."_
-- **Prompt template (post-PDPA injection re-run)**:
-  > _"Legal just flagged a red-line: using the browsing history of any customer under 18 for personalised recommendations violates PDPA. This is law, not a preference. Update the constraint classification — which rules just changed from soft to hard? What is the new exclusion rule? Re-classify the under-18 browsing-history feature as a hard exclusion, state the per-record exposure is $220, and re-justify. Save this as a separate journal entry so we can compare before and after."_
-- **Evaluation checklist**:
-  - [ ] Every constraint classified with explicit rationale (law / physics / contract / preference).
-  - [ ] Soft constraints have defensible penalty values.
-  - [ ] No constraint labelled "probably hard" without reason.
-  - [ ] Post-injection: under-18 browsing-history feature correctly re-classified as hard exclusion, with the $220-per-record PDPA exposure cited.
-  - [ ] Post-injection journal names exactly what changed from the prior pass — not a full re-write.
-- **Journal schema** (both passes):
-  ```
-  Phase 11 — Constraints
-  Hard: ____ (reason each)
-  Soft: ____ (penalty each)
-  What changed from prior pass (post-injection only): ____
-  ```
-- **Common failure modes**:
-  - Under-18 rule mis-classified as soft after injection (the injection exists precisely to test this — scores 1/4 on constraint classification if missed).
-  - Hard-constraint set too tight → recommender cannot find any eligible SKU → student panics. Recovery: re-check whether a preference was mis-labelled as hard.
-  - Penalty values unspecified ("some penalty") — 1/4 on classification rubric.
-  - PDPA re-classification done but the feature itself is not removed from the training pipeline — hard constraints must change behaviour, not just live in a journal.
-- **Artefact**: `journal/phase_11_constraints.md` + `journal/phase_11_postpdpa.md`.
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ USML ✓ ▸ SML ✓ ▸ **Opt ◉** ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 3 · Phase 11 of 12 — Constraints
+ LEVERS:        hard-vs-soft · penalty calibration · demotion rules · regulatory triggers
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+For each rule the system must respect, classify **hard** (law, physics, contract — never crossable) or **soft** (preference — we'd rather not, at what price). Soft constraints get dollar penalties. Hard constraints get a regulatory/physical reason. When the world changes mid-sprint (the PDPA injection), re-classify and save both passes — before and after.
+
+### Why it matters (SML + Optimization lens)
+
+- **LP constraints are linear inequalities.** `A x ≤ b`. A hard constraint forbids `A x > b`; a soft constraint allows `A x > b` at a cost (`+ λ (A x − b)` in the objective with penalty coefficient λ).
+- **Dual / shadow prices on hard constraints** tell you the cost of the regulation. If the PDPA hard constraint has shadow price $50k, that's the dollar cost of compliance.
+- **Slack variables** make soft constraints workable: `A x − s ≤ b` where `s ≥ 0` is the violation, and `c^T x + λ · s` is the penalized objective.
+- **Infeasibility diagnosis.** When no `x` satisfies all hard constraints, the LP is infeasible. Fix: demote a hard constraint to soft with a big penalty, or widen the budget. Infeasibility is a product problem, not a solver problem.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): hard-vs-soft classification.** Law / contract / physics → hard. Preference / convenience → soft.
+- **Lever 2 (the soft-constraint penalty):** in dollars per unit of violation. "$2 per touch over the per-segment cap" — defensible? The penalty should make the solver trade off soft constraint violation against objective gain.
+- **Lever 3 (the demotion rule):** if all-hard produces infeasibility, demote to soft with a reasoned penalty. Document which one demoted and why.
+- **Lever 4 (the regulatory trigger):** when a law changes mid-sprint (the PDPA injection), re-classify + re-solve. Save both passes as separate journal entries.
+
+### Trust-plane question
+
+Hard or soft for each rule? Penalty for each soft?
+
+### Prompt template — universal (first pass)
+
+> _"List every rule the [system] must respect. For each: hard (law/physics/contract) or soft (preference with penalty)? For soft, propose a dollar penalty per unit of violation. Justify each classification. Show me which pairs (objective × constraint) would change if I demoted a hard to soft or vice versa."_
+
+> **Universal (post-injection re-run):** _"[Regulatory event] changes [rule] — re-classify. Document the change in a separate journal entry. Show the old pass and the new pass side by side. Explain the cost of the new hard classification in $ (shadow price)."_
+
+> **For tonight's product (first pass):** _"Classify Arcadia allocator rules — touch budget, per-segment fatigue cap, PDPA under-18 browsing, inventory availability, brand exclusion list. Hard or soft with penalty. Defend each."_
+
+> **For tonight's product (PDPA injection):** _"Legal has classified under-18 browsing history as a PDPA §13 hard exclusion (was soft before). Re-classify. Re-solve the allocator with the new hard constraint. Report the dollar cost of compliance (shadow price). Save `phase_11_postpdpa.md`."_
+
+### Evaluation checklist
+
+- [ ] Every constraint classified with explicit rationale (law / contract / physics / preference).
+- [ ] Soft constraints have defensible penalty values.
+- [ ] No constraint labelled "probably hard" without a reason.
+- [ ] Post-injection: PDPA correctly re-classified as hard (PDPA §13).
+- [ ] Post-injection re-solve produces a different plan than pre-injection.
+
+### Journal schema — universal
+
+```
+Phase 11 — Constraints
+Hard: ____ (regime + reason each)
+Soft: ____ (penalty $ each)
+What changed post-injection (if applicable): ____ (from ___ to ___)
+Shadow price of key hard: $ ____ (cost of compliance)
+```
+
+### Common failure modes
+
+- Constraint mis-classified as soft when law says hard (PDPA!) — 1/4 on D4.
+- All-hard produces infeasibility → student panics instead of demoting one.
+- Penalty values unspecified ("some penalty") — LP solver can't use them.
+- Student writes `phase_11_postpdpa.md` but doesn't re-solve the LP — Phase 12 still has the old plan.
+
+### Artefact
+
+`POST /allocate/constraints` + `journal/phase_11_constraints.md` + `journal/phase_11_postpdpa.md`.
+
+### Instructor pause point
+
+- Inject PDPA live. Ask every student to re-classify the under-18 browsing feature in 90 seconds. Collect. Anyone still at "soft" loses D4 — discuss why.
+- Draw the constraint ladder: law → contract → preference → convenience. Place 5 rules.
+- Ask: if 3 constraints are hard and the allocator is infeasible, what went wrong? Walk the recovery (demote one + justify).
+
+### Transfer to your next project
+
+1. For each constraint, can I name the exact law / contract clause / physical limit that makes it hard — or is "probably hard" doing the work?
+2. For each soft constraint, is the penalty a real dollar or hand-wave — and does it actually change the system's behaviour (traced to the objective function, not just the journal)?
+3. When the regulator changes the rules mid-project, do I have a process to re-classify in writing, save the before/after, and re-run — or will I just patch and hope?
 
 ---
 
-## Phase 12 — Recommender Offline Evaluation (Accept / Re-tune / Redesign)
+## Phase 12 — Solver Acceptance (REPLACED for Optimization)
 
-- **Sprints**: Sprint 2 (~12 min). Re-run after PDPA injection.
-- **Trust-plane question**: On a held-out slice of real Arcadia sessions, does the chosen recommender clear the four offline metrics (precision@k, coverage, cold-start rate, diversity) — and is it free of pathological patterns?
-- **Prompt template**:
-  > _"Evaluate the recommender in three variants — one that relies on customer-to-customer similarity ('people like you bought'), one that relies on product-to-product similarity ('because you liked this'), and one that blends them. For each variant, run an offline evaluation on the held-out session data and report these four metrics side-by-side: (1) **precision@k** (of the top-k items we recommended, how many did the customer actually engage with; use k=5 and k=10), (2) **catalogue coverage** (what fraction of the 2,000 SKUs ever appeared in a top-10 list across the held-out sessions), (3) **cold-start rate** (what fraction of sessions triggered the cold-start fallback, and — for the hybrid — is the fallback the Sprint 1 segment's modal basket as intended), (4) **diversity** (within a single top-10 list, how many distinct categories are represented on average). Also confirm the hard constraints: no out-of-stock SKU was recommended; no under-18-sourced signal was used. Then look for pathological patterns — does one variant recommend the same top-5 hero SKUs to more than 30% of customers; does any variant's cold-start behaviour default to a generic catalogue popularity list instead of the segment-aware fallback the student declared in Phase 10? Recommend: accept the hybrid, re-tune the weights of one variant, fall back to a simpler variant, or re-design. Save the offline-eval report and the recommender plan for the dashboard."_
-- **Evaluation checklist**:
-  - [ ] All four offline metrics reported per variant: precision@5, precision@10, catalogue coverage, cold-start rate, diversity within top-10.
-  - [ ] Hard constraints confirmed satisfied per variant (inventory availability; PDPA exclusion under-18 signal).
-  - [ ] Cold-start behaviour confirmed to match the Phase 10 declaration (segment modal basket, or whatever was chosen) — not a silent default.
-  - [ ] Pathologies named (top-5-SKU concentration, long-tail starvation, cold-start default-to-generic, diversity collapse).
-  - [ ] Decision — accept / re-tune / fall back / redesign — defended with the numbers.
-  - [ ] Post-injection: pre-PDPA and post-PDPA recommender plans both on disk, neither overwritten.
-- **Journal schema**:
-  ```
-  Phase 12 — Recommender Offline Eval
-  Variant | precision@5 | precision@10 | coverage | cold-start rate | diversity | PDPA ok
-  ---|---|---|---|---|---|---
-  collaborative | __ | __ | __ | __ | __ | ___
-  content-based | __ | __ | __ | __ | __ | ___
-  hybrid | __ | __ | __ | __ | __ | ___
-  Pathologies: ____
-  Decision: Accept hybrid / Re-tune ____ / Fall back to ____ / Redesign
-  What would make me re-design: ____
-  ```
-- **Common failure modes**:
-  - Student accepts the hybrid because "hybrid is always best" — the slide deck warns that hybrid has the highest complexity and is not automatically the winner on a 2,000-SKU catalogue. Numbers decide, not defaults.
-  - Catalogue coverage not checked — the recommender ships and kills the long tail.
-  - Cold-start behaviour not verified against the Phase 10 declaration — the hybrid silently defaults to catalogue popularity, the Sprint 1 segmentation is unused, and the whole product story breaks.
-  - Precision@k reported at one value of k only (usually k=1) — the rank-dependence is the point; use k=5 and k=10 both.
-  - Scenario-injection state corruption: the recommender plan file is overwritten without a pre-PDPA snapshot. Recovery: re-run the pre-PDPA variant with a `_prepdpa` suffix from the preserved model registry version.
-- **Artefact**: `data/recommender_plan_prepdpa.json` + `data/recommender_plan_postpdpa.json` + `journal/phase_12_rec.md` + `journal/phase_12_postpdpa.md`.
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ USML ✓ ▸ SML ✓ ▸ **Opt ◉** ▸ MLOps ▸ Close
+ THIS PHASE:    Sprint 3 · Phase 12 of 12 — Solver Acceptance
+ LEVERS:        held-out choice · pathology detection · accept/retune/redesign · rollback readiness
+──────────────────────────────────────────────────────────────────
+```
 
----
+### Concept
 
-# Sprint 3 — MLOps: Drift on Segments and Recommender (Phases 13–14)
+The solver runs. It returns a plan. You check: feasibility (every hard constraint satisfied), optimality (how close to the LP optimum), pathologies (one segment getting 90% of the plan, dead campaigns with zero allocation). Decide: accept, re-tune (change weights or penalties), fall back (demote a hard constraint), or redesign (the problem is ill-posed).
 
-Same DriftMonitor shape as Week 4 — but the signal is different. No MAPE to watch (no labels). The signals that matter are **segment-assignment stability** (what fraction of customers stay in the same segment week-over-week) and **recommender click-through decay** (is CTR on the new recommender drifting back down toward the old 12% baseline, and if so, why?).
+### Why it matters (Optimization lens — the DEPTH Week 4 skipped)
 
----
+- **Feasibility first, optimality second.** An infeasible LP returns no plan. A feasible-but-pathological plan returns an unusable one. Both are failures; the diagnosis differs.
+- **Optimality gap.** Distance from the LP optimum (or the LP relaxation upper bound for MIP). Gap > 5% → either tighten the solver or accept the sub-optimality with a reason.
+- **Pathology detection.** Feasible plans can still be wrong: concentration (one output gets the whole plan), dead variables (unused campaigns / SKUs / routes), boundary cases (the solver chose an extreme corner of the polytope).
+- **Sensitivity analysis.** How robust is the plan to small changes in the objective weights or constraint values? If weight_revenue = 0.95 gives plan A but weight_revenue = 0.93 gives plan B, your plan is fragile.
 
-## Phase 13 — Drift Triggers
+### Your levers this phase
 
-- **Sprints**: Sprint 3 (~15 min).
-- **Trust-plane question**: When do we retrain (or roll back)? What are the signals, and who decides?
-- **Prompt template**:
-  > _"The retail scaffold has already registered the training-window behavioural data as the baseline for the segmentation model and the first-week live click data as the baseline for the recommender. Confirm both references are active. Then run a drift check on each against the most recent week of live data. Show me: for the segmentation, what fraction of customers have moved segments, which segments are growing or shrinking, and are any segments dissolving (approaching the operational-collapse threshold from Phase 7). For the recommender, what is the week-over-week click-through rate, which product categories are losing CTR fastest, and is the cold-start fallback rate creeping up. Based on the results, propose the signals and thresholds I should monitor going forward — how much drift before we retrain? Should that be an automatic trigger or should a human review first? Ground the thresholds in historical variance of these signals, not round numbers. Treat the segmentation drift signal and the recommender drift signal as separate rules, not one combined alarm."_
-- **Evaluation checklist**:
-  - [ ] Both reference datasets confirmed active (pre-provisioned by the scaffold — the student confirms, does not re-register).
-  - [ ] Drift check output surfaces per-signal numbers (segment-assignment stability %, week-over-week CTR, cold-start fallback rate) plus an overall severity per module.
-  - [ ] Each proposed signal has a threshold grounded in historical variance, not a guess.
-  - [ ] Duration window prevents retrain-on-spike (e.g. "sustained 3 consecutive weeks", not "one bad week").
-  - [ ] Retrain decision stays in the Trust Plane — the journal prescribes _signals and thresholds the operator monitors_, not _if X then retrain_ as automatic agent logic. (Post-Black-Friday behaviour is abnormal by design; auto-retrain on that spike would destabilise the segmentation for no reason.)
-  - [ ] Segmentation drift signal and recommender drift signal are written as separate rules with separate thresholds — they are different products with different historical variances.
-- **Journal schema**:
-  ```
-  Phase 13 — Retrain Rule
-  Signal(s): ____  (separate rule per module)
-  Threshold(s): ____ (historical variance grounding: ____)
-  Duration window: ____
-  Human-in-the-loop: yes / no (justification: ____)
-  Re-cluster cadence (segmentation): ____
-  Recommender retrain trigger: ____
-  ```
-- **Common failure modes**:
-  - Student tries to re-register the reference data — it is already registered by the scaffold. If the drift check returns "no reference set", ask Claude Code to read the scaffold's drift status endpoint rather than re-seeding.
-  - Threshold guessed ("15% feels right") with no variance grounding — 1/4 on reversal condition.
-  - Asks Claude Code to "auto-retrain when segment reassignment rate exceeds 20%". The prompt MUST be reframed as "signals and thresholds for operator monitoring". The retrain decision itself stays in the Trust Plane.
-  - One combined alarm for both modules — the segmentation is stable on a monthly cadence; the recommender drifts on a daily-to-weekly cadence. One threshold cannot cover both.
-- **Artefact**: `data/drift_report.json` + `journal/phase_13_retrain.md`.
+- **Lever 1 (the big one): pathology detection.** Concentration (one segment > 60%), dead campaigns (0 allocation), boundary solutions (activity at 100% of budget when you expected 80%).
+- **Lever 2 (the decision):** accept, re-tune, fall back, redesign. Don't default to accept; the solver being feasible is not the same as the plan being shippable.
+- **Lever 3 (the rollback readiness):** the prior plan. Is the current plan better than the prior plan by the dollar lift you expected? If not, stay with the prior.
+- **Lever 4 (the sensitivity):** perturb the weights by ±10% and re-solve. If the plan is stable, ship. If it flips, your decision is on a knife edge.
 
----
+### Trust-plane question
 
-## Phase 14 — Fairness Audit (DEFERRED TO WEEK 7)
+Is the solution feasible, optimal, edge-case safe, and pathology-free?
 
-Not run in Week 5. Phase 7 journal entries include a one-line "Fairness audit deferred to Week 7 per Playbook" so the deferral is explicit, not silent. Week 7 (healthcare + credit) is the natural home — protected classes and disparate-impact testing get a full treatment there.
+### Prompt template — universal
 
-In retail, the fairness questions that will surface in Week 7 include: are small segments over-populated by vulnerable groups (low-income, new-to-Singapore, under-18, first-language-not-English); does the recommender systematically under-recommend certain SKU categories to certain segments; is any observed segment-by-channel interaction a proxy for a protected attribute. Flag these on the Phase 7 red-team with "deferred to Week 7" — do not silently drop them.
+> _"Run the [solver] with the Phase 10 objective and Phase 11 constraints. Report: (a) feasibility per hard constraint, (b) optimality gap, (c) pathologies — concentration, dead variables, boundary solutions, (d) sensitivity: perturb weights by 10% and re-solve. Recommend accept / re-tune / fall back / redesign; I decide. Save the plan."_
 
-- **Sprints**: none in Week 5.
-- **Artefact**: deferred.
+> **For tonight's product (Sprint 3):** _"Run the allocator with the current objective + constraints. Report: PDPA active yes/no, touch budget used / remaining, per-segment concentration, dead campaigns. Run sensitivity: weight_revenue ± 0.05. Pathology list. Decide: accept the plan, re-tune weights, demote PDPA (don't!), or redesign."_
 
----
+### Evaluation checklist
 
-# Optional: The Shopping Advisor (Sprint 3 stretch — only if drift journal is complete)
+- [ ] Every hard constraint confirmed satisfied.
+- [ ] Optimality gap reported numerically.
+- [ ] Pathologies named (concentration, dead variables, boundary cases).
+- [ ] Sensitivity checked (perturb ± 10%).
+- [ ] Accept / re-tune / fall back / redesign decision defended.
+- [ ] Post-injection re-run: `phase_12_postpdpa.md` on disk alongside `phase_12_accept.md`.
 
-If Sprint 3's Phase 13 is done, accepted, and journalled with at least 15 minutes of wall-clock left, consider the RAG-powered Shopping Advisor. It does not have its own Playbook phases tonight — treat it as a mini-version of the same 14-phase shape, compressed:
+### Journal schema — universal
 
-- **Frame (compressed Phase 1)**: five canonical customer questions from `data/arcadia_canonical_questions.md`; what answered "well" looks like (cited product IDs, cited policy snippets, "I don't know" rather than a fabricated answer).
-- **Data audit (compressed Phase 2)**: what is in the knowledge base (catalogue, pricing, stock, return policy, FAQ) and what is explicitly out (customer reviews, competitor comparisons, internal memos). Every exclusion has a reason.
-- **Metric (compressed Phase 6)**: grounding-rate (fraction of answers that cite a real document) and refusal-rate (fraction of answers that correctly say "I don't know" when the KB cannot support it). There is no label — the metric shape is again a set of signals, not an accuracy number.
-- **Red-team (compressed Phase 7)**: does the advisor leak stale prices, recommend out-of-stock items, answer a question it was not asked, or fabricate a policy that does not exist?
+```
+Phase 12 — Solver Acceptance
+Feasibility per hard constraint: ____
+Optimality gap: ____
+Pathologies: ____
+Sensitivity (± 10%): plan stable? ____
+Decision: Accept / Re-tune / Fall back / Redesign
+Reason: ____
+Prior-plan comparison: expected lift = ____; actual lift = ____
+What would make me re-design: ____
+```
 
-Skip the stretch if Sprint 3 is tight. The segmentation + recommender combination is the full credit path.
+### Common failure modes
+
+- Solver returns feasible but pathological plan (one segment 90%). Student accepts because "feasible" — 1/4 on D3.
+- Optimality gap not surfaced (solver reports it; student doesn't read it).
+- Sensitivity skipped — plan ships on a knife edge.
+- Post-injection plan overwrites pre-injection (state corruption).
+
+### Artefact
+
+`POST /allocate/solve` response saved to `data/allocator_last_plan.json` + `journal/phase_12_accept.md` + `journal/phase_12_postpdpa.md`.
+
+### Instructor pause point
+
+- Show the 3-segment concentration plot. Ask: 70% of the plan in one segment — is this shippable?
+- Demonstrate: perturb weight_revenue by 10%. Plan changes? By how much?
+- Ask: PDPA re-solve shows $50K of shadow-price cost. Do we accept? What's the business defence?
+
+### Transfer to your next project
+
+1. Does my solver return **feasible** AND **pathology-free**? Did I check for concentration, dead variables, boundary solutions?
+2. What is the optimality gap, and is it tight enough for the decision's dollar stakes?
+3. Is my plan stable under ± 10% perturbation of the weights, or is it on a knife edge?
 
 ---
 
-## Week 5 delta (to be appended by Phase 9 at the close of class)
+# SPRINT 4 — MLOPS · Monitor · Phase 13
 
-_Your `/codify` output lands here. Three transferable lessons, two domain-specific, as a section below this line. The next week (Media) will read it._
+---
+
+## Phase 13 — Drift (× 3 models tonight)
+
+```
+──────────────────────────────────────────────────────────────────
+ VALUE CHAIN:   Analyze ▸ Todos ▸ USML ✓ ▸ SML ✓ ▸ Opt ✓ ▸ **MLOps ◉** ▸ Close
+ THIS PHASE:    Sprint 4 · Phase 13 of 14 — Drift Monitoring
+ LEVERS:        signal choice · threshold grounding · duration window · HITL-vs-auto
+──────────────────────────────────────────────────────────────────
+```
+
+### Concept
+
+Setting up monitoring for the day after launch. Reference data registered; current-week data checked. You propose signals and thresholds grounded in historical variance, classify each rule as human-in-the-loop or automatic. The retrain decision stays in the Trust Plane; the monitoring system reports signals, it does not pull the trigger.
+
+**Three models tonight, three drift rules.** Segmentation (USML) drifts on **membership churn** — fraction of customers who move segments monthly. Churn classifier (SML) drifts on **calibration decay + feature PSI**. Allocator (Opt) drifts on **constraint-violation rate + feasibility rate**. Not one alarm — three, with separate cadences.
+
+### Why it matters (SML + USML + Opt lenses — the DEPTH Week 4 skipped)
+
+- **Feature drift (PSI)** measures distributional shift in input features. PSI < 0.1 stable, 0.1–0.25 moderate, > 0.25 severe.
+- **Performance decay** measures target-related drift. For SML: AUC decay, precision decay, recall decay. For USML: cluster-stability decay (re-cluster + compare).
+- **Calibration drift** measures whether predicted probabilities still match actual rates. A classifier can have stable AUC and drifted calibration.
+- **Concept drift** (label definition changes over time) is the subtlest. If "churn" means "90 days of inactivity" today and will mean "60 days" next year, your label is moving. Monitor your definitions.
+- **Virtuous drift** (the model got better!) is also drift. If your customer base is maturing and the old threshold is too sensitive, the model needs retraining to benefit from the shift — not just when it degrades.
+- **Don't retrain on seasonal spikes.** Black Friday, Chinese New Year, payday. These look like drift but are known seasonality. Duration window + HITL on first trigger.
+
+### Your levers this phase
+
+- **Lever 1 (the big one): signal choice per model.** Segmentation = membership churn %. Classifier = calibration error + AUC decay + feature PSI. Allocator = constraint-violation rate.
+- **Lever 2 (threshold grounding):** historical rolling variance, not round numbers. "0.15 because it's the 95th percentile of weekly drift variance in the past year" = 4/4. "0.15 because that's sort of big" = 1/4.
+- **Lever 3 (duration window):** 1 day of drift = usually seasonality or single-day anomaly. 7 days = real. 30 days = definitely. Pick based on the cost of a false-positive retrain.
+- **Lever 4 (HITL vs auto):** first trigger always HITL (human approves). Repeat triggers may auto-retrain if the process has been stable for multiple cycles.
+
+### Trust-plane question
+
+When do we retrain? What is the rule?
+
+### Prompt template — universal
+
+> _"Set up drift monitoring for [model(s)]. First confirm reference data is registered. For each model, name: (1) primary drift signals (at least one distributional, one performance), (2) thresholds grounded in historical variance, (3) duration window that distinguishes drift from seasonality, (4) human-in-the-loop-vs-automatic for first trigger. If multiple models, separate rules per model. Flag any seasonal dates in the reference window that should be excluded."_
+
+> **For tonight's product (Sprint 4):** _"Three drift rules: (a) segmentation = monthly segment-membership churn, threshold = 12% grounded in the training window's weekly variance; (b) churn classifier = weekly calibration error + AUC decay > 3 points; (c) allocator = daily constraint-violation rate, threshold = 5%. Duration: 2 consecutive triggers for segmentation, 1 for classifier, 3 for allocator. HITL on first trigger for all three. Exclude Nov–Dec from the segmentation baseline."_
+
+### Evaluation checklist
+
+- [ ] Reference data confirmed registered for every model.
+- [ ] Primary + secondary signals named per model.
+- [ ] Thresholds grounded in historical variance, not round numbers.
+- [ ] Duration window prevents retrain-on-spike.
+- [ ] HITL-vs-auto classified with reason.
+- [ ] Retrain decision stays in Trust Plane (no "auto-retrain on X" without HITL first).
+
+### Journal schema — universal
+
+```
+Phase 13 — Retrain Rule (per model)
+Model: ____
+Signal(s): ____
+Threshold(s): ____ (variance grounding: ____)
+Duration window: ____
+Human-in-the-loop: yes / no (justification: ____)
+Seasonal exclusions: ____
+Reversal: what makes me change this rule? ____
+```
+
+### Common failure modes
+
+- `set_reference_data` not called — drift check returns "no reference".
+- Threshold = "15% feels right" without variance grounding — 1/4 on D5.
+- Duration window = "immediately" — model retrains on Black Friday → produces worse model.
+- Agent-reasoning violation: "auto-retrain when X > Y". Must be reframed as "signal + threshold for operator" — the human owns retraining.
+- Single rule for all three models — the cadences are different, the signals are different, the rule must be different.
+
+### Artefact
+
+`POST /drift/retrain_rule` × 3 + `journal/phase_13_retrain.md`.
+
+### Instructor pause point
+
+- Ask: if segment-reassignment rate was 8% last month and 14% this month, is that drift? What's the fourth data point that turns "two spikes" into "a trend"?
+- Draw two cadences (segmentation monthly, recommender daily). What would a single combined alarm miss on each side?
+- Show a Black-Friday-shaped data spike. Ask: retrain or hold? Why?
+
+### Transfer to your next project
+
+1. What is the signal my product leaks when it starts going wrong — and is there a measurable historical baseline for what "normal" looks like?
+2. What duration distinguishes genuine drift from known seasonality or one-off spikes?
+3. Who decides to retrain — human with signal as input, or automatic? If automatic, what's my safeguard against retraining on a Black-Friday-style event?
+
+---
+
+## Phase 14 — Fairness Audit (DEFERRED to Week 7)
+
+```
+──────────────────────────────────────────────────────────────────
+ THIS PHASE:    Week 7 · Phase 14 of 14 — Fairness
+ STATUS:        DEFERRED (see narrative below)
+──────────────────────────────────────────────────────────────────
+```
+
+This phase is intentionally **not executed in Week 5** — and the deferral is an instructional choice, not a gap. Running a fairness audit well requires two literacies students haven't built yet: (a) naming the protected classes that actually apply in the jurisdiction (Singapore PDPA, EU GDPR Article 22, US ECOA, HIPAA — not just "protected groups"), and (b) disparate-impact testing with baselines and significance, which needs the credit + healthcare case material Weeks 6 and 7 are built on. A half-done fairness audit in Week 5 ("no segment is more than 60% one demographic, so we're fine") is worse than no audit — it produces a defensive document the student then references as if real, exactly the fairness-washing failure we want to prevent.
+
+In the interim, the student does three things. First, during Phase 3 they run the proxy-check for every demographic-like feature and document proxy concerns explicitly. Second, during Phase 7 the Safety dimension flags "small-segment vulnerable-population overlap" as a finding with the explicit note "deferred to Week 7 per Playbook." Third, when the student commissions a similar product in the real world six months after the course, the presence of a deferred Phase 14 in their journal is the reminder to either run it properly (after Week 7 material) or commission a qualified fairness auditor; it is not permission to skip the step.
+
+---
+
+## Appendix — Transferable lessons accumulating through the term
+
+_(Populated by Phase 9 Codify at the end of each week.)_
+
+### Week 4 (supply chain / SML + optimization)
+
+- AutoML trials above 10 blow the Sprint 1 budget and add no discovery value.
+- "Monitor production" means nothing; "monitor [signal] weekly, alert at [threshold]" is the contract.
+- Cost asymmetry in $ anchors every later phase; without it, floors float.
+
+### Week 5 (retail / USML + SML + Opt + MLOps) — _to be populated tonight_
+
+- (Student groups add 3 transferable lessons here during /codify.)
+
+---
+
+**END OF PLAYBOOK — v2026-04-23 · Universal Edition · Week 5 (Arcadia Retail) instantiation**

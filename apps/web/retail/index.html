@@ -12,69 +12,130 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     :root {
       --bg: #0f1720; --panel: #1a2332; --text: #e6edf3; --muted: #8b949e;
       --accent: #58a6ff; --ok: #3fb950; --warn: #d29922; --err: #f85149;
+      --done: #26a641; --current: #d29922; --upcoming: #3b4148;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
       background: var(--bg); color: var(--text); }
-    h1 { font-size: 20px; margin: 0 0 4px 0; }
-    .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
-    .card { background: var(--panel); border-radius: 10px; padding: 18px; border: 1px solid #30363d; }
-    .card h2 { margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
-    .metric { display: flex; justify-content: space-between; margin: 6px 0; font-size: 13px; }
+    h1 { font-size: 18px; margin: 0; }
+    .subtitle { color: var(--muted); font-size: 12px; }
+
+    /* --- BANNER --- */
+    .banner { background: var(--panel); padding: 14px 24px; border-bottom: 2px solid #30363d; }
+    .banner-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .pipeline { display: flex; gap: 4px; align-items: stretch; overflow-x: auto; }
+    .stage { flex: 1 1 auto; min-width: 110px; padding: 10px 8px; border-radius: 6px; text-align: center;
+      font-size: 11px; font-weight: 500; position: relative; transition: all 0.2s ease; }
+    .stage.done { background: var(--done); color: #fff; }
+    .stage.done::after { content: "✓"; position: absolute; top: 2px; right: 6px; font-size: 10px; }
+    .stage.current { background: var(--current); color: #000; box-shadow: 0 0 0 2px var(--current); font-weight: 700; }
+    .stage.upcoming { background: var(--upcoming); color: var(--muted); }
+    .stage .label { display: block; }
+    .stage .clock { display: block; font-size: 9px; opacity: 0.7; margin-top: 2px; }
+    .current-detail { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      padding: 10px 14px; background: #0d131a; border-radius: 6px; border-left: 3px solid var(--current); }
+    .cd-block { font-size: 12px; }
+    .cd-block .k { color: var(--muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; }
+    .cd-block .v { color: var(--text); font-weight: 500; margin-top: 2px; }
+    .decisions { margin-top: 10px; padding: 10px 14px; background: #0d131a; border-radius: 6px; }
+    .decisions-head { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .decision { display: flex; gap: 8px; font-size: 12px; margin: 3px 0; }
+    .decision .icon { width: 18px; }
+    .decision.done .icon { color: var(--ok); }
+    .decision.pending .icon { color: var(--muted); }
+    .decision .text { flex: 1; }
+
+    /* --- DASHBOARD --- */
+    .dashboard { padding: 16px 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+    .card { background: var(--panel); border-radius: 8px; padding: 14px; border: 1px solid #30363d; }
+    .card h2 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+    .metric { display: flex; justify-content: space-between; margin: 4px 0; font-size: 12px; }
     .metric .k { color: var(--muted); }
     .metric .v { font-family: "SF Mono", "Monaco", monospace; }
     .status-ok { color: var(--ok); }
     .status-err { color: var(--err); }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #30363d; }
-    th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; }
-    pre { background: #0d131a; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 11px; max-height: 200px; }
-    .refresh { background: none; border: 1px solid #30363d; color: var(--muted); padding: 4px 10px;
-      border-radius: 6px; cursor: pointer; font-size: 11px; }
-    .refresh:hover { color: var(--text); border-color: var(--accent); }
+    .status-warn { color: var(--warn); }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #30363d; }
+    th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 10px; }
+    td.num { font-family: "SF Mono", "Monaco", monospace; text-align: right; }
+    .path-warning { background: rgba(248,81,73,0.1); color: var(--err); padding: 6px 8px;
+      border-radius: 4px; font-size: 11px; margin-top: 6px; }
   </style>
 </head>
 <body>
-  <h1>Arcadia Retail — Metis Week 5 Viewer</h1>
-  <div class="subtitle">
-    Read-only dashboard. Reads from the backend at <code>http://127.0.0.1:8000</code>.
-    <button class="refresh" onclick="refreshAll()">↻ refresh all</button>
+
+  <!-- ===== VALUE CHAIN BANNER ===== -->
+  <div class="banner">
+    <div class="banner-head">
+      <div>
+        <h1>Arcadia Retail — Metis Week 5</h1>
+        <div class="subtitle">Traditional ML value chain in one product · <span id="elapsed">0m elapsed</span></div>
+      </div>
+      <div class="subtitle">backend <code>:8000</code> · polls every 2s</div>
+    </div>
+    <div class="pipeline" id="pipeline">loading…</div>
+    <div class="current-detail" id="current-detail">
+      <div class="cd-block">
+        <div class="k">Current phase</div>
+        <div class="v" id="cd-phase">—</div>
+      </div>
+      <div class="cd-block">
+        <div class="k">Levers in play</div>
+        <div class="v" id="cd-levers">—</div>
+      </div>
+    </div>
+    <div class="decisions">
+      <div class="decisions-head">The five Trust-Plane decision moments (rubric-anchored)</div>
+      <div id="decisions">loading…</div>
+    </div>
   </div>
 
-  <div class="grid">
-    <div class="card" id="health-card">
-      <h2>Preflight</h2>
-      <div id="health-body">loading…</div>
-    </div>
-    <div class="card" id="baseline-card">
-      <h2>Baseline Segmentation (pre-built)</h2>
-      <div id="baseline-body">loading…</div>
-    </div>
-    <div class="card" id="candidates-card">
-      <h2>K-Sweep (reference)</h2>
-      <div id="candidates-body">loading…</div>
-    </div>
-    <div class="card" id="registry-card">
-      <h2>Segment Registry</h2>
-      <div id="registry-body">loading…</div>
-    </div>
-    <div class="card" id="recommender-card">
-      <h2>Recommender Config</h2>
-      <div id="recommender-body">loading…</div>
-    </div>
-    <div class="card" id="drift-card">
-      <h2>Drift Status</h2>
-      <div id="drift-body">loading…</div>
+  <!-- ===== DASHBOARD ===== -->
+  <div class="dashboard">
+    <div class="grid">
+      <div class="card" id="health-card">
+        <h2>Preflight</h2>
+        <div id="health-body">loading…</div>
+      </div>
+      <div class="card" id="segment-card">
+        <h2>Sprint 1 · USML · Segmentation</h2>
+        <div id="segment-body">loading…</div>
+      </div>
+      <div class="card" id="ksweep-card">
+        <h2>K-sweep reference (pre-baked)</h2>
+        <div id="ksweep-body">loading…</div>
+      </div>
+      <div class="card" id="churn-card">
+        <h2>Sprint 2 · SML · Churn classifier</h2>
+        <div id="churn-body">loading…</div>
+      </div>
+      <div class="card" id="conv-card">
+        <h2>Sprint 2 · SML · Conversion classifier</h2>
+        <div id="conv-body">loading…</div>
+      </div>
+      <div class="card" id="recommender-card">
+        <h2>Recommender config</h2>
+        <div id="recommender-body">loading…</div>
+      </div>
+      <div class="card" id="allocator-card">
+        <h2>Sprint 3 · Opt · Allocator</h2>
+        <div id="allocator-body">loading…</div>
+      </div>
+      <div class="card" id="drift-card">
+        <h2>Sprint 4 · MLOps · Drift</h2>
+        <div id="drift-body">loading…</div>
+      </div>
     </div>
   </div>
 
   <script>
     const API = "http://127.0.0.1:8000";
 
-    async function j(path) {
+    async function j(path, opts) {
       try {
-        const r = await fetch(API + path);
+        const r = await fetch(API + path, opts);
         return await r.json();
       } catch (e) {
         return { _error: e.message };
@@ -82,13 +143,57 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     }
 
     function metric(k, v) { return `<div class="metric"><span class="k">${k}</span><span class="v">${v}</span></div>`; }
+    function fmtMinSec(s) { const m = Math.floor(s/60); const r = s%60; return `${m}m ${r}s`; }
 
+    // ===== BANNER =====
+    async function renderBanner() {
+      const d = await j("/state/current");
+      if (d._error) {
+        document.getElementById("pipeline").innerHTML =
+          `<div class="status-err">backend unreachable — start with <code>bash src/retail/scripts/run_backend.sh</code></div>`;
+        return;
+      }
+      // Pipeline stages
+      const completed = new Set(d.completed_stages || []);
+      const current = d.current.stage;
+      const html = d.pipeline.map(s => {
+        const cls = completed.has(s.id) ? "done" : (s.id === current ? "current" : "upcoming");
+        return `<div class="stage ${cls}">
+          <span class="label">${s.label}</span>
+          <span class="clock">${s.clock || ""}</span>
+        </div>`;
+      }).join("");
+      document.getElementById("pipeline").innerHTML = html;
+
+      // Current phase detail
+      const phaseText = d.current.phase
+        ? `Sprint ${d.current.sprint} · Phase ${d.current.phase} of 14 — ${d.current.phase_name}`
+        : d.current.stage_label;
+      document.getElementById("cd-phase").textContent = phaseText;
+      document.getElementById("cd-levers").textContent = d.current.phase_levers || "—";
+
+      // Elapsed
+      document.getElementById("elapsed").textContent =
+        `${fmtMinSec(d.elapsed.workshop_seconds)} elapsed`;
+
+      // Decision moments
+      const dMoments = d.decision_moments.map(m => {
+        const cls = m.completed ? "done" : "pending";
+        const icon = m.completed ? "✓" : "○";
+        return `<div class="decision ${cls}">
+          <span class="icon">${icon}</span>
+          <span class="text">${m.id}. ${m.label} <span class="subtitle">(Sprint ${m.sprint} · Phase ${m.phase})</span></span>
+        </div>`;
+      }).join("");
+      document.getElementById("decisions").innerHTML = dMoments;
+    }
+
+    // ===== DASHBOARD CARDS =====
     async function renderHealth() {
       const d = await j("/health");
       const el = document.getElementById("health-body");
       if (d._error || d.status !== "ok") {
-        el.innerHTML = `<div class="status-err">✗ backend unreachable — start with <code>bash src/retail/scripts/run_backend.sh</code></div>`;
-        return;
+        el.innerHTML = `<div class="status-err">✗ backend unreachable</div>`; return;
       }
       el.innerHTML = `
         <div class="status-ok">✓ ${d.status}</div>
@@ -101,41 +206,52 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
       `;
     }
 
-    async function renderBaseline() {
+    async function renderSegment() {
       const d = await j("/segment/baseline");
-      const el = document.getElementById("baseline-body");
+      const el = document.getElementById("segment-body");
       if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
       el.innerHTML = `
         ${metric("version", d.version)}
-        ${metric("algorithm", d.algorithm)}
         ${metric("K", d.k)}
         ${metric("silhouette", d.silhouette)}
-        ${metric("inertia", d.inertia)}
-        ${metric("segment sizes", JSON.stringify(d.segment_sizes))}
         ${metric("stage", d.stage)}
+        ${metric("sizes", JSON.stringify(d.segment_sizes))}
       `;
     }
 
-    async function renderCandidates() {
+    async function renderKsweep() {
       const d = await j("/segment/candidates");
-      const el = document.getElementById("candidates-body");
+      const el = document.getElementById("ksweep-body");
       if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
       let html = `<table><tr><th>K</th><th>silhouette</th><th>sizes</th></tr>`;
       for (const r of d.sweep) {
-        html += `<tr><td>${r.k}</td><td>${r.silhouette.toFixed(3)}</td><td>${JSON.stringify(r.segment_sizes)}</td></tr>`;
+        html += `<tr><td class="num">${r.k}</td><td class="num">${r.silhouette.toFixed(3)}</td><td>${JSON.stringify(r.segment_sizes)}</td></tr>`;
       }
       html += `</table>`;
       el.innerHTML = html;
     }
 
-    async function renderRegistry() {
-      const d = await j("/segment/registry");
-      const el = document.getElementById("registry-body");
+    async function renderChurn() {
+      const d = await j("/predict/leaderboard/churn");
+      const el = document.getElementById("churn-body");
       if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
-      let html = `${metric("production", d.production || "—")}${metric("shadow", d.shadow || "—")}<br/>`;
-      html += `<table><tr><th>version</th><th>algo</th><th>K</th><th>stage</th></tr>`;
-      for (const [v, e] of Object.entries(d.versions || {})) {
-        html += `<tr><td>${v}</td><td>${e.algorithm}</td><td>${e.k}</td><td>${e.stage}</td></tr>`;
+      let html = `<table><tr><th>family</th><th>AUC</th><th>prec</th><th>recall</th><th>brier</th></tr>`;
+      for (const [name, entry] of Object.entries(d.candidates)) {
+        const m = entry.metrics;
+        html += `<tr><td>${name}</td><td class="num">${m.auc.toFixed(3)}</td><td class="num">${m.precision_at_threshold.toFixed(3)}</td><td class="num">${m.recall_at_threshold.toFixed(3)}</td><td class="num">${m.brier_score.toFixed(3)}</td></tr>`;
+      }
+      html += `</table>`;
+      el.innerHTML = html;
+    }
+
+    async function renderConv() {
+      const d = await j("/predict/leaderboard/conversion");
+      const el = document.getElementById("conv-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      let html = `<table><tr><th>family</th><th>AUC</th><th>prec</th><th>recall</th></tr>`;
+      for (const [name, entry] of Object.entries(d.candidates)) {
+        const m = entry.metrics;
+        html += `<tr><td>${name}</td><td class="num">${m.auc.toFixed(3)}</td><td class="num">${m.precision_at_threshold.toFixed(3)}</td><td class="num">${m.recall_at_threshold.toFixed(3)}</td></tr>`;
       }
       html += `</table>`;
       el.innerHTML = html;
@@ -149,9 +265,28 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
         ${metric("mode", d.mode)}
         ${metric("hybrid weights", JSON.stringify(d.hybrid_weights))}
         ${metric("cold-start", d.cold_start_strategy)}
-        ${metric("constraints", JSON.stringify(d.constraints))}
-        ${metric("updated", d.updated_at || "—")}
       `;
+    }
+
+    async function renderAllocator() {
+      const d = await j("/allocate/last_plan");
+      const el = document.getElementById("allocator-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      if (d.plan_exists === false) {
+        el.innerHTML = `<div class="subtitle">no plan yet — POST /allocate/solve when you reach Sprint 3</div>`;
+        return;
+      }
+      let html = `
+        ${metric("feasibility", d.feasibility ? "✓" : "✗")}
+        ${metric("expected $", "$" + (d.expected_revenue || 0).toLocaleString())}
+        ${metric("touches", (d.total_touches || 0) + " / " + (d.touch_budget || 0))}
+        ${metric("PDPA active", d.pdpa_active ? "yes" : "no")}
+        ${metric("concentration", (d.per_segment_concentration || 0).toFixed(3))}
+      `;
+      if (d.pathologies && d.pathologies.length) {
+        html += `<div class="path-warning"><b>pathologies:</b><br/>${d.pathologies.join("<br/>")}</div>`;
+      }
+      el.innerHTML = html;
     }
 
     async function renderDrift() {
@@ -160,8 +295,7 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
       if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
       el.innerHTML = `
         ${metric("model", d.model_id)}
-        ${metric("reference_set", d.reference_set ? "✓" : "✗")}
-        ${metric("window", d.reference_window || "—")}
+        ${metric("reference set", d.reference_set ? "✓" : "✗")}
         ${metric("reference rows", d.n_reference_rows || 0)}
         ${metric("feature columns", (d.feature_columns || []).length)}
       `;
@@ -169,13 +303,20 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
 
     async function refreshAll() {
       await Promise.all([
-        renderHealth(), renderBaseline(), renderCandidates(),
-        renderRegistry(), renderRecommender(), renderDrift(),
+        renderBanner(),
+        renderHealth(),
+        renderSegment(),
+        renderKsweep(),
+        renderChurn(),
+        renderConv(),
+        renderRecommender(),
+        renderAllocator(),
+        renderDrift(),
       ]);
     }
 
     refreshAll();
-    setInterval(refreshAll, 5000);
+    setInterval(refreshAll, 2000);
   </script>
 </body>
 </html>
