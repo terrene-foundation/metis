@@ -476,11 +476,21 @@ so I can see you're alive during the ~17s NMF warm-up.
    Wait 2s, then curl -sI http://127.0.0.1:3000/ to confirm HTTP 200.
 
 4. Confirm all four sprint endpoints are live (one sample per sprint):
-   - Sprint 1 USML: GET /segment/baseline returns K=3.
-   - Sprint 2 SML: GET /predict/leaderboard/churn returns 3 families.
-   - Sprint 3 Opt: GET /allocate/campaigns returns 5 campaigns.
+   - Sprint 1 USML: GET /segment/baseline returns a body with "k": 3
+     and "silhouette" near 0.3422.
+   - Sprint 2 SML: GET /predict/leaderboard/churn returns a body with a
+     "candidates" object holding exactly three keys
+     (logistic_regression, random_forest, gradient_boosted).
+   - Sprint 3 Opt: GET /allocate/campaigns returns a body with 5
+     entries under "campaigns".
    - Sprint 4 MLOps: GET /drift/status/customer_segmentation returns
-     reference_set=true.
+     "reference_set": true.
+
+Describe any algorithm you mention in your summary ONLY if you can
+quote the file and function you read it from (e.g. "K-means, per
+`train_baseline_segmentation` in src/retail/backend/ml_context.py").
+If you are unsure which algorithm backs a module, say "I did not read
+the source for this — I can confirm after /analyze" rather than guess.
 
 5. Open the viewer in my browser so I can see the value-chain banner:
      open http://127.0.0.1:3000/
