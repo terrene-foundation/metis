@@ -1,0 +1,32 @@
+# Session Notes — 2026-04-23
+
+## Where we are
+
+Between Week 4 ship and tonight's Week 5 lesson. Synced `.claude/` from template (no artifact deltas — already at 3.5.1) and bumped Kailash pins in `pyproject.toml` to latest PyPI: kailash 2.8.12, dataflow 2.0.12, nexus 2.1.1, kaizen 2.11.0, pact 0.9.0, mcp 0.2.8, ml 0.17.0 (big jump), align 0.4.0, kaizen-agents 0.9.3. `uv sync` succeeded; imports verified. Now assembling Week 5 retail playbook focused on wielding SML + USML (skip the scaffold build, students walk in with working data + app and focus on the 14-phase Playbook).
+
+## Read first
+
+1. `workspaces/metis/week-04-supply-chain/PLAYBOOK.md` — 14-phase ML Decision Playbook; Week 5 extends this
+2. `workspaces/metis/reference-decks/week-05-retail.html` — lesson content: USML (K-Means/DBSCAN/PCA/UMAP), recommender systems, RAG
+3. `workspaces/metis/week-04-supply-chain/START_HERE.md` — student manual pattern to mirror
+4. `workspaces/metis/week-04-supply-chain/specs/playbook-phases-sml.md` / `-prescribe.md` / `-mlops.md` — phase source specs
+5. `.venv/bin/python -c "import kailash_ml; print(dir(kailash_ml))"` — confirms USML primitives (HDBSCAN, UMAP via `umap-learn`, etc.) available
+
+## In-flight state
+
+- pyproject.toml pins bumped but NOT committed yet — commit with the Week 5 playbook in one atomic commit.
+- `.claude/VERSION` `synced_at` refreshed to 2026-04-23T04:34Z; sdk_packages map updated to latest PyPI.
+- Week 5 workspace directory created (`workspaces/metis/week-05-retail/`) but empty except these notes.
+- Week 4 has uncommitted working data (sqlite memdb files, mlartifacts/) — leave untracked.
+
+## Traps
+
+- `kailash_ml` is the import path (NOT `kailash.ml`). Week 4 prompt templates that said `kailash-ml` are fine in prose, but sample code must use `import kailash_ml`.
+- kailash-ml 0.17.0 is a big jump from 0.9.0 — AutoMLEngine constructor signature, registry APIs may have shifted. Verify against `.venv/lib/python3.*/site-packages/kailash_ml/` before citing specific API names in the playbook.
+- The user explicitly wants to SKIP scaffold build time — students should NOT run `/analyze`/`/todos`/`/implement` for app scaffolding. They go straight to wielding the Playbook on a pre-built retail dataset + app.
+- Week 4 PLAYBOOK.md is generated from 3 source specs — edit the specs, not the rollup, when updating.
+
+## Open questions for the human
+
+- Is the retail workspace pre-scaffolded somewhere I should reuse, or do I design a "pretend the app is already there, focus on decisions" lesson shape?
+- Week 5 reference deck includes RAG — do you want RAG covered tonight or pushed to a sub-session since it blurs into Week 6's LLM territory?

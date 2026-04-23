@@ -1,0 +1,57 @@
+{
+  "model_name": "customer_segmentation",
+  "version": "baseline-v1",
+  "algorithm": "kmeans",
+  "k": 3,
+  "features": [
+    "total_spend_24mo",
+    "avg_basket_size",
+    "visits_per_week",
+    "weekend_browse_fraction",
+    "luxury_category_fraction",
+    "distinct_categories",
+    "days_since_last_visit",
+    "marketing_email_open_rate"
+  ],
+  "silhouette_score": 0.3423791777813196,
+  "inertia": 22609.765003347537,
+  "segment_sizes": [
+    3612,
+    571,
+    817
+  ],
+  "centroids": [
+    [
+      -0.23174981689605118,
+      -0.3606692575676423,
+      -0.0728522739738285,
+      0.352132115826373,
+      -0.37420701083674673,
+      -0.15164363125709673,
+      -0.32544645824609847,
+      -0.09543405251346072
+    ],
+    [
+      -0.4729914388664527,
+      -0.3752346476825267,
+      -1.121302657331314,
+      -0.06680751401447152,
+      -0.13529734968239163,
+      -0.10961070011930162,
+      2.613535414880233,
+      -0.012943108914389252
+    ],
+    [
+      1.3551511018620332,
+      1.8567886684957715,
+      1.1057603805748446,
+      -1.5101029520962015,
+      1.7489479924246933,
+      0.7470312189336048,
+      -0.38777982216854945,
+      0.43096488723223686
+    ]
+  ],
+  "seed": 20260423,
+  "note": "The pre-built baseline. Students CRITIQUE this in Sprint 1; their Phase 4-8 decisions either confirm K=3 or promote a better K."
+}

@@ -1,0 +1,7 @@
+{
+  "scenario_id": "pdpa_redline",
+  "sprint": 2,
+  "phase": 11,
+  "event": "Legal has flagged that using under-18 browsing history for personalization violates PDPA \u00a713. The weekend_browse_fraction feature, when joined with age_band=18-24, effectively infers under-18 behaviour. Re-classify: is this a hard constraint?",
+  "expected_trust_plane_response": "Hard constraint (law). Drop weekend_browse_fraction for under-21 age bands OR drop age_band as a feature. Document in journal."
+}

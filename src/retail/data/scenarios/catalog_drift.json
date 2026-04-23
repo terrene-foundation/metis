@@ -1,0 +1,7 @@
+{
+  "scenario_id": "catalog_drift",
+  "sprint": 3,
+  "phase": 13,
+  "event": "Arcadia launched a new 'wellness' category 30 days ago. It now accounts for 12 % of transactions. The customer_segmentation model was trained before the launch. Check drift.",
+  "expected_trust_plane_response": "Expect segment-membership churn >20 % for customers who adopted wellness. Decision: retrain cadence, or hold and monitor?"
+}

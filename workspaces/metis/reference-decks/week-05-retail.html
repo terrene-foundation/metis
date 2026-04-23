@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MGMT655 Week 5 — Retail &amp; E-Commerce</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+
+  <!-- Custom Theme -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 1: Domain Context & Unsupervised ML                    -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 1: Title -->
+      <section class="title-slide">
+        <span class="week-badge">Week 5</span>
+        <h1>Retail AI</h1>
+        <div class="subtitle">Customer Intelligence &amp; Conversational AI</div>
+        <div class="meta">
+          Dr. Jack Hong<br>
+          Singapore Management University<br>
+          2026 Term 1
+        </div>
+      </section>
+
+      <!-- Slide 2: Domain Context -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Know Your Customer, Act on It</h2>
+        <p style="font-size: 0.75em;">Retail generates massive data &mdash; every click, cart, and purchase tells a story. The challenge: turning noise into actionable intelligence.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 16px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Segmentation</h4>
+            <p style="font-size: 0.65em;">Who are your customers, really? Not demographics &mdash; behaviors.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Recommendations</h4>
+            <p style="font-size: 0.65em;">"Customers who bought X also bought Y" &mdash; but smarter.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Conversational AI</h4>
+            <p style="font-size: 0.65em;">AI shopping advisors that actually know your product catalog.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.7em; margin: 0;"><strong>This week:</strong> Unsupervised ML finds the patterns. RAG makes AI talk about your products intelligently.</p>
+        </div>
+      </section>
+
+      <!-- Slide 3: What Is Unsupervised ML? -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>What Is Unsupervised ML?</h2>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Supervised (Weeks 2&ndash;3)</h4>
+              <p style="font-size: 0.65em; margin: 0 0 6px 0;"><strong>You give it the answers</strong></p>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Labeled data: "this is fraud / not fraud"</li>
+                <li>Model learns to predict labels</li>
+                <li>Classification, regression</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Unsupervised (This Week)</h4>
+              <p style="font-size: 0.65em; margin: 0 0 6px 0;"><strong>No labels &mdash; find hidden patterns</strong></p>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>No "right answer" to learn from</li>
+                <li>Model discovers structure in data</li>
+                <li>Clustering, dimensionality reduction</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Key insight:</strong> Supervised ML answers questions you already know to ask. Unsupervised ML reveals questions you didn't know existed.</p>
+        </div>
+      </section>
+
+      <!-- Slide 4: Clustering -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Clustering &mdash; Grouping the Unknown</h2>
+        <p style="font-size: 0.7em;">Give the algorithm data points. It finds natural groups.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">K-Means</h4>
+            <p style="font-size: 0.65em;">You pick K groups. Algorithm assigns every point to the nearest center. Fast, simple, works well on spherical clusters.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">DBSCAN</h4>
+            <p style="font-size: 0.65em;">Finds clusters of any shape. Automatically detects outliers. No need to specify number of clusters upfront.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Hierarchical</h4>
+            <p style="font-size: 0.65em;">Builds a tree of clusters. Useful when you need nested segments (e.g., "premium" splits into "luxury" and "aspirational").</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Think of it as:</strong> Scattered dots on a page &rarr; colored groups. Each color is a segment with shared characteristics.</p>
+        </div>
+      </section>
+
+      <!-- Slide 5: How Many Clusters? -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>How Many Clusters Are Real?</h2>
+        <p style="font-size: 0.7em;">The algorithm will always find K clusters if you ask for K. The question is: <strong>how many are meaningful?</strong></p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Statistical Methods</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li><strong>Elbow plot:</strong> graph error vs. K, look for the "bend"</li>
+                <li><strong>Silhouette score:</strong> how well-separated are clusters?</li>
+                <li><strong>Gap statistic:</strong> compare to random data</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Business Logic Matters More</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Can your marketing team act on 12 segments? Probably not.</li>
+                <li>Do the clusters tell a story you recognize?</li>
+                <li>Are they stable over time?</li>
+                <li><strong>3&ndash;7 segments</strong> is usually actionable</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6: Dimensionality Reduction -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Dimensionality Reduction</h2>
+        <p style="font-size: 0.7em;">Your customer data has 100+ features. Humans can visualize 2&ndash;3. How do you bridge that gap?</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">PCA (Principal Component Analysis)</h4>
+            <p style="font-size: 0.65em;">Finds the directions of maximum variance. Collapses correlated features into "components." Good for preprocessing before clustering.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">t-SNE / UMAP</h4>
+            <p style="font-size: 0.65em;">Visualization tools. Maps high-dimensional data to 2D while preserving local structure. Great for seeing if clusters exist.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Use PCA to simplify before modeling. Use t-SNE/UMAP to visualize and validate. They serve different purposes.</p>
+        </div>
+      </section>
+
+      <!-- Slide 7: Recommender Systems -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Recommender Systems</h2>
+        <p style="font-size: 0.7em;">The engine behind "You might also like..." &mdash; worth billions to Amazon, Netflix, Spotify.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Collaborative Filtering</h4>
+              <p style="font-size: 0.65em; margin: 0 0 6px 0;"><strong>"People like you bought..."</strong></p>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Uses behavior of similar users</li>
+                <li>No need to understand the product</li>
+                <li>Needs lots of user interaction data</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Content-Based Filtering</h4>
+              <p style="font-size: 0.65em; margin: 0 0 6px 0;"><strong>"Because you liked this product..."</strong></p>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Uses product attributes and features</li>
+                <li>Works for niche products</li>
+                <li>Needs good product metadata</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Best practice:</strong> Hybrid systems combine both. Netflix uses collaborative + content + contextual signals.</p>
+        </div>
+      </section>
+
+      <!-- Slide 8: Cold Start Problem -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>The Cold Start Problem</h2>
+        <p style="font-size: 0.7em;">Recommendations need data. What happens when you have none?</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">New User</h4>
+            <p style="font-size: 0.65em;">No purchase history, no browsing data. Solutions: ask preferences during onboarding, use demographics, show popular items, leverage content-based approach.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">New Product</h4>
+            <p style="font-size: 0.65em;">No ratings or interactions yet. Solutions: use product attributes (content-based), editorial curation, A/B test with small traffic, leverage similar products.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Business impact:</strong> Cold start directly affects new customer conversion and new product launch success. Your strategy here is a product decision, not a technical one.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 2: RAG & Conversational AI                             -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 9: Section Divider -->
+      <section class="section-divider">
+        <h2>RAG &amp; Conversational AI</h2>
+        <p>Making LLMs useful with your data</p>
+      </section>
+
+      <!-- Slide 10: What Is RAG? -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>What Is RAG?</h2>
+        <h3 style="font-size: 1em;">Retrieval-Augmented Generation</h3>
+        <p style="font-size: 0.7em;">LLMs are powerful but they don't know <strong>your</strong> products, policies, or prices. RAG solves this.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Without RAG</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>LLM guesses or hallucinates</li>
+                <li>Generic answers, no specifics</li>
+                <li>"I don't have information about your product catalog"</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">With RAG</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>LLM searches your knowledge base first</li>
+                <li>Answers grounded in real data</li>
+                <li>"The Nike Air Max 90 is $189, available in sizes 7&ndash;12"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 11: RAG Architecture -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>RAG Architecture</h2>
+        <p style="font-size: 0.7em;">How it works, step by step:</p>
+        <div class="mermaid" style="margin-top: 12px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff', 'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor': '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Customer\nQuestion"] --> B["Embed\nQuery"]
+          B --> C["Search\nKnowledge Base"]
+          C --> D["Retrieve\nRelevant Docs"]
+          D --> E["LLM\nGenerates"]
+          E --> F["Grounded\nAnswer"]
+          style A fill:#0891b2,color:#fff,stroke:#0891b2
+          style B fill:#1a56db,color:#fff,stroke:#1a56db
+          style C fill:#1a56db,color:#fff,stroke:#1a56db
+          style D fill:#1a56db,color:#fff,stroke:#1a56db
+          style E fill:#1a56db,color:#fff,stroke:#1a56db
+          style F fill:#059669,color:#fff,stroke:#059669
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The key idea:</strong> Instead of fine-tuning the LLM (expensive, rigid), you give it a searchable library. Update the library anytime &mdash; prices change, stock changes, policies change.</p>
+        </div>
+      </section>
+
+      <!-- Slide 12: Product Brief -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Product Brief &mdash; Retail AI</h2>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">AI Shopping Advisor</h4>
+            <p style="font-size: 0.65em;">Conversational AI that knows your entire catalog. Answers questions, compares products, suggests alternatives. RAG-powered with real-time inventory.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Customer Segmentation Engine</h4>
+            <p style="font-size: 0.65em;">Clusters customers by behavior, not demographics. Discovers segments like "weekend browsers who convert on sale days" automatically.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Dynamic Pricing</h4>
+            <p style="font-size: 0.65em;">Adjusts prices based on demand, competition, inventory levels. Unsupervised ML identifies pricing sensitivity segments.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Personalized Recommendations</h4>
+            <p style="font-size: 0.65em;">Hybrid recommender combining collaborative filtering, content-based signals, and customer segment membership.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 3: Key Decisions                                        -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 13: Section Divider -->
+      <section class="section-divider">
+        <h2>Key Decisions</h2>
+        <p>The choices that define your product</p>
+      </section>
+
+      <!-- Slide 14: Key Decision — Segments -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Decision: How Many Segments?</h2>
+        <p style="font-size: 0.7em;">The algorithm gives you clusters. You decide which are <strong>real and actionable</strong>.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Too Few (2&ndash;3)</h4>
+            <p style="font-size: 0.65em;">Easy to act on, but you miss nuance. "Big spenders" and "everyone else" isn't useful for personalization.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Too Many (15+)</h4>
+            <p style="font-size: 0.65em;">Statistically perfect, operationally impossible. Your marketing team can't run 15 different campaigns.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The right answer:</strong> As many as your organization can meaningfully act on. Usually 4&ndash;7. Each segment should suggest a different action.</p>
+        </div>
+      </section>
+
+      <!-- Slide 15: Key Decision — Recommendation Strategy -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Decision: Recommendation Strategy</h2>
+        <table style="margin-top: 12px;">
+          <thead>
+            <tr>
+              <th>Factor</th>
+              <th>Collaborative</th>
+              <th>Content-Based</th>
+              <th>Hybrid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Data needed</strong></td>
+              <td>User interactions</td>
+              <td>Product attributes</td>
+              <td>Both</td>
+            </tr>
+            <tr>
+              <td><strong>Cold start</strong></td>
+              <td>Struggles</td>
+              <td>Handles well</td>
+              <td>Best</td>
+            </tr>
+            <tr>
+              <td><strong>Serendipity</strong></td>
+              <td>High &mdash; surprises users</td>
+              <td>Low &mdash; similar items</td>
+              <td>Balanced</td>
+            </tr>
+            <tr>
+              <td><strong>Complexity</strong></td>
+              <td>Medium</td>
+              <td>Low</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><strong>Best for</strong></td>
+              <td>Large user base</td>
+              <td>Niche catalogs</td>
+              <td>Mature platforms</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Start simple:</strong> Content-based if you have good product data. Add collaborative once you have user behavior at scale.</p>
+        </div>
+      </section>
+
+      <!-- Slide 16: Key Decision — RAG Knowledge Base -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Decision: What Goes Into RAG?</h2>
+        <p style="font-size: 0.7em;">Your knowledge base defines what the AI can and cannot answer.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Include</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Product catalog &amp; descriptions</li>
+              <li>Pricing and availability</li>
+              <li>Return/shipping policies</li>
+              <li>FAQ and common questions</li>
+              <li>Size guides, compatibility info</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Think Carefully</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Customer reviews (helpful but noisy)</li>
+              <li>Competitor comparisons (legal risk?)</li>
+              <li>Internal memos (data leakage risk)</li>
+              <li>Historical pricing (do you want AI sharing old prices?)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Rule of thumb:</strong> If a well-trained sales associate should know it, put it in the knowledge base. If they shouldn't share it, don't.</p>
+        </div>
+      </section>
+
+      <!-- Slide 17: Key Decision — PDPA -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Decision: Personalization vs. PDPA</h2>
+        <p style="font-size: 0.7em;">Singapore's Personal Data Protection Act sets clear boundaries. Better personalization needs more data. More data needs more compliance.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">What You Can Do</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Aggregate behavior (anonymous segments)</li>
+                <li>Consent-based personalization</li>
+                <li>On-device processing (no data leaves phone)</li>
+                <li>Pseudonymized analytics</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Red Lines</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Tracking without consent</li>
+                <li>Cross-platform data merging without notice</li>
+                <li>Inferring sensitive attributes (health, religion)</li>
+                <li>Selling personal data to third parties</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 4: Modern AI & Build                                    -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 18: Modern AI Patterns -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Modern AI: LLM Grounding</h2>
+        <p style="font-size: 0.7em;">RAG is one form of grounding &mdash; connecting LLMs to real-world data. Here's the broader landscape:</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">RAG</h4>
+            <p style="font-size: 0.65em;">Search a knowledge base before answering. Best for factual queries about your domain.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Tool Use</h4>
+            <p style="font-size: 0.65em;">LLM calls APIs: check inventory, calculate shipping, process returns. Actions, not just answers.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Conversational AI</h4>
+            <p style="font-size: 0.65em;">Multi-turn dialog with memory. Remembers context: "the shoes you asked about earlier are now on sale."</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The trend:</strong> AI shopping assistants are replacing traditional search. By 2027, Gartner predicts 25% of e-commerce interactions will be conversational.</p>
+        </div>
+      </section>
+
+      <!-- Slide 19: Today's Build -->
+      <section>
+        <span class="week-badge">Week 5</span>
+        <h2>Today's Build</h2>
+        <p style="font-size: 0.7em;">COC full cycle &mdash; lighter guidance this week. You've done this three times. Trust the process.</p>
+        <div class="flow" style="margin: 16px 0;">
+          <span class="flow-step">/analyze</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/todos</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/implement</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/redteam</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/codify</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/deploy</span>
+        </div>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Your Focus</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Define customer segments that make business sense</li>
+              <li>Choose recommendation strategy</li>
+              <li>Design the RAG knowledge base</li>
+              <li>Set personalization boundaries</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">COC Handles</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Clustering implementation</li>
+              <li>Recommendation engine</li>
+              <li>RAG pipeline setup</li>
+              <li>Frontend and deployment</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 20: Next Week Preview -->
+      <section>
+        <span class="week-badge">Next Week</span>
+        <h2>Week 6 &mdash; Media &amp; Content</h2>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.75em;"><strong>Deep Learning + Multi-Modal AI</strong></p>
+        </div>
+        <div class="card-grid" style="margin-top: 16px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Domain</h4>
+            <p style="font-size: 0.65em;">Media &amp; Content &mdash; moderation, creation, visual search, multi-modal understanding</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">ML Techniques</h4>
+            <p style="font-size: 0.65em;">Neural networks, CNNs, transformers, vision-language models</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Come Prepared</h4>
+            <p style="font-size: 0.65em;">Think about content moderation challenges &mdash; what should AI auto-moderate vs. flag for humans?</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 21: Q&A -->
+      <section class="section-divider">
+        <h2>Q&amp;A</h2>
+        <p>Ask me anything</p>
+      </section>
+
+    </div><!-- /.slides -->
+  </div><!-- /.reveal -->
+
+  <!-- Reveal.js -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#1a56db',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#1a56db',
+        lineColor: '#64748b',
+        secondaryColor: '#e8eefb',
+        tertiaryColor: '#f8fafc',
+        fontSize: '16px'
+      },
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      block: {
+        useMaxWidth: true
+      }
+    });
+
+    // Initialize Reveal.js
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      width: 1280,
+      height: 720,
+      margin: 0,
+      center: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      plugins: []
+    });
+
+    // Render Mermaid diagrams after Reveal is ready
+    Reveal.on('ready', async () => {
+      const mermaidDivs = document.querySelectorAll('.mermaid');
+      for (let i = 0; i < mermaidDivs.length; i++) {
+        const el = mermaidDivs[i];
+        const graphDef = el.textContent.trim();
+        el.textContent = '';
+        try {
+          const { svg } = await mermaid.render('mermaid-' + i, graphDef);
+          el.innerHTML = svg;
+        } catch (e) {
+          console.error('Mermaid render error:', e);
+          el.innerHTML = '<pre style="color: red; font-size: 0.6em;">' + e.message + '</pre>';
+        }
+      }
+    });
+
+    // Re-render Mermaid on slide change (for lazy rendering)
+    Reveal.on('slidechanged', () => {
+      window.dispatchEvent(new Event('resize'));
+    });
+  </script>
+</body>
+
+</html>

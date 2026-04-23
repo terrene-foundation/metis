@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MGMT655 Week 7 — Manufacturing &amp; Industrial</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+
+  <!-- Custom Theme -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 1: Domain Context & Transfer Learning                   -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 1: Title -->
+      <section class="title-slide">
+        <span class="week-badge">Week 7</span>
+        <h1>Industrial AI</h1>
+        <div class="subtitle">Transfer Learning, RL &amp; AI Agents</div>
+        <div class="meta">
+          Dr. Jack Hong<br>
+          Singapore Management University<br>
+          2026 Term 1
+        </div>
+      </section>
+
+      <!-- Slide 2: Domain Context -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>AI Becomes Physical</h2>
+        <p style="font-size: 0.7em;">In manufacturing, AI doesn't just analyze &mdash; it inspects, controls, and decides. Mistakes have physical consequences.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Inspect</h4>
+            <p style="font-size: 0.65em;">Computer vision catches defects humans miss. 24/7, consistent, sub-millimeter precision on production lines.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Control</h4>
+            <p style="font-size: 0.65em;">RL optimizes temperature, pressure, speed in real time. Learns from trial and error without breaking things.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Decide</h4>
+            <p style="font-size: 0.65em;">AI agents coordinate maintenance schedules, reroute production, escalate anomalies. Autonomous but supervised.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The stakes:</strong> A wrong recommendation in retail loses a sale. A wrong action on a production line can injure people or destroy equipment worth millions.</p>
+        </div>
+      </section>
+
+      <!-- Slide 3: Transfer Learning -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Transfer Learning</h2>
+        <h3 style="font-size: 1em;">Why Train From Scratch When You Can Adapt?</h3>
+        <p style="font-size: 0.7em;">Deep learning needs massive data. Manufacturing often has only hundreds of images. Transfer learning solves this.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Without Transfer Learning</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Need millions of labeled images</li>
+                <li>Training takes days/weeks on GPUs</li>
+                <li>Costs tens of thousands of dollars</li>
+                <li>Often impossible in specialized domains</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">With Transfer Learning</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Start with a model trained on millions of images</li>
+                <li>Fine-tune with your 100&ndash;500 images</li>
+                <li>Training takes hours, not weeks</li>
+                <li>Often achieves 95%+ accuracy</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4: How Transfer Learning Works -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>How Transfer Learning Works</h2>
+        <div class="mermaid" style="margin-top: 12px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff', 'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor': '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Pre-trained\nModel\n(ImageNet)"] --> B["Freeze\nEarly Layers\n(edges, shapes)"]
+          B --> C["Replace\nFinal Layers\n(your classes)"]
+          C --> D["Fine-tune\nWith Your\nData"]
+          D --> E["Specialized\nModel\n(defect detector)"]
+          style A fill:#0891b2,color:#fff,stroke:#0891b2
+          style B fill:#1a56db,color:#fff,stroke:#1a56db
+          style C fill:#1a56db,color:#fff,stroke:#1a56db
+          style D fill:#1a56db,color:#fff,stroke:#1a56db
+          style E fill:#059669,color:#fff,stroke:#059669
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The intuition:</strong> A model that learned to see edges, textures, and shapes from millions of everyday images already knows <em>how to see</em>. You just teach it <em>what to look for</em> &mdash; your specific defects.</p>
+        </div>
+      </section>
+
+      <!-- Slide 5: Transfer Learning in Practice -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Transfer Learning in Practice</h2>
+        <p style="font-size: 0.7em;">ImageNet (14M images, 20K categories) trained models are the starting point for most industrial vision.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Defect Detection</h4>
+            <p style="font-size: 0.65em;">100 images of scratches on metal surfaces. Transfer from ResNet. 97% accuracy in detecting micro-cracks.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">PCB Inspection</h4>
+            <p style="font-size: 0.65em;">500 images of circuit boards. Transfer from EfficientNet. Detects solder defects faster than human inspectors.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Weld Quality</h4>
+            <p style="font-size: 0.65em;">200 X-ray images of welds. Transfer from VGG. Classifies weld integrity: good, acceptable, reject.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Key takeaway:</strong> Transfer learning democratized deep learning. You don't need Google's data budget. You need a good pre-trained model and a few hundred labeled examples.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 2: Reinforcement Learning                              -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 6: Section Divider -->
+      <section class="section-divider">
+        <h2>Reinforcement Learning</h2>
+        <p>Learning by trial and error</p>
+      </section>
+
+      <!-- Slide 7: What Is RL? -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Reinforcement Learning</h2>
+        <p style="font-size: 0.7em;">Not supervised (no labels). Not unsupervised (there is a goal). The agent <strong>learns by doing</strong> and receiving rewards or penalties.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">How It Works</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Agent observes the <strong>state</strong> of the world</li>
+                <li>Takes an <strong>action</strong></li>
+                <li>Receives a <strong>reward</strong> (or penalty)</li>
+                <li>Learns which actions maximize long-term reward</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Real-World Examples</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>AlphaGo: learned to play Go better than any human</li>
+                <li>Robot arms: learned to grasp objects</li>
+                <li>HVAC systems: learned to minimize energy use</li>
+                <li>Data center cooling: Google saved 40% energy</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8: The RL Framework -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>The RL Framework</h2>
+        <div class="mermaid" style="margin-top: 12px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff', 'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor': '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Agent"] -->|"Action"| B["Environment"]
+          B -->|"State + Reward"| A
+          style A fill:#1a56db,color:#fff,stroke:#1a56db
+          style B fill:#0891b2,color:#fff,stroke:#0891b2
+        </div>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 16px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">State</h4>
+            <p style="font-size: 0.65em;">What the agent observes. Temperature, pressure, vibration, production rate, time of day.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Action</h4>
+            <p style="font-size: 0.65em;">What the agent can do. Adjust speed, change temperature, switch tooling, call maintenance.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Reward</h4>
+            <p style="font-size: 0.65em;">Feedback signal. +1 for good output, -10 for defect, -100 for equipment damage, -1000 for safety incident.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9: Reward Function Design -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Reward Function Design</h2>
+        <p style="font-size: 0.7em;">The reward function defines what "good" means. Get it wrong, and the agent optimizes for the wrong thing.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Good Reward Design</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Maximize throughput AND minimize defects</li>
+                <li>Heavy penalty for safety violations</li>
+                <li>Reward maintenance that prevents breakdown</li>
+                <li>Balance multiple objectives</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Bad Reward Design</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>"Maximize output" &rarr; agent skips quality checks</li>
+                <li>"Minimize cost" &rarr; agent defers all maintenance</li>
+                <li>"Zero defects" &rarr; agent runs so slowly nothing gets made</li>
+                <li>Reward hacking: agent finds loopholes</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Goodhart's Law:</strong> "When a measure becomes a target, it ceases to be a good measure." Your reward function IS the product specification.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 3: AI Agents                                           -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 10: Section Divider -->
+      <section class="section-divider">
+        <h2>AI Agents</h2>
+        <p>Perception, reasoning, action</p>
+      </section>
+
+      <!-- Slide 11: What Are AI Agents? -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>What Are AI Agents?</h2>
+        <p style="font-size: 0.7em;">An AI agent perceives its environment, reasons about what to do, and takes action. It's the step beyond chatbots.</p>
+        <div class="mermaid" style="margin-top: 12px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff', 'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor': '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Perceive\n(sensors, data)"] --> B["Reason\n(plan, decide)"]
+          B --> C["Act\n(tools, APIs)"]
+          C --> D["Observe\nResult"]
+          D --> A
+          style A fill:#0891b2,color:#fff,stroke:#0891b2
+          style B fill:#1a56db,color:#fff,stroke:#1a56db
+          style C fill:#059669,color:#fff,stroke:#059669
+          style D fill:#d97706,color:#fff,stroke:#d97706
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Chatbot:</strong> you ask, it answers. <strong>Agent:</strong> you set a goal, it figures out the steps, uses tools, handles errors, and reports back.</p>
+        </div>
+      </section>
+
+      <!-- Slide 12: Agent Architecture -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Agent Architecture</h2>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Tool Use</h4>
+            <p style="font-size: 0.65em;">Agents call external tools: databases, APIs, calculators, sensors, actuators. The LLM decides <em>which</em> tool to use and <em>when</em>.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Planning</h4>
+            <p style="font-size: 0.65em;">Break complex goals into steps. "Inspect batch" becomes: capture image, run defect model, log results, flag if defective, update dashboard.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Memory</h4>
+            <p style="font-size: 0.65em;">Short-term: current task context. Long-term: learned patterns, past incidents, equipment history. Agents improve over time.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Reflection</h4>
+            <p style="font-size: 0.65em;">Agent evaluates its own output. "Did my action achieve the goal?" If not, it adjusts. Self-correction without human intervention.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 13: Agent Safety -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Agent Safety</h2>
+        <p style="font-size: 0.7em;">In a factory, agent mistakes can injure people or destroy equipment. Safety is not optional.</p>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 16px;">
+          <div style="background: #dc2626; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Kill Switch &mdash; Human can override ANY agent action instantly</div>
+          <div style="background: #d97706; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Escalation Logic &mdash; Agent knows when to ask for human help</div>
+          <div style="background: #059669; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Autonomy Boundaries &mdash; Clear limits on what the agent can do alone</div>
+          <div style="background: #1a56db; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Audit Trail &mdash; Every decision logged with reasoning</div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Rule of thumb:</strong> The higher the consequences of a wrong action, the lower the autonomy should be. Agents should earn trust gradually.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 4: Product & Key Decisions                              -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 14: Product Brief -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Product Brief &mdash; Industrial AI</h2>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">QC Agent</h4>
+            <p style="font-size: 0.65em;">Transfer-learned vision model inspects every unit. Agents coordinate pass/fail decisions, route defective items, and alert operators.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Predictive Maintenance</h4>
+            <p style="font-size: 0.65em;">Sensor data + ML predicts equipment failure before it happens. Agent schedules maintenance during low-production windows.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Process Optimization</h4>
+            <p style="font-size: 0.65em;">RL agent continuously adjusts manufacturing parameters (temperature, speed, pressure) to maximize quality and throughput.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Safety Monitor</h4>
+            <p style="font-size: 0.65em;">Computer vision + agent monitors workplace safety. Detects PPE violations, restricted zone intrusions, hazardous situations.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 15: Key Decision — Base Model -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Decision: Which Base Model?</h2>
+        <p style="font-size: 0.7em;">Transfer learning starts from a pre-trained model. Your choice matters.</p>
+        <table style="margin-top: 12px;">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Strengths</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>ResNet</strong></td>
+              <td>Robust, well-understood, fast</td>
+              <td>General defect detection</td>
+            </tr>
+            <tr>
+              <td><strong>EfficientNet</strong></td>
+              <td>Best accuracy/efficiency ratio</td>
+              <td>Edge deployment (on-device)</td>
+            </tr>
+            <tr>
+              <td><strong>YOLO</strong></td>
+              <td>Real-time object detection</td>
+              <td>Moving production lines</td>
+            </tr>
+            <tr>
+              <td><strong>Vision Transformers</strong></td>
+              <td>Highest accuracy, attention-based</td>
+              <td>Complex, subtle defects</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Match the model to your constraints. Edge device? EfficientNet. Real-time conveyor? YOLO. Maximum accuracy? Vision Transformer.</p>
+        </div>
+      </section>
+
+      <!-- Slide 16: Key Decision — Reward Function -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Decision: Reward Function</h2>
+        <p style="font-size: 0.7em;">What happens when you get the reward function wrong?</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Scenario A: "Maximize Output"</h4>
+            <p style="font-size: 0.65em;">Agent runs machines at maximum speed, skips quality checks, defers maintenance. Output goes up for 2 weeks. Then a $500K machine breaks.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Scenario B: "Balanced Reward"</h4>
+            <p style="font-size: 0.65em;">+1 per unit produced. -5 per defective unit. -50 for unplanned downtime. -500 for safety incident. Agent learns to balance speed, quality, and safety.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The lesson:</strong> The reward function encodes your values. It's not a technical parameter &mdash; it's a business and ethical decision. Get stakeholders involved.</p>
+        </div>
+      </section>
+
+      <!-- Slide 17: Key Decision — Escalation -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Decision: When Should the Agent Escalate?</h2>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Agent Acts Alone</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Routine quality pass/fail decisions</li>
+                <li>Small parameter adjustments within safe range</li>
+                <li>Standard maintenance scheduling</li>
+                <li>Data logging and reporting</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Agent Escalates to Human</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Anomaly it hasn't seen before</li>
+                <li>Action outside defined boundaries</li>
+                <li>Any safety-related decision</li>
+                <li>Equipment shutdown or production halt</li>
+                <li>Low confidence (&lt;threshold) on any decision</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 18: Key Decision — Agent Safety on Production Line -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Decision: Agent Safety on a Line</h2>
+        <p style="font-size: 0.7em;">A production line agent has real-world consequences. These safeguards are non-negotiable:</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Technical Safeguards</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Hard limits on all physical parameters</li>
+              <li>Watchdog timers: if agent stops responding, system halts</li>
+              <li>Redundant sensors: never trust a single reading</li>
+              <li>Graceful degradation: fallback to manual mode</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Operational Safeguards</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Shadow mode first: agent recommends, human decides</li>
+              <li>Gradual autonomy: earn trust with track record</li>
+              <li>Regular audits of agent decisions</li>
+              <li>Incident reporting and root cause analysis</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 5: Modern AI & Build                                    -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 19: Modern AI Patterns -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Modern AI: Edge AI &amp; Human-Agent Collaboration</h2>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Edge AI</h4>
+            <p style="font-size: 0.65em;">Run AI models on the device (camera, sensor, robot) instead of the cloud. Benefits: zero latency, works offline, data stays local. Critical for real-time factory decisions.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Human-Agent Collaboration</h4>
+            <p style="font-size: 0.65em;">The future isn't fully autonomous factories. It's agents that amplify human workers: AI spots the defect, human decides the action. AI suggests the schedule, human approves.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The trend:</strong> Edge + Agents + Human-in-the-Loop = the industrial AI stack. Cloud for training, edge for inference, humans for judgment.</p>
+        </div>
+      </section>
+
+      <!-- Slide 20: Today's Build -->
+      <section>
+        <span class="week-badge">Week 7</span>
+        <h2>Today's Build</h2>
+        <p style="font-size: 0.7em;">COC mostly independent. This is your sixth product. You know the workflow. Focus on the decisions.</p>
+        <div class="flow" style="margin: 16px 0;">
+          <span class="flow-step">/analyze</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/todos</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/implement</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/redteam</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/codify</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/deploy</span>
+        </div>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Your Focus</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Choose transfer learning base model</li>
+              <li>Design reward function</li>
+              <li>Set agent autonomy boundaries</li>
+              <li>Define safety safeguards</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">COC Handles</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Transfer learning pipeline</li>
+              <li>RL training environment</li>
+              <li>Agent implementation</li>
+              <li>Frontend and deployment</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 21: Next Week Preview -->
+      <section>
+        <span class="week-badge">Next Week</span>
+        <h2>Week 8 &mdash; Capstone</h2>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.75em;"><strong>Advanced AI + Team Presentations</strong></p>
+        </div>
+        <div class="card-grid" style="margin-top: 16px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Advanced Topics</h4>
+            <p style="font-size: 0.65em;">GANs, federated learning, graph neural networks, multi-agent orchestration, ISO standards</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Team Presentations</h4>
+            <p style="font-size: 0.65em;">Your startup pitch. Top 2 teams pitch to a US-based PE firm for entrepreneur-in-residence + $50k + equity.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Come Prepared</h4>
+            <p style="font-size: 0.65em;">Finalize your team presentation. Practice your pitch. This is it.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 22: Q&A -->
+      <section class="section-divider">
+        <h2>Q&amp;A</h2>
+        <p>Ask me anything</p>
+      </section>
+
+    </div><!-- /.slides -->
+  </div><!-- /.reveal -->
+
+  <!-- Reveal.js -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#1a56db',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#1a56db',
+        lineColor: '#64748b',
+        secondaryColor: '#e8eefb',
+        tertiaryColor: '#f8fafc',
+        fontSize: '16px'
+      },
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      block: {
+        useMaxWidth: true
+      }
+    });
+
+    // Initialize Reveal.js
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      width: 1280,
+      height: 720,
+      margin: 0,
+      center: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      plugins: []
+    });
+
+    // Render Mermaid diagrams after Reveal is ready
+    Reveal.on('ready', async () => {
+      const mermaidDivs = document.querySelectorAll('.mermaid');
+      for (let i = 0; i < mermaidDivs.length; i++) {
+        const el = mermaidDivs[i];
+        const graphDef = el.textContent.trim();
+        el.textContent = '';
+        try {
+          const { svg } = await mermaid.render('mermaid-' + i, graphDef);
+          el.innerHTML = svg;
+        } catch (e) {
+          console.error('Mermaid render error:', e);
+          el.innerHTML = '<pre style="color: red; font-size: 0.6em;">' + e.message + '</pre>';
+        }
+      }
+    });
+
+    // Re-render Mermaid on slide change (for lazy rendering)
+    Reveal.on('slidechanged', () => {
+      window.dispatchEvent(new Event('resize'));
+    });
+  </script>
+</body>
+
+</html>

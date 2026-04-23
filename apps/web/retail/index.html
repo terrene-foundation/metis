@@ -1,0 +1,181 @@
+<!--
+Copyright (c) 2026 Terrene Foundation (Singapore CLG)
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Arcadia Retail — Metis Week 5 Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0f1720; --panel: #1a2332; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --ok: #3fb950; --warn: #d29922; --err: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+      background: var(--bg); color: var(--text); }
+    h1 { font-size: 20px; margin: 0 0 4px 0; }
+    .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
+    .card { background: var(--panel); border-radius: 10px; padding: 18px; border: 1px solid #30363d; }
+    .card h2 { margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+    .metric { display: flex; justify-content: space-between; margin: 6px 0; font-size: 13px; }
+    .metric .k { color: var(--muted); }
+    .metric .v { font-family: "SF Mono", "Monaco", monospace; }
+    .status-ok { color: var(--ok); }
+    .status-err { color: var(--err); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #30363d; }
+    th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; }
+    pre { background: #0d131a; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 11px; max-height: 200px; }
+    .refresh { background: none; border: 1px solid #30363d; color: var(--muted); padding: 4px 10px;
+      border-radius: 6px; cursor: pointer; font-size: 11px; }
+    .refresh:hover { color: var(--text); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <h1>Arcadia Retail — Metis Week 5 Viewer</h1>
+  <div class="subtitle">
+    Read-only dashboard. Reads from the backend at <code>http://127.0.0.1:8000</code>.
+    <button class="refresh" onclick="refreshAll()">↻ refresh all</button>
+  </div>
+
+  <div class="grid">
+    <div class="card" id="health-card">
+      <h2>Preflight</h2>
+      <div id="health-body">loading…</div>
+    </div>
+    <div class="card" id="baseline-card">
+      <h2>Baseline Segmentation (pre-built)</h2>
+      <div id="baseline-body">loading…</div>
+    </div>
+    <div class="card" id="candidates-card">
+      <h2>K-Sweep (reference)</h2>
+      <div id="candidates-body">loading…</div>
+    </div>
+    <div class="card" id="registry-card">
+      <h2>Segment Registry</h2>
+      <div id="registry-body">loading…</div>
+    </div>
+    <div class="card" id="recommender-card">
+      <h2>Recommender Config</h2>
+      <div id="recommender-body">loading…</div>
+    </div>
+    <div class="card" id="drift-card">
+      <h2>Drift Status</h2>
+      <div id="drift-body">loading…</div>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function j(path) {
+      try {
+        const r = await fetch(API + path);
+        return await r.json();
+      } catch (e) {
+        return { _error: e.message };
+      }
+    }
+
+    function metric(k, v) { return `<div class="metric"><span class="k">${k}</span><span class="v">${v}</span></div>`; }
+
+    async function renderHealth() {
+      const d = await j("/health");
+      const el = document.getElementById("health-body");
+      if (d._error || d.status !== "ok") {
+        el.innerHTML = `<div class="status-err">✗ backend unreachable — start with <code>bash src/retail/scripts/run_backend.sh</code></div>`;
+        return;
+      }
+      el.innerHTML = `
+        <div class="status-ok">✓ ${d.status}</div>
+        ${metric("customers", d.customers.toLocaleString())}
+        ${metric("products", d.products.toLocaleString())}
+        ${metric("transactions", d.transactions.toLocaleString())}
+        ${metric("baseline K", d.baseline_k)}
+        ${metric("baseline silhouette", d.baseline_silhouette)}
+        ${metric("baseline stage", d.baseline_stage)}
+      `;
+    }
+
+    async function renderBaseline() {
+      const d = await j("/segment/baseline");
+      const el = document.getElementById("baseline-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      el.innerHTML = `
+        ${metric("version", d.version)}
+        ${metric("algorithm", d.algorithm)}
+        ${metric("K", d.k)}
+        ${metric("silhouette", d.silhouette)}
+        ${metric("inertia", d.inertia)}
+        ${metric("segment sizes", JSON.stringify(d.segment_sizes))}
+        ${metric("stage", d.stage)}
+      `;
+    }
+
+    async function renderCandidates() {
+      const d = await j("/segment/candidates");
+      const el = document.getElementById("candidates-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      let html = `<table><tr><th>K</th><th>silhouette</th><th>sizes</th></tr>`;
+      for (const r of d.sweep) {
+        html += `<tr><td>${r.k}</td><td>${r.silhouette.toFixed(3)}</td><td>${JSON.stringify(r.segment_sizes)}</td></tr>`;
+      }
+      html += `</table>`;
+      el.innerHTML = html;
+    }
+
+    async function renderRegistry() {
+      const d = await j("/segment/registry");
+      const el = document.getElementById("registry-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      let html = `${metric("production", d.production || "—")}${metric("shadow", d.shadow || "—")}<br/>`;
+      html += `<table><tr><th>version</th><th>algo</th><th>K</th><th>stage</th></tr>`;
+      for (const [v, e] of Object.entries(d.versions || {})) {
+        html += `<tr><td>${v}</td><td>${e.algorithm}</td><td>${e.k}</td><td>${e.stage}</td></tr>`;
+      }
+      html += `</table>`;
+      el.innerHTML = html;
+    }
+
+    async function renderRecommender() {
+      const d = await j("/recommend/config");
+      const el = document.getElementById("recommender-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      el.innerHTML = `
+        ${metric("mode", d.mode)}
+        ${metric("hybrid weights", JSON.stringify(d.hybrid_weights))}
+        ${metric("cold-start", d.cold_start_strategy)}
+        ${metric("constraints", JSON.stringify(d.constraints))}
+        ${metric("updated", d.updated_at || "—")}
+      `;
+    }
+
+    async function renderDrift() {
+      const d = await j("/drift/status/customer_segmentation");
+      const el = document.getElementById("drift-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      el.innerHTML = `
+        ${metric("model", d.model_id)}
+        ${metric("reference_set", d.reference_set ? "✓" : "✗")}
+        ${metric("window", d.reference_window || "—")}
+        ${metric("reference rows", d.n_reference_rows || 0)}
+        ${metric("feature columns", (d.feature_columns || []).length)}
+      `;
+    }
+
+    async function refreshAll() {
+      await Promise.all([
+        renderHealth(), renderBaseline(), renderCandidates(),
+        renderRegistry(), renderRecommender(), renderDrift(),
+      ]);
+    }
+
+    refreshAll();
+    setInterval(refreshAll, 5000);
+  </script>
+</body>
+</html>

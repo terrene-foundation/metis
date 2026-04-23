@@ -1,0 +1,134 @@
+{
+  "algorithm": "kmeans",
+  "features": [
+    "total_spend_24mo",
+    "avg_basket_size",
+    "visits_per_week",
+    "weekend_browse_fraction",
+    "luxury_category_fraction",
+    "distinct_categories",
+    "days_since_last_visit",
+    "marketing_email_open_rate"
+  ],
+  "sweep": [
+    {
+      "k": 2,
+      "silhouette": 0.43443675334360393,
+      "inertia": 27557.02041714692,
+      "segment_sizes": [
+        814,
+        4186
+      ]
+    },
+    {
+      "k": 3,
+      "silhouette": 0.3421747514212457,
+      "inertia": 23166.818516333016,
+      "segment_sizes": [
+        519,
+        940,
+        3541
+      ]
+    },
+    {
+      "k": 4,
+      "silhouette": 0.23948319377890634,
+      "inertia": 19174.395550615056,
+      "segment_sizes": [
+        515,
+        2131,
+        567,
+        1787
+      ]
+    },
+    {
+      "k": 5,
+      "silhouette": 0.26249391587986765,
+      "inertia": 15854.527425014861,
+      "segment_sizes": [
+        2338,
+        1224,
+        570,
+        359,
+        509
+      ]
+    },
+    {
+      "k": 6,
+      "silhouette": 0.25726544386199995,
+      "inertia": 14100.242938317388,
+      "segment_sizes": [
+        1275,
+        1364,
+        935,
+        360,
+        509,
+        557
+      ]
+    },
+    {
+      "k": 7,
+      "silhouette": 0.24851913198087272,
+      "inertia": 13031.504287766229,
+      "segment_sizes": [
+        738,
+        878,
+        971,
+        1005,
+        507,
+        544,
+        357
+      ]
+    },
+    {
+      "k": 8,
+      "silhouette": 0.23530864861934342,
+      "inertia": 12514.507084157078,
+      "segment_sizes": [
+        749,
+        460,
+        959,
+        532,
+        507,
+        551,
+        887,
+        355
+      ]
+    },
+    {
+      "k": 9,
+      "silhouette": 0.2300829644431833,
+      "inertia": 11375.833086115359,
+      "segment_sizes": [
+        736,
+        461,
+        969,
+        532,
+        178,
+        551,
+        886,
+        346,
+        341
+      ]
+    },
+    {
+      "k": 10,
+      "silhouette": 0.2305575201953417,
+      "inertia": 10730.481044521408,
+      "segment_sizes": [
+        628,
+        449,
+        779,
+        571,
+        178,
+        524,
+        658,
+        347,
+        341,
+        525
+      ]
+    }
+  ],
+  "seed": 20260423,
+  "note": "Reference k-sweep \u2014 compare against live runs in Phase 4."
+}

@@ -1,0 +1,63 @@
+{
+  "model_name": "customer_segmentation",
+  "window": "signup_offset >= 30 (established customers, pre-wellness-launch)",
+  "n_customers": 5000,
+  "features": {
+    "total_spend_24mo": {
+      "mean": 4627.180146000001,
+      "std": 8774.709127399072,
+      "min": 4.95,
+      "max": 88234.63,
+      "p50": 1574.54
+    },
+    "avg_basket_size": {
+      "mean": 85.05926000000001,
+      "std": 67.32511176661555,
+      "min": 5.0,
+      "max": 451.8,
+      "p50": 57.980000000000004
+    },
+    "visits_per_week": {
+      "mean": 0.921265,
+      "std": 0.6848960643037596,
+      "min": 0.019,
+      "max": 4.136,
+      "p50": 0.7635000000000001
+    },
+    "weekend_browse_fraction": {
+      "mean": 0.509124,
+      "std": 0.18998903176351545,
+      "min": 0.0,
+      "max": 1.0,
+      "p50": 0.505
+    },
+    "luxury_category_fraction": {
+      "mean": 0.3853454,
+      "std": 0.23474321496953823,
+      "min": 0.0,
+      "max": 1.0,
+      "p50": 0.355
+    },
+    "distinct_categories": {
+      "mean": 4.4882,
+      "std": 2.217305583091731,
+      "min": 1.0,
+      "max": 12.0,
+      "p50": 4.0
+    },
+    "days_since_last_visit": {
+      "mean": 17.9174,
+      "std": 38.340002196057306,
+      "min": 0.0,
+      "max": 179.0,
+      "p50": 4.0
+    },
+    "marketing_email_open_rate": {
+      "mean": 0.5077436,
+      "std": 0.19088475490979206,
+      "min": 0.01,
+      "max": 0.986,
+      "p50": 0.509
+    }
+  }
+}

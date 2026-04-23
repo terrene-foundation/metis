@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MGMT655 Week 6 — Media &amp; Content</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+
+  <!-- Custom Theme -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 1: Domain Context & Deep Learning Foundations           -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 1: Title -->
+      <section class="title-slide">
+        <span class="week-badge">Week 6</span>
+        <h1>Media &amp; Content AI</h1>
+        <div class="subtitle">Deep Learning &amp; Multi-Modal AI</div>
+        <div class="meta">
+          Dr. Jack Hong<br>
+          Singapore Management University<br>
+          2026 Term 1
+        </div>
+      </section>
+
+      <!-- Slide 2: Domain Context -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Content Moderation Is a $B+ Market</h2>
+        <p style="font-size: 0.7em;">Every platform faces the same challenge: billions of posts, images, and videos uploaded daily. Human review alone is impossible.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Scale</h4>
+            <p style="font-size: 0.65em;">500+ hours of video uploaded to YouTube every minute. No human team can review that.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Complexity</h4>
+            <p style="font-size: 0.65em;">A meme combines text + image. Sarcasm, cultural context, inside jokes &mdash; hard for AI, hard for humans.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Stakes</h4>
+            <p style="font-size: 0.65em;">Get it wrong: harmful content stays up, or legitimate speech gets silenced. Both are business-ending risks.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>This week:</strong> Deep learning sees images, reads text, watches video. Multi-modal AI combines them all.</p>
+        </div>
+      </section>
+
+      <!-- Slide 3: What Is Deep Learning? -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>What Is Deep Learning?</h2>
+        <p style="font-size: 0.7em;">Neural networks with many layers &mdash; each layer learns increasingly abstract patterns.</p>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 16px;">
+          <div style="background: #1a56db; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Layer N: High-level concepts (faces, objects, sentiments)</div>
+          <div style="background: #2563eb; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Layer 3: Combinations (eyes, noses, wheels)</div>
+          <div style="background: #3b82f6; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Layer 2: Simple shapes (curves, corners, textures)</div>
+          <div style="background: #60a5fa; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Layer 1: Raw features (edges, colors, pixel patterns)</div>
+          <div style="background: #93bbfd; color: #1e293b; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Input: Raw data (pixels, characters, audio samples)</div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Key insight:</strong> Classical ML needs you to engineer features. Deep learning learns its own features. That's the breakthrough.</p>
+        </div>
+      </section>
+
+      <!-- Slide 4: How Neural Networks Learn -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>How Neural Networks Learn</h2>
+        <div class="mermaid" style="margin-top: 12px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff', 'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor': '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Input\nData"] --> B["Hidden\nLayers"]
+          B --> C["Output\nPrediction"]
+          C --> D["Compare to\nTrue Answer"]
+          D --> E["Calculate\nError"]
+          E -->|"Backpropagation"| B
+          style A fill:#0891b2,color:#fff,stroke:#0891b2
+          style B fill:#1a56db,color:#fff,stroke:#1a56db
+          style C fill:#1a56db,color:#fff,stroke:#1a56db
+          style D fill:#d97706,color:#fff,stroke:#d97706
+          style E fill:#dc2626,color:#fff,stroke:#dc2626
+        </div>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Forward Pass</h4>
+              <p style="font-size: 0.65em; margin: 0;">Data flows in, prediction comes out. Like a student taking a test.</p>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Backpropagation</h4>
+              <p style="font-size: 0.65em; margin: 0;">Error flows backward, adjusting weights. Like a student learning from mistakes &mdash; millions of times.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5: CNNs -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>CNNs &mdash; Seeing Images</h2>
+        <h3 style="font-size: 1em;">Convolutional Neural Networks</h3>
+        <p style="font-size: 0.7em;">Designed to process visual data. Scans images with small filters that detect features at every position.</p>
+        <div class="mermaid" style="margin-top: 12px;">
+          %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a56db', 'primaryTextColor': '#fff', 'primaryBorderColor': '#1a56db', 'lineColor': '#64748b', 'secondaryColor': '#e8eefb', 'tertiaryColor': '#f8fafc', 'fontSize': '14px'}}}%%
+          flowchart LR
+          A["Image\nInput"] --> B["Detect\nEdges"]
+          B --> C["Detect\nShapes"]
+          C --> D["Detect\nObjects"]
+          D --> E["Classification:\nCat / Dog / Car"]
+          style A fill:#0891b2,color:#fff,stroke:#0891b2
+          style B fill:#60a5fa,color:#fff,stroke:#60a5fa
+          style C fill:#3b82f6,color:#fff,stroke:#3b82f6
+          style D fill:#1a56db,color:#fff,stroke:#1a56db
+          style E fill:#059669,color:#fff,stroke:#059669
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Applications:</strong> Content moderation (detect NSFW), product image search, quality control, medical imaging, autonomous vehicles.</p>
+        </div>
+      </section>
+
+      <!-- Slide 6: RNN/LSTM -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>RNN/LSTM &mdash; Understanding Sequences</h2>
+        <p style="font-size: 0.7em;">Some data has <strong>order</strong>: text reads left to right, stock prices move through time, video is a sequence of frames.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">RNN (Recurrent Neural Network)</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Has "memory" &mdash; output depends on previous inputs</li>
+                <li>Good for short sequences</li>
+                <li>Struggles with long-range dependencies</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">LSTM (Long Short-Term Memory)</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Solves the "forgetting" problem</li>
+                <li>Gates control what to remember vs. forget</li>
+                <li>Good for time series, speech, music</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Note:</strong> Transformers have largely replaced RNN/LSTM for text, but they remain useful for time series and real-time sensor data.</p>
+        </div>
+      </section>
+
+      <!-- Slide 7: Transformers -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Transformers &mdash; The Attention Revolution</h2>
+        <p style="font-size: 0.7em;">The architecture behind ChatGPT, Claude, DALL-E, and nearly every modern AI breakthrough.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">The Key Idea: Attention</h4>
+            <p style="font-size: 0.65em;">Instead of reading left-to-right, the model looks at <strong>all words simultaneously</strong> and learns which words relate to which. "The bank by the river" vs. "the bank approved the loan" &mdash; same word, different meaning. Attention figures this out.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Why It Matters</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Processes entire sequences in parallel (fast)</li>
+              <li>Captures long-range relationships (accurate)</li>
+              <li>Scales to billions of parameters (powerful)</li>
+              <li>Works for text, images, audio, video, code</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>"Attention Is All You Need"</strong> (Vaswani et al., 2017) &mdash; the paper that launched the current AI revolution.</p>
+        </div>
+      </section>
+
+      <!-- Slide 8: Large Language Models -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Large Language Models</h2>
+        <p style="font-size: 0.7em;">Transformers trained on massive text datasets. They learn language patterns so well they can generate, summarize, translate, and reason.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Pre-training</h4>
+            <p style="font-size: 0.65em;">Trained on trillions of words from the internet. Learns grammar, facts, reasoning patterns. Expensive: millions of dollars.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Fine-tuning</h4>
+            <p style="font-size: 0.65em;">Adapt the pre-trained model to your specific task with smaller, curated data. Cheaper, faster, domain-specific.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Prompting</h4>
+            <p style="font-size: 0.65em;">No training at all &mdash; just tell the model what to do. Zero-shot or few-shot. Cheapest, most flexible, but less reliable.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Your decision:</strong> Fine-tune when you need consistent, domain-specific behavior. Prompt when you need flexibility and speed.</p>
+        </div>
+      </section>
+
+      <!-- Slide 9: Fine-tuning vs Prompting -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Fine-tuning vs. Prompting</h2>
+        <table style="margin-top: 12px;">
+          <thead>
+            <tr>
+              <th>Factor</th>
+              <th>Fine-tuning</th>
+              <th>Prompting</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cost</strong></td>
+              <td>$1K&ndash;$100K+ upfront</td>
+              <td>Pay per API call</td>
+            </tr>
+            <tr>
+              <td><strong>Time to deploy</strong></td>
+              <td>Days to weeks</td>
+              <td>Minutes</td>
+            </tr>
+            <tr>
+              <td><strong>Consistency</strong></td>
+              <td>High &mdash; learned behavior</td>
+              <td>Variable &mdash; depends on prompt</td>
+            </tr>
+            <tr>
+              <td><strong>Data needed</strong></td>
+              <td>Hundreds to thousands of examples</td>
+              <td>Zero to a few examples</td>
+            </tr>
+            <tr>
+              <td><strong>Flexibility</strong></td>
+              <td>Fixed to trained task</td>
+              <td>Can adapt on the fly</td>
+            </tr>
+            <tr>
+              <td><strong>Best for</strong></td>
+              <td>Repeated, high-volume tasks</td>
+              <td>Exploration, prototyping, varied tasks</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Slide 10: Multi-Modal AI -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Multi-Modal AI</h2>
+        <p style="font-size: 0.7em;">The real world isn't single-modality. A meme is text + image. A TikTok is video + audio + text. Multi-modal AI understands all of them together.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">What It Does</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Image + text: "What's in this photo?"</li>
+              <li>Video + audio: content moderation at scale</li>
+              <li>Text + image generation: DALL-E, Midjourney</li>
+              <li>Document understanding: charts, tables, forms</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Why It Matters for Media</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>A harmless image + harmful text = harmful meme</li>
+              <li>Audio tone changes meaning of words</li>
+              <li>Context requires understanding multiple signals</li>
+              <li>Single-modality AI misses these combinations</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 2: Product & Key Decisions                              -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 11: Section Divider -->
+      <section class="section-divider">
+        <h2>Product &amp; Key Decisions</h2>
+        <p>Building content AI that works</p>
+      </section>
+
+      <!-- Slide 12: Product Brief -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Product Brief &mdash; Content AI</h2>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Content Moderator</h4>
+            <p style="font-size: 0.65em;">Multi-modal content moderation: scans text, images, and video for policy violations. Flags for human review or auto-removes based on confidence.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Content Creation Suite</h4>
+            <p style="font-size: 0.65em;">AI-assisted content generation: write copy, generate images, suggest video edits. Human creative direction + AI execution.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Visual Search</h4>
+            <p style="font-size: 0.65em;">Upload a photo, find similar products or content. CNN-powered feature extraction meets similarity search.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Content Intelligence</h4>
+            <p style="font-size: 0.65em;">Analyze what content performs best, auto-tag and categorize, predict virality. Data-driven content strategy.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 13: Key Decision — What Is Harmful? -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Decision: What Counts as "Harmful"?</h2>
+        <p style="font-size: 0.7em;">This is a <strong>policy decision</strong>, not a technical one. The model enforces rules &mdash; you write the rules.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Clear Cases</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Child exploitation (universal)</li>
+              <li>Terrorism / incitement to violence</li>
+              <li>Personally identifiable information exposure</li>
+              <li>Copyright infringement</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Gray Areas</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Satire vs. hate speech</li>
+              <li>News reporting vs. glorifying violence</li>
+              <li>Art with nudity vs. explicit content</li>
+              <li>Political speech vs. misinformation</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The hard truth:</strong> AI can classify with high accuracy on clear cases. Gray areas still need human judgment. Your product must decide where the line is.</p>
+        </div>
+      </section>
+
+      <!-- Slide 14: Key Decision — Modality Integration -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Decision: Modality Integration</h2>
+        <p style="font-size: 0.7em;">A meme with a cute puppy image and the text "I want to destroy all humans" is harmful. Either modality alone misses it.</p>
+        <div class="columns" style="margin-top: 12px;">
+          <div class="col">
+            <div class="card highlight" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Single Modality (Simpler)</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Separate text classifier + image classifier</li>
+                <li>Combine scores with rules</li>
+                <li>Misses cross-modal meaning</li>
+                <li>Cheaper to build and maintain</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card accent" style="padding: 16px; height: 100%; box-sizing: border-box;">
+              <h4 style="margin: 0 0 6px 0; font-size: 0.8em;">Multi-Modal (More Accurate)</h4>
+              <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+                <li>Joint model that sees text + image together</li>
+                <li>Understands cross-modal relationships</li>
+                <li>Catches memes, sarcasm, context</li>
+                <li>More expensive, needs multi-modal training data</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 15: Key Decision — Automation Boundary -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Decision: Automation Boundary</h2>
+        <p style="font-size: 0.7em;">How much should AI decide on its own vs. flag for humans?</p>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 16px;">
+          <div style="background: #059669; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Auto-Approve: High confidence clean content (>99% sure it's safe)</div>
+          <div style="background: #d97706; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Human Review Queue: Uncertain cases (60&ndash;99% confidence)</div>
+          <div style="background: #dc2626; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.7em; font-weight: 600;">Auto-Remove: High confidence violation (>99% sure it's harmful)</div>
+        </div>
+        <div class="callout" style="margin-top: 12px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The trade-off:</strong> Auto-remove more = faster, cheaper, but more false positives (legitimate content removed). Auto-remove less = fairer, but harmful content stays up longer and human costs increase.</p>
+        </div>
+      </section>
+
+      <!-- Slide 16: Key Decision — Cultural Context -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Decision: Cultural Context</h2>
+        <p style="font-size: 0.7em;">Content acceptability varies dramatically across cultures and jurisdictions.</p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Examples</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Satire of political leaders: protected in some countries, illegal in others</li>
+              <li>Religious imagery: art in one context, blasphemy in another</li>
+              <li>Gestures: thumbs up is positive in the West, offensive elsewhere</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Product Implications</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>One global policy or region-specific rules?</li>
+              <li>Who defines "acceptable" for each market?</li>
+              <li>How do you train AI on cultural nuance?</li>
+              <li>Local reviewers for local content?</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>Reality:</strong> Most platforms use a global baseline (child safety, terrorism) + regional overlays. The AI detects; local teams interpret.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- BLOCK 3: Modern AI & Build                                    -->
+      <!-- ============================================================ -->
+
+      <!-- Slide 17: Modern AI Landscape -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Modern AI: Vision-Language Models</h2>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">CLIP</h4>
+            <p style="font-size: 0.65em;">OpenAI's model that understands images and text together. "Describe this image" or "Find images matching this text." Zero-shot visual classification.</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Vision-Language Models</h4>
+            <p style="font-size: 0.65em;">GPT-4V, Claude Vision, Gemini. Can reason about images: read charts, identify objects, understand scenes in context.</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">AI Safety</h4>
+            <p style="font-size: 0.65em;">As models get more capable, safety becomes critical. Alignment, red-teaming, content filters, responsible deployment practices.</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; padding: 12px 16px;">
+          <p style="font-size: 0.65em; margin: 0;"><strong>The trend:</strong> Multi-modal models are converging. Soon, one model will handle text, image, video, and audio natively. The question shifts from "can AI do this?" to "should it?"</p>
+        </div>
+      </section>
+
+      <!-- Slide 18: Today's Build -->
+      <section>
+        <span class="week-badge">Week 6</span>
+        <h2>Today's Build</h2>
+        <p style="font-size: 0.7em;">COC independent with checkpoints. You've built four products. By now, you should be directing COC with confidence.</p>
+        <div class="flow" style="margin: 16px 0;">
+          <span class="flow-step">/analyze</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/todos</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/implement</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/redteam</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/codify</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-step">/deploy</span>
+        </div>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; margin-top: 12px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Your Focus</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Define content policy (what's harmful?)</li>
+              <li>Set automation boundaries</li>
+              <li>Choose modality approach</li>
+              <li>Handle cultural context</li>
+            </ul>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">COC Handles</h4>
+            <ul style="font-size: 0.65em; margin: 0; padding-left: 1em; line-height: 1.5;">
+              <li>Deep learning model setup</li>
+              <li>Multi-modal pipeline</li>
+              <li>Moderation interface</li>
+              <li>Frontend and deployment</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 19: Next Week Preview -->
+      <section>
+        <span class="week-badge">Next Week</span>
+        <h2>Week 7 &mdash; Manufacturing &amp; Industrial</h2>
+        <div class="callout" style="margin-top: 16px; padding: 12px 16px;">
+          <p style="font-size: 0.75em;"><strong>Transfer Learning, RL &amp; AI Agents</strong></p>
+        </div>
+        <div class="card-grid" style="margin-top: 16px;">
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Domain</h4>
+            <p style="font-size: 0.65em;">Manufacturing &mdash; quality control, predictive maintenance, process optimization, autonomous agents</p>
+          </div>
+          <div class="card highlight" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">ML Techniques</h4>
+            <p style="font-size: 0.65em;">Transfer learning, reinforcement learning, AI agents with tool use</p>
+          </div>
+          <div class="card accent" style="padding: 16px;">
+            <h4 style="font-size: 0.8em;">Come Prepared</h4>
+            <p style="font-size: 0.65em;">Think about industrial AI &mdash; where does AI need to take physical action, and what are the safety implications?</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 20: Q&A -->
+      <section class="section-divider">
+        <h2>Q&amp;A</h2>
+        <p>Ask me anything</p>
+      </section>
+
+    </div><!-- /.slides -->
+  </div><!-- /.reveal -->
+
+  <!-- Reveal.js -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#1a56db',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#1a56db',
+        lineColor: '#64748b',
+        secondaryColor: '#e8eefb',
+        tertiaryColor: '#f8fafc',
+        fontSize: '16px'
+      },
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      block: {
+        useMaxWidth: true
+      }
+    });
+
+    // Initialize Reveal.js
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      width: 1280,
+      height: 720,
+      margin: 0,
+      center: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      plugins: []
+    });
+
+    // Render Mermaid diagrams after Reveal is ready
+    Reveal.on('ready', async () => {
+      const mermaidDivs = document.querySelectorAll('.mermaid');
+      for (let i = 0; i < mermaidDivs.length; i++) {
+        const el = mermaidDivs[i];
+        const graphDef = el.textContent.trim();
+        el.textContent = '';
+        try {
+          const { svg } = await mermaid.render('mermaid-' + i, graphDef);
+          el.innerHTML = svg;
+        } catch (e) {
+          console.error('Mermaid render error:', e);
+          el.innerHTML = '<pre style="color: red; font-size: 0.6em;">' + e.message + '</pre>';
+        }
+      }
+    });
+
+    // Re-render Mermaid on slide change (for lazy rendering)
+    Reveal.on('slidechanged', () => {
+      window.dispatchEvent(new Event('resize'));
+    });
+  </script>
+</body>
+
+</html>

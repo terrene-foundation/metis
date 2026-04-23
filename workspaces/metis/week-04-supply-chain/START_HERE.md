@@ -71,7 +71,7 @@ If you cannot frame the problem, pick the metric, defend the threshold, classify
 
 A last-mile delivery operator's control dashboard. Three modules on one screen:
 
-1. **Demand Forecaster** — predicts order volume by region for the next 7 days. Feeds the optimizer.
+1. **Demand Forecaster** — predicts next-day order volume per depot (1-day rolling horizon). Feeds the optimizer. 7-day visibility is achieved by rolling the 1-day forecast forward; no separate 7-day model is trained in Week 4.
 2. **Route Optimizer** — plans tomorrow's deliveries. Takes the forecast + vehicle/driver constraints → produces an optimal route plan.
 3. **Drift Monitor** — watches whether the forecast model is still accurate in production, and tells you when to retrain.
 
