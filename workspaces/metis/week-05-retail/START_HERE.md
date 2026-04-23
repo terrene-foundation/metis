@@ -214,6 +214,13 @@ For every tool below, you get six answers: What is it / Why do we need it / Impl
 
 Tonight Claude Code will generate a lot of text very fast. Most of it will be correct. Some of it will not. The four checks below are the discipline that catches the difference — without you needing to know any ML to apply them. You are not grading algorithms. You are grading whether Claude Code has **earned** the claim it just made.
 
+Two quick definitions before the checks, because three of the four use them:
+
+- **Floor** = a pass/fail line. "Silhouette must be at least 0.25" is a floor. A floor is only honest if you wrote it down _before_ you saw the result.
+- **Pre-registration** = writing a floor in your journal before running the test. It is the difference between measuring and moving the goalposts.
+
+Three of the four checks below enforce this one idea in different ways.
+
 Use this toolkit reactively. You do not run all four on every response. You watch the output for one of four signals — a technical-sounding claim, a specific number, a threshold, a word like "blocked" or "blocking" — and then you run the matching check.
 
 #### Check 1 — "Show me the line"
@@ -224,9 +231,13 @@ Use this toolkit reactively. You do not run all four on every response. You watc
 
 > Show me the exact file, function, and line that proves this. Quote the line. If you have not read it, say so and mark the claim uncertain until we check together.
 
-**Worked example.** Claude Code wrote: _"The segmentation module uses NMF clustering with 7 behavioural features, which explains the baseline silhouette of 0.34."_ You reply with the verbatim question above. Claude Code reads `src/retail/backend/ml_context.py`, comes back with: _"I was wrong. The function `train_baseline_segmentation` uses `sklearn.cluster.KMeans(n_clusters=3, random_state=42)`. NMF is used elsewhere (the collaborative recommender's matrix factorisation). I confused two modules. The silhouette of 0.34 is real; the algorithm name was wrong."_ You move on. The check took forty seconds and saved a journal entry that names the wrong algorithm — which the instructor would mark down.
+**Worked example (no ML knowledge required).** When you ran the opening prompt, `/health` returned `customers: 5000, baseline_k: 3`. An hour later Claude Code writes: _"The scaffold holds 10,000 customers and the baseline K is 5, per the startup configuration."_ You ask the verbatim question above. Claude Code reads `src/retail/backend/ml_context.py` and `src/retail/backend/routes/health.py`, comes back with: _"I was wrong. The scaffold loads 5,000 customers (polars.read_csv call in startup.py::run_startup_sync) and the baseline K is 3 (train_baseline_segmentation default argument). I confused tonight's scaffold with a larger dataset I have seen elsewhere."_ You move on.
+
+You did not need to know what K is or what a scaffold configuration is — you just needed to remember _two numbers from /health_ and ask where the new numbers came from. The check took forty seconds and saved a journal entry that names the wrong customer count — which the instructor would mark down.
 
 **The analogy.** A journalist fact-checking a source. _"You said the contract was signed in March — show me the page of the contract with the date on it. If you did not see the contract, I am marking this as 'reported, not verified' until we find the PDF."_
+
+**Note.** The same check catches ML-vocabulary hallucinations too — e.g., an agent saying _"segmentation uses NMF"_ when the code uses K-means — but the example above is written so you can apply the check without needing to know what NMF or K-means are. The question is universal; the receipts are what matter.
 
 #### Check 2 — "Show me the brief"
 
@@ -273,6 +284,8 @@ Use this toolkit reactively. You do not run all four on every response. You watc
 ---
 
 ## 4. The ML Decision Playbook (detail in `PLAYBOOK.md`)
+
+**Sprints vs Phases — read this once.** A **Sprint** is a wall-clock block in tonight's workshop (Sprints 1–4, running roughly 2:30–5:00 pm). A **Phase** is a step in the 14-phase ML Decision Playbook (Phases 1–13; Phase 14 deferred). Each Sprint runs several Phases; some Phases run more than once across Sprints. Sprint 2, for example, _replays_ Phases 4–8 for the SML classifiers after Sprint 1 ran them for USML segmentation. The §6 clock table below shows the full mapping; jump there if anything gets confusing.
 
 The Playbook is the **14-phase universal procedure**. Tonight you run Phases 1–13 (Fairness is Phase 14, deferred to Week 7).
 
@@ -622,9 +635,10 @@ I need you to:
 Once skeletons are copied and endpoints confirmed live, summarise:
 (a) the eight phases of this sprint and the single Trust Plane
 decision each phase owns (one sentence each), (b) the three floors
-I will pre-register in Phase 6, (c) the two segmentation-specific
-red-team sweeps in Phase 7 (re-seed churn, drop-one-demographic
-proxy test).
+I will pre-register in Phase 6 (named by shape only — separation,
+stability, actionability — NOT by value), (c) the segmentation-
+specific Phase 7 red-team sweeps in PLAYBOOK.md §Phase 7; name
+them, do NOT execute or explain them here.
 
 Then stop and wait for my Phase 1 prompt.
 ```
@@ -969,19 +983,22 @@ three models:
    random seeds. For each seed, trace what changes in Sprint 2
    (does the churn classifier's top-5 feature importance change?
    does the conversion classifier's calibration drift?) and in
-   Sprint 3 (does the LP plan in data/allocator_last_plan.json
-   change segment-by-segment allocations by more than 10%?). Rank
-   findings by dollar severity using PRODUCT_BRIEF.md §2 costs —
-   quote the lines.
+   Sprint 3 (how much do the LP plan's segment-by-segment
+   allocations in data/allocator_last_plan.json change?). Report
+   the measured percentage change per segment; do NOT compare it
+   to a threshold — I will judge significance against the floors
+   I pre-registered in Phases 6 USML and 8. Rank findings by
+   dollar severity using PRODUCT_BRIEF.md §2 costs — quote the
+   lines.
 
 2. PROXY LEAKAGE. Drop postal_district AND age_band from the
    Sprint 1 feature set and re-cluster. Count how many customers
    change segments. Re-train the churn classifier without these
-   features — does its AUC drop? Re-solve the allocator with the
-   proxy-dropped segments — does the expected revenue change? If
-   the cascade's output changes more than 5% in dollars, the
-   original segmentation was demographic in disguise, and every
-   later layer inherited that disguise.
+   features — does its AUC drop, and by how many points? Re-solve
+   the allocator with the proxy-dropped segments — what is the
+   expected-revenue change in dollars? Report the measured
+   deltas; do NOT compare them to a threshold. I decide whether
+   the cascade leaked demographic structure.
 
 3. OPERATIONAL COLLAPSE. Filter the data to post-Black-Friday
    shapes (volume spike + mix shift). Re-cluster: does any segment
