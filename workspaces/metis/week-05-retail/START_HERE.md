@@ -131,10 +131,11 @@ For every tool below, you get six answers: What is it / Why do we need it / Impl
 
 **How to use it.**
 
-- Open a terminal at the project root (`~/repos/training/metis`). Type `claude` to start.
-- Paste the opening prompt from Section 9.
+- Open **one** terminal at the project root (`~/repos/training/metis`). Type `claude` to start.
+- Paste the opening prompt from Section 9. Claude Code will run the preflight, start the backend in the background, start the viewer in the background, and open the viewer in your browser — you do not type any bash commands. When it reports "all four sprints green", the product is up.
 - After that, adapt the phase prompts from `PLAYBOOK.md` in your own words.
 - **Reference files with the `@` prefix** — typing `@PLAYBOOK.md` in your message pulls that file's contents into the conversation. This is Claude Code syntax, not shell syntax — it works inside the `claude` session only.
+- You will NOT open a second terminal tonight. Everything happens inside the one `claude` session plus your browser tab.
 
 **How to evaluate it.** After every response, ask yourself:
 
@@ -454,26 +455,40 @@ We WILL still run the full COC routine — /analyze, /todos, /implement,
 are building. The 14-phase ML Decision Playbook is the CONTENT of
 /implement tonight, not a replacement for it.
 
-First, confirm the pre-provisioned environment is green:
-1. Run .venv/bin/python src/retail/scripts/preflight.py and report
-   the exit code plus any non-green rows. All rows should be ✓.
-2. If the backend is not already running, start it with
-   bash src/retail/scripts/run_backend.sh in a second terminal,
-   then curl http://127.0.0.1:8000/health and confirm status=ok
-   plus a baseline_silhouette around 0.34.
-3. Confirm all four sprint endpoints are live:
-   - Sprint 1 USML: /segment/baseline (K=3 sil≈0.34), /segment/candidates (K=2..10 sweep)
-   - Sprint 2 SML: /predict/leaderboard/churn AND /predict/leaderboard/conversion
-     (each returning a 3-family leaderboard with AUC, precision, recall, Brier)
-   - Sprint 3 Opt: /allocate/campaigns (5 campaigns registered) AND
-     GET /allocate/objective (default weights visible)
-   - Sprint 4 MLOps: /drift/status/customer_segmentation (reference_set=true)
-4. Confirm the viewer is up by hitting http://127.0.0.1:3000/ —
-   the value-chain banner should render with 9 pipeline stages
-   (Open → Analyze → Todos → USML → SML → Opt → MLOps → Redteam → Codify).
+Boot the pre-provisioned environment FOR ME (I will not run bash myself).
+Execute these steps in order inside this session; start long-running
+processes in the background so you can continue. Report progress aloud
+so I can see you're alive during the ~17s NMF warm-up.
 
-If any check fails, STOP and tell me what failed — do not try to
-fix the scaffold yourself. The instructor will intervene.
+1. Run the preflight check:
+     .venv/bin/python src/retail/scripts/preflight.py
+   Expect exit 0, all rows ✓. Report any non-green rows.
+
+2. Start the backend in the background:
+     bash src/retail/scripts/run_backend.sh
+   Poll curl -sf http://127.0.0.1:8000/health every 2 seconds until it
+   responds (it will take ~17s — the collaborative NMF pre-fit is the
+   slowest step). Report "backend ready" with the baseline_silhouette
+   number (should be ≈0.3422) when /health responds.
+
+3. Start the viewer in the background:
+     bash apps/web/retail/serve.sh
+   Wait 2s, then curl -sI http://127.0.0.1:3000/ to confirm HTTP 200.
+
+4. Confirm all four sprint endpoints are live (one sample per sprint):
+   - Sprint 1 USML: GET /segment/baseline returns K=3.
+   - Sprint 2 SML: GET /predict/leaderboard/churn returns 3 families.
+   - Sprint 3 Opt: GET /allocate/campaigns returns 5 campaigns.
+   - Sprint 4 MLOps: GET /drift/status/customer_segmentation returns
+     reference_set=true.
+
+5. Open the viewer in my browser so I can see the value-chain banner:
+     open http://127.0.0.1:3000/
+   (If on Linux use xdg-open instead. If neither works, tell me to
+   click http://127.0.0.1:3000/ manually.)
+
+If ANY of steps 1–4 fails, STOP and tell me what failed. Do not try to
+debug or fix the scaffold — raise your hand for the instructor.
 
 Once green, summarise:
 1. The four-layer product cascade: Sprint 1 USML segmentation
