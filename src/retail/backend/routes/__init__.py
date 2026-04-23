@@ -6,13 +6,16 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from . import drift, health, recommend, segment
+from . import allocate, drift, health, predict, recommend, segment, state
 
 
 def build_router() -> APIRouter:
     router = APIRouter()
     router.include_router(health.router)
+    router.include_router(state.router, prefix="/state", tags=["state"])
     router.include_router(segment.router, prefix="/segment", tags=["segment"])
+    router.include_router(predict.router, prefix="/predict", tags=["predict"])
     router.include_router(recommend.router, prefix="/recommend", tags=["recommend"])
+    router.include_router(allocate.router, prefix="/allocate", tags=["allocate"])
     router.include_router(drift.router, prefix="/drift", tags=["drift"])
     return router

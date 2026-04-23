@@ -28,8 +28,6 @@ import numpy as np
 import polars as pl
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from sklearn.decomposition import NMF
-
 from ..config import load_settings
 from ..ml_context import get_context
 
@@ -87,45 +85,12 @@ class ConfigRequest(BaseModel):
 
 
 # ----------------------------- collaborative backbone -----------------------
-
-
-def _build_user_item_matrix() -> tuple[np.ndarray, list[str], list[str]]:
-    ctx = get_context()
-    txns = ctx.transactions
-    cust_ids = ctx.customers["customer_id"].to_list()
-    sku_ids = ctx.products["sku"].to_list()
-    cust_idx = {c: i for i, c in enumerate(cust_ids)}
-    sku_idx = {s: i for i, s in enumerate(sku_ids)}
-    mat = np.zeros((len(cust_ids), len(sku_ids)), dtype=np.float32)
-    for row in txns.iter_rows(named=True):
-        ci = cust_idx.get(row["customer_id"])
-        si = sku_idx.get(row["sku"])
-        if ci is not None and si is not None:
-            mat[ci, si] += float(row["qty"])
-    return mat, cust_ids, sku_ids
-
-
-_COLLAB_CACHE: dict[str, Any] = {}
+# NMF is pre-fit at startup (see ml_context.build_collaborative_recommender).
+# Scores are O(1) per customer — no lazy fit, no first-call stall.
 
 
 def _collaborative_scores(customer_id: str) -> dict[str, float]:
-    """NMF-based matrix factorization, cached after first call."""
-    if "W" not in _COLLAB_CACHE:
-        mat, cust_ids, sku_ids = _build_user_item_matrix()
-        nmf = NMF(n_components=16, init="nndsvd", random_state=42, max_iter=200, tol=1e-3)
-        W = nmf.fit_transform(mat)
-        H = nmf.components_
-        _COLLAB_CACHE.update({"W": W, "H": H, "cust_ids": cust_ids, "sku_ids": sku_ids})
-    W = _COLLAB_CACHE["W"]
-    H = _COLLAB_CACHE["H"]
-    cust_ids = _COLLAB_CACHE["cust_ids"]
-    sku_ids = _COLLAB_CACHE["sku_ids"]
-    try:
-        idx = cust_ids.index(customer_id)
-    except ValueError:
-        return {}
-    preds = W[idx] @ H
-    return dict(zip(sku_ids, preds.tolist()))
+    return get_context().collaborative.scores_for(customer_id)
 
 
 def _content_scores(customer_id: str) -> dict[str, float]:

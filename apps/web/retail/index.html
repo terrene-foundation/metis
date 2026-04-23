@@ -142,7 +142,17 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
       }
     }
 
-    function metric(k, v) { return `<div class="metric"><span class="k">${k}</span><span class="v">${v}</span></div>`; }
+    // HTML-escape any backend-sourced string before putting it into innerHTML.
+    // Segment names, pathology messages, and other free-form strings pass
+    // through user-controlled paths (/segment/name), so we escape at render.
+    function esc(s) {
+      if (s === null || s === undefined) return "";
+      return String(s).replace(/[&<>"']/g, c =>
+        ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    }
+    function escJson(v) { return esc(JSON.stringify(v)); }
+
+    function metric(k, v) { return `<div class="metric"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`; }
     function fmtMinSec(s) { const m = Math.floor(s/60); const r = s%60; return `${m}m ${r}s`; }
 
     // ===== BANNER =====
@@ -158,14 +168,14 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
       const current = d.current.stage;
       const html = d.pipeline.map(s => {
         const cls = completed.has(s.id) ? "done" : (s.id === current ? "current" : "upcoming");
-        return `<div class="stage ${cls}">
-          <span class="label">${s.label}</span>
-          <span class="clock">${s.clock || ""}</span>
+        return `<div class="stage ${esc(cls)}">
+          <span class="label">${esc(s.label)}</span>
+          <span class="clock">${esc(s.clock || "")}</span>
         </div>`;
       }).join("");
       document.getElementById("pipeline").innerHTML = html;
 
-      // Current phase detail
+      // Current phase detail — textContent is naturally escape-safe
       const phaseText = d.current.phase
         ? `Sprint ${d.current.sprint} · Phase ${d.current.phase} of 14 — ${d.current.phase_name}`
         : d.current.stage_label;
@@ -180,9 +190,9 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
       const dMoments = d.decision_moments.map(m => {
         const cls = m.completed ? "done" : "pending";
         const icon = m.completed ? "✓" : "○";
-        return `<div class="decision ${cls}">
+        return `<div class="decision ${esc(cls)}">
           <span class="icon">${icon}</span>
-          <span class="text">${m.id}. ${m.label} <span class="subtitle">(Sprint ${m.sprint} · Phase ${m.phase})</span></span>
+          <span class="text">${esc(m.id)}. ${esc(m.label)} <span class="subtitle">(Sprint ${esc(m.sprint)} · Phase ${esc(m.phase)})</span></span>
         </div>`;
       }).join("");
       document.getElementById("decisions").innerHTML = dMoments;
@@ -196,7 +206,7 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
         el.innerHTML = `<div class="status-err">✗ backend unreachable</div>`; return;
       }
       el.innerHTML = `
-        <div class="status-ok">✓ ${d.status}</div>
+        <div class="status-ok">✓ ${esc(d.status)}</div>
         ${metric("customers", d.customers.toLocaleString())}
         ${metric("products", d.products.toLocaleString())}
         ${metric("transactions", d.transactions.toLocaleString())}
@@ -209,7 +219,7 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     async function renderSegment() {
       const d = await j("/segment/baseline");
       const el = document.getElementById("segment-body");
-      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
       el.innerHTML = `
         ${metric("version", d.version)}
         ${metric("K", d.k)}
@@ -222,10 +232,10 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     async function renderKsweep() {
       const d = await j("/segment/candidates");
       const el = document.getElementById("ksweep-body");
-      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
       let html = `<table><tr><th>K</th><th>silhouette</th><th>sizes</th></tr>`;
       for (const r of d.sweep) {
-        html += `<tr><td class="num">${r.k}</td><td class="num">${r.silhouette.toFixed(3)}</td><td>${JSON.stringify(r.segment_sizes)}</td></tr>`;
+        html += `<tr><td class="num">${esc(r.k)}</td><td class="num">${esc(r.silhouette.toFixed(3))}</td><td>${escJson(r.segment_sizes)}</td></tr>`;
       }
       html += `</table>`;
       el.innerHTML = html;
@@ -234,11 +244,11 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     async function renderChurn() {
       const d = await j("/predict/leaderboard/churn");
       const el = document.getElementById("churn-body");
-      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
       let html = `<table><tr><th>family</th><th>AUC</th><th>prec</th><th>recall</th><th>brier</th></tr>`;
       for (const [name, entry] of Object.entries(d.candidates)) {
         const m = entry.metrics;
-        html += `<tr><td>${name}</td><td class="num">${m.auc.toFixed(3)}</td><td class="num">${m.precision_at_threshold.toFixed(3)}</td><td class="num">${m.recall_at_threshold.toFixed(3)}</td><td class="num">${m.brier_score.toFixed(3)}</td></tr>`;
+        html += `<tr><td>${esc(name)}</td><td class="num">${esc(m.auc.toFixed(3))}</td><td class="num">${esc(m.precision_at_threshold.toFixed(3))}</td><td class="num">${esc(m.recall_at_threshold.toFixed(3))}</td><td class="num">${esc(m.brier_score.toFixed(3))}</td></tr>`;
       }
       html += `</table>`;
       el.innerHTML = html;
@@ -247,11 +257,11 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     async function renderConv() {
       const d = await j("/predict/leaderboard/conversion");
       const el = document.getElementById("conv-body");
-      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
       let html = `<table><tr><th>family</th><th>AUC</th><th>prec</th><th>recall</th></tr>`;
       for (const [name, entry] of Object.entries(d.candidates)) {
         const m = entry.metrics;
-        html += `<tr><td>${name}</td><td class="num">${m.auc.toFixed(3)}</td><td class="num">${m.precision_at_threshold.toFixed(3)}</td><td class="num">${m.recall_at_threshold.toFixed(3)}</td></tr>`;
+        html += `<tr><td>${esc(name)}</td><td class="num">${esc(m.auc.toFixed(3))}</td><td class="num">${esc(m.precision_at_threshold.toFixed(3))}</td><td class="num">${esc(m.recall_at_threshold.toFixed(3))}</td></tr>`;
       }
       html += `</table>`;
       el.innerHTML = html;
@@ -260,7 +270,7 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     async function renderRecommender() {
       const d = await j("/recommend/config");
       const el = document.getElementById("recommender-body");
-      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
       el.innerHTML = `
         ${metric("mode", d.mode)}
         ${metric("hybrid weights", JSON.stringify(d.hybrid_weights))}
@@ -271,7 +281,7 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     async function renderAllocator() {
       const d = await j("/allocate/last_plan");
       const el = document.getElementById("allocator-body");
-      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
       if (d.plan_exists === false) {
         el.innerHTML = `<div class="subtitle">no plan yet — POST /allocate/solve when you reach Sprint 3</div>`;
         return;
@@ -284,7 +294,8 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
         ${metric("concentration", (d.per_segment_concentration || 0).toFixed(3))}
       `;
       if (d.pathologies && d.pathologies.length) {
-        html += `<div class="path-warning"><b>pathologies:</b><br/>${d.pathologies.join("<br/>")}</div>`;
+        const safePath = d.pathologies.map(esc).join("<br/>");
+        html += `<div class="path-warning"><b>pathologies:</b><br/>${safePath}</div>`;
       }
       el.innerHTML = html;
     }
@@ -292,7 +303,7 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
     async function renderDrift() {
       const d = await j("/drift/status/customer_segmentation");
       const el = document.getElementById("drift-body");
-      if (d._error) { el.innerHTML = `<div class="status-err">${d._error}</div>`; return; }
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
       el.innerHTML = `
         ${metric("model", d.model_id)}
         ${metric("reference set", d.reference_set ? "✓" : "✗")}

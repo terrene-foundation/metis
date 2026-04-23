@@ -6,7 +6,7 @@ https://creativecommons.org/licenses/by/4.0/
 
 # Arcadia Retail Intelligence Suite — Product Brief
 
-Workshop product: a customer-intelligence **Retail Suite** for Arcadia Retail — one product with three layered modules. By the end of the 210-minute workshop you will have shipped a Customer Segmentation Engine and a Hybrid Recommender (and, if Sprint 3 has spare budget, a RAG-powered Shopping Advisor) against a pre-provisioned retail backend, and defended a page of written decisions that explain why you shipped them that way.
+Workshop product: the **Arcadia Retail Intelligence Suite** — one product assembled as the traditional ML value chain (USML → SML → Optimization → MLOps). By the end of the 210-minute workshop you will have shipped a Customer Segmentation engine (USML), churn + conversion classifiers (SML), a campaign allocator (Optimization) and drift monitors for all three (MLOps), against a pre-provisioned retail backend, and defended a page of written decisions that explain why you shipped them that way.
 
 Read this before writing your first prompt. Every dollar figure here is cited by the rubric and the contract grader; making them up in a journal entry scores zero.
 
@@ -55,87 +55,101 @@ You play the Student role and commission the Execution Plane on behalf of the th
 | ML Engineer    | Execution Plane | Ships training pipeline, registry, drift monitor (= Claude Code during the workshop) | Logs, run tracker, model registry        |
 | Student (you)  | Trust Plane     | Commissions every piece; graded on journal + contract grader                         | Viewer Pane, terminal, `PLAYBOOK.md`     |
 
-## 4. The product story — one product, three layered modules
+## 4. The product story — one product, four layered modules (the ML value chain)
 
-This is a single product with a clear cascade. Each module depends on the one above it. If you get the top wrong, every module below it silently inherits the error.
+This is a single product built as the traditional ML value chain: **discover → predict → decide → monitor**. Each module consumes the one above it. Skip a link and the chain breaks at your weakest stakeholder.
 
-1. **Segmentation is the foundation.** Every customer gets a segment label — their behavioural class. The segment is the common currency every other module speaks in.
-2. **The recommender uses the segment label as its cold-start bootstrap.** A brand-new customer has no purchase history; the recommender falls back on the modal basket of that customer's nearest segment until their own behaviour accumulates. A better segmentation produces a better cold-start; a worse segmentation produces junk recommendations for every new customer.
-3. **The Shopping Advisor (if reached) grounds its retrieval in segment-aware ranking.** The same question — "show me jackets under $180" — surfaces different products to a "weekend-bargain-hunter" segment customer than to a "weekday-luxury-buyer" segment customer. The Advisor reads the segment label; it does not re-compute it.
+1. **Segmentation is the foundation (USML · Sprint 1).** Every customer gets a segment label — their behavioural class. The segment is the common currency every later module speaks in.
+2. **The classifiers predict behaviour (SML · Sprint 2).** Two supervised models use the segment label as a feature. _Churn_ answers "will this customer stop buying in the next 30 days?"; _Conversion_ answers "will this customer convert on a category-level offer?". The churn model drives retention; the conversion model feeds the allocator.
+3. **The allocator decides where money goes (Optimization · Sprint 3).** A linear-programming solver takes segments × predicted conversion probabilities × touch budget × PDPA/inventory constraints and returns a campaign plan that maximises expected revenue under the constraints. This is where ML becomes a business decision.
+4. **The drift monitor watches for lies (MLOps · Sprint 4).** Three rules, one per artefact, because the three models drift on different signals at different cadences. Without Sprint 4 you never learn that Sprint 1/2/3 have silently rotted.
 
-Cascade: segment count and quality drives recommender cold-start quality drives Advisor relevance. One product, three layers, one chain of decisions.
+Cascade: segment quality → predicted-response quality → allocator decisions → monitoring coverage. One product, four layers, one chain of decisions.
 
-## 4a. The three modules on the table tonight
+## 4a. The four modules on the table tonight
 
-### 4.1 Customer Segmentation Engine (Sprint 1, required — the foundation)
+### 4.1 Customer Segmentation Engine (Sprint 1 · USML · Discover)
 
-**What it is.** An unsupervised learning system that groups Arcadia's 50,000 customers into 4–7 behavioural segments — not demographic buckets, but patterns in _what they actually do_ ("high-frequency weekend browser, converts on promo", "premium one-visit-per-quarter", "lapsed e-com, dormant store").
+**What it is.** An unsupervised learning system that groups Arcadia's customers into 3–7 behavioural segments — not demographic buckets, but patterns in _what they actually do_ ("high-frequency weekend browser, converts on promo", "premium one-visit-per-quarter", "lapsed e-com, dormant store"). Scaffold sample: 5,000 customers clustered on 7 behavioural features.
 
 **Why it exists.** The CMO cannot run 50,000 one-to-one campaigns. She can run six. The segmentation engine turns raw customer records into a small, stable set of segments the marketing team can build campaigns around.
 
-**Who signs off.** CMO (segment definitions + campaign map) and CX Lead (segments must be usable on the product pages).
+**Who signs off.** CMO (segment definitions + campaign map) and CX Lead (segments must be usable on product pages).
 
-**Success at 3:30 pm.** A segment map exists on disk with a segment ID per customer, every segment has a one-paragraph business profile, the segment count is defended in a journal entry, and the campaign-cost-at-risk has been quantified using the table above.
+**Success at 5:30 pm.** A chosen K is promoted from staging to shadow in the segment registry. Every segment has a one-paragraph business profile and a differentiated marketing action. K is defended in the Phase 6 journal tied to the three floors (separation, stability, actionability) AND the counterfactual dollar lift vs the 2020 rulebook.
 
-### 4.2 Hybrid Recommender (Sprint 2, required — uses the segmentation for cold-start)
+### 4.2 Response Predictors: Churn + Conversion (Sprint 2 · SML · Predict)
 
-**What it is.** A system that, given a customer and a product page (or a cart), returns a ranked list of recommended SKUs. It blends three signals: what other similar customers bought (collaborative), what products are similar to the one being viewed (content-based), and — for customers with no purchase history — the modal basket of the segment they were assigned to in Sprint 1 (cold-start bootstrap). This is how the segmentation gets used: it is the answer to "what do we recommend to someone we know nothing about yet?"
+**What it is.** Two supervised classifiers trained on the segment-labelled customers. Same 3-family leaderboard each time (logistic regression + random forest + gradient-boosted ensemble — the king for tabular data). _Churn_: P(customer has not visited in 30+ days | features). _Conversion_: P((customer, category) produces a transaction | features + category one-hot). The scaffold trains them at startup; `/predict/leaderboard/{churn,conversion}` exposes the numbers.
 
-**Why it exists.** The current rule-based recommender converts at 12%. Industry benchmarks for a hybrid recommender on a catalogue this size sit at 18–24%. Each converted click is worth $18. Each wasted impression costs $14. The CX Lead wants to know which recommender strategy — collaborative, content-based, or hybrid — wins on Arcadia's specific data, and what the cold-start behaviour should be for new customers.
+**Why it exists.** The CX Lead wants to know who to reach out to (churn) and what to recommend (conversion). Both are binary SML problems with clean cost asymmetries. Churn CAC is $120 to reacquire vs $3 touch cost (40:1). Conversion feeds Sprint 3: you can't allocate campaign budget without knowing per-segment-per-category response probabilities.
 
-**Who signs off.** CX Lead (strategy + uplift) and CMO (does the rec respect the segment strategy).
+**Who signs off.** CX Lead (chosen family + threshold per classifier) and CMO (threshold must respect marketing's capacity ceiling).
 
-**Success at 3:30 pm.** A chosen recommender strategy is running behind the pre-wired recommender endpoint; the decision (collaborative vs content-based vs hybrid) is defended in a journal entry tied to the $18 / $14 asymmetry; cold-start disposition is an explicit product decision (fall back to segment modal basket, fall back to catalogue popularity, or fall back to editorial curation); the PDPA hard line is documented in the constraint table.
+**Success at 5:30 pm.** Both classifiers have a chosen family on the leaderboard, a cost-based threshold on the PR curve with dollar justification (Phase 6 SML lens), calibration confirmed (Brier score), promotion to shadow in the predictor registry (Phase 8). 5 SML journal entries per classifier (Candidates → Implications → Metric+Threshold → Red-team → Gate, each with `_sml` suffix).
 
-### 4.3 Shopping Advisor (optional stretch — segment-aware retrieval)
+### 4.3 Campaign Allocator (Sprint 3 · Optimization · Decide)
 
-**What it is.** A RAG-powered conversational assistant sitting on the catalogue, pricing, stock, and return-policy documents. A customer types "I'm looking for a waterproof jacket under $180 that ships tomorrow" — the assistant retrieves relevant product records, policy snippets, and stock levels, then answers in natural language, grounded in real data. The Advisor reads the customer's segment label (from Sprint 1) and uses it to re-rank retrieval: the same query produces different top results for a bargain-hunter than for a luxury-buyer.
+**What it is.** A linear-programming solver that decides, for each (segment, campaign) pair, how many customers to touch. Maximises expected revenue = Σ x × (P(convert) × revenue_per_convert − cost_per_touch). Respects hard constraints (touch budget cap, PDPA exclusions, inventory) and soft constraints with dollar penalties (per-segment fatigue cap). The scaffold exposes `/allocate/objective`, `/allocate/constraints`, `/allocate/solve`, `/allocate/last_plan`.
 
-**Why it exists.** The CX Lead thinks 25% of shopping conversations a year from now will be with an AI assistant. She wants a working proof-of-concept that can answer five canonical customer questions honestly, with citations — and that visibly personalises by segment without crossing the PDPA line.
+**Why it exists.** The CMO has a fixed quarterly budget. The CX Lead knows which classifier says who will convert. Neither knows how to allocate optimally across five campaigns × three+ segments under a touch budget and PDPA hard-lines. Optimization is where ML becomes a business decision under constraints.
 
-**Who signs off.** CX Lead (useful answers, visible segment-aware personalisation) and E-com Ops Lead (no data leak, no made-up prices).
+**Who signs off.** CMO + E-com Ops Lead (co-ownership: CMO owns the objective weights, Ops owns the constraint set).
 
-**Success at 3:30 pm (if reached).** The advisor answers the five canonical questions from `data/arcadia_canonical_questions.md` with cited product IDs and policy snippets; a journal entry names what is in / out of the knowledge base plus why; a journal entry names the grounding-failure fallback (does it say "I don't know", fall back to catalogue popularity, or escalate to a human) — this is a product decision, not a default.
+**Mid-sprint injection (~4:30pm).** Legal flags under-18 browsing-history use as a PDPA §13 hard exclusion. The allocator re-runs with the new hard constraint, the expected revenue drops (the shadow price of compliance becomes visible in dollars), and students re-journal Phase 11 + 12 as `_postpdpa.md`.
 
-Note for tonight's workshop: Sprint 3 is primarily the **Monitor** sprint (drift on segments + recommender click-through). The Shopping Advisor is a stretch goal. Do not start it until Sprint 3's Phase 13 journal entry is written and accepted.
+**Success at 5:30 pm.** `/allocate/solve` produces a feasible, non-pathological plan; objective weights + constraint classifications are defended in Phase 10–12 journals; post-PDPA re-run saved as `phase_11_postpdpa.md` AND `phase_12_postpdpa.md` (skipping the Phase 12 re-run is the single most common D3 failure).
+
+### 4.4 Drift Monitor × 3 models (Sprint 4 · MLOps · Monitor)
+
+**What it is.** Three separate drift rules, one per artefact, because the three models drift on different signals at different cadences. Segmentation drifts on **membership churn** (monthly). Churn/conversion classifiers drift on **calibration decay + feature PSI** (weekly). Allocator drifts on **constraint-violation rate + feasibility rate** (daily). The scaffold's `/drift/check` accepts a window name and returns per-feature PSI + segment-membership churn + overall severity.
+
+**Why it exists.** Without Sprint 4, a student ships a "working" product that silently rots over the next quarter. The Ops Lead needs three drift rules — one per model — with variance-grounded thresholds, duration windows, and human-in-the-loop on first trigger. The Phase 13 journal captures all three in one entry.
+
+**Who signs off.** E-com Ops Lead (monitoring + retrain rules), CMO (re-training approval under HITL first trigger).
+
+**Success at 5:30 pm.** `/drift/retrain_rule` has been called for each of the three models with defensible thresholds. Each rule names: signal, threshold, duration window, HITL disposition, seasonal exclusions. The Phase 13 journal entry covers all three.
 
 ## 5. The five Trust Plane decision moments
 
 Tonight collapses into five moments where the decision has teeth. Every other phase produces artefacts; these five are where you can silently ship a weak product if you are not paying attention. They are the rubric's highest-pressure points.
 
-1. **Pick K and defend in dollars** (Phase 6). Not "silhouette said 5". Rather: "5 because marketing can run 5 parallel campaigns; 7 would cost $X in setup with no realistic chance of lift." Stability and actionability have floors, not just targets.
-2. **Name each segment and declare a differentiated action per segment** (Phase 5 + 6). If two segments get the same action, they are one segment with noise between them. Collapse them, or defend the difference in dollars.
-3. **Choose the recommender strategy with an explicit cold-start disposition** (Phase 10 + 12). Collaborative, content-based, or hybrid — and for new customers with no history, say what happens: segment modal basket, catalogue popularity, or editorial curation. "Default fallback" is not an answer.
-4. **Declare what goes into the RAG corpus and what stays out** (Advisor stretch, Phase 11 analogue). PDPA, legal exposure, data staleness — every exclusion has a reason.
-5. **Set the grounding-failure fallback** (Advisor stretch). When the knowledge base cannot support an answer, does the Advisor say "I don't know", fall back to the popular item, or escalate to a human? This is a product decision.
+1. **Pick the primary operating point and defend it in the declared unit of harm** (Phase 6). _Retail tonight_: pick K for segmentation and defend in $ of wrong-campaign cost + marketing capacity. Not "silhouette said 5" — "5 because marketing can run 5 campaigns; 7 costs $X in setup; stability drops below 0.80 at K=7".
+2. **Commit to a distinct downstream action per output class** (Phase 5 + 6). _Retail tonight_: if two segments get the same marketing campaign, they are one segment with noise. Collapse or defend in dollars.
+3. **Choose the SML classifier's family and threshold with cost-based justification** (Phase 4→6 SML replay). Ensemble is the king for tabular data, but you still read the PR curve and pick the threshold that minimises expected cost against the CAC vs touch asymmetry (churn 40:1). For both classifiers, not just one.
+4. **Classify hard-vs-soft constraints under regulatory pressure** (Phase 11 + re-run). _Retail tonight_: when PDPA fires at 4:30, re-classify under-18 browsing as a hard line AND re-solve the LP. Not just the journal entry.
+5. **Set retrain rules × 3 models, grounded in historical variance** (Phase 13). Three rules, three cadences, three signals. No universal "auto-retrain when X" — signal + threshold + duration window + HITL.
 
-If you ship tonight with any of the first three unjudged, the rubric will catch it. Decision moments 4 and 5 only apply if you reach the Advisor stretch in Sprint 3.
+All five are non-negotiable tonight.
 
-## 6. 3:30 pm success definition
+## 6. 5:30 pm success definition
 
-By the close of the workshop (15:30 wall-clock), a passing run looks like this. Every item is grader-verifiable or rubric-verifiable.
+By the close of the workshop, a passing run looks like this. Every item is grader-verifiable or rubric-verifiable.
 
-- [ ] All four required product endpoints answer the contract grader with real data (not `{"status":"ok"}` stubs): segmentation train, segmentation profile, recommender train, recommender predict. (Endpoint paths are the scaffold's; you do not wire them.)
-- [ ] At least 10 journal entries exist at `journal/phase_<N>_<slug>.md`. Each one names its signal, threshold, and duration window under `## Reversal condition` — never the phrase "if data changes".
-- [ ] The `pdpa-under-18` scenario injection at roughly 02:05 produced both `journal/phase_11_constraints.md` and `journal/phase_11_postpdpa.md`; the re-run classifies the under-18 browsing-history feature as a **hard** exclusion with the $220/record exposure cited.
-- [ ] The `segment-drift` (or recommender CTR decay) scenario at roughly 02:40 produced a Phase 13 journal entry that names a signal (segment-assignment stability on the top-3 segments, or 7-day click-through-rate decay), a numeric threshold grounded in the training-window variance, and a duration window (e.g. "sustained for 3 consecutive days").
-- [ ] `metis journal export --output journal.pdf` renders without silent degradation.
+- [ ] **All four modules' endpoints return real data** (no `{"status":"ok"}` stubs): `/segment/baseline` + `/segment/registry` (shadow/production set), `/predict/leaderboard/{churn,conversion}` with chosen thresholds via `/predict/threshold`, `/allocate/solve` produces a feasible plan at `/allocate/last_plan`, `/drift/check` ran against both `recent_30d` and `catalog_drift` windows, `/drift/retrain_rule` called for all three model IDs.
+- [ ] **At least 14 journal entries** at `journal/phase_N_{usml,sml,...}.md`. Each one names its signal, threshold, and duration under `## Reversal condition` — never the phrase "if data changes".
+- [ ] **PDPA injection produces four files, not two**: `journal/phase_11_constraints.md`, `journal/phase_11_postpdpa.md`, `journal/phase_12_accept.md`, `journal/phase_12_postpdpa.md`. The PDPA re-run hits the ALLOCATOR, not a recommender. The compliance cost (expected revenue delta) is quantified in `phase_12_postpdpa.md`.
+- [ ] **Phase 13 journal has three rules**, one per model (segmentation / churn / allocator), each with signal + variance-grounded threshold + duration window + HITL disposition + seasonal exclusions.
+- [ ] **The value-chain banner on the viewer shows all four sprints green** at close, and the five decision moments all ticked.
 
-Combined score target: ≥ 0.60 (60% journal rubric mean + 40% contract grader).
+Combined score target: ≥ 0.60 (60% journal rubric mean + 40% endpoint-contract grader).
 
 ## 7. What is different from Week 4 (read this if you took Week 4)
 
-- **No scaffold work, but the COC routine still runs.** The backend, data generator, baseline K=3 clustering run, baseline content-based recommender, and drift monitor with reference data registered are all pre-provisioned at `src/retail/` and `apps/web/retail/`. Your first prompt confirms preflight is green, then you enter `/analyze` — which inventories what the baseline commits to and what decisions are still yours — followed by `/todos` (draft the 14 Playbook phases; instructor gate), then `/implement` (the three Playbook-driven sprints), then `/redteam`, then `/codify`. The Playbook phases are the CONTENT of `/implement`, not a replacement for the routine.
-- **No label, no "accuracy".** Sprint 1 is unsupervised. There is no ground-truth segment column. The metric conversation in Phase 6 changes shape — silhouette floor + stability floor + business-actionability floor replace RMSE and MAPE. See the Playbook for the rewrite.
-- **Phase 3 is unfolded this week.** Week 4 folded Feature Framing into Data Audit. Week 5 unfolds it: pre-cluster feature selection has higher stakes than pre-model feature selection (an ethically loaded feature does not just bias a model, it _creates_ a segment that is really a proxy for a protected class). Phase 3 gets its own 10-minute pass and its own journal entry.
-- **PDPA is the new union cap.** Week 4's mid-sprint legal shock was a MOM overtime circular. This week it is a PDPA notice about under-18 browsing data. Same rubric pressure — hard/soft constraint classification — different regulatory surface.
-- **Recommender strategy is the new route-plan decision.** Collaborative vs content-based vs hybrid is the "which solver" call. Phase 12 acceptance applies in the same shape: feasibility (respects PDPA, respects inventory), optimality (precision@k, coverage, cold-start rate beat the 12% rule-based benchmark), pathology (does it keep recommending the same five hero SKUs to everyone?).
+- **No scaffold work, but the COC routine still runs.** The backend, data generator, baseline K=3 clustering, churn + conversion classifiers pre-trained at startup, and drift reference registered are all pre-provisioned at `src/retail/` and `apps/web/retail/`. Your first prompt confirms preflight is green, then you enter `/analyze` — inventorying what the baseline commits to and what decisions are still yours — followed by `/todos` (draft the Playbook phases; instructor gate), then `/implement` (four paradigm sprints USML→SML→Opt→MLOps), `/redteam`, `/codify`. The Playbook phases are the CONTENT of `/implement`, not a replacement for the routine.
+- **Four paradigms, one night.** Week 4 was SML (forecasting) + Optimization (routing). Week 5 is the whole value chain in one product: USML (segmentation) + SML (churn + conversion classifiers) + Optimization (campaign allocator) + MLOps (drift on all three). Students take the Playbook into their next project with all four paradigms practised.
+- **No label in Sprint 1.** Segmentation is unsupervised — no ground-truth segment column, no MAPE, no AUC. Phase 6 USML changes shape: silhouette floor + stability floor + business-actionability floor, all pre-registered BEFORE seeing the Phase 4 leaderboard.
+- **Phase 3 is unfolded this week.** Week 4 folded Feature Framing into Data Audit. Week 5 unfolds it because pre-cluster feature selection has higher stakes — an ethically loaded feature does not just bias a model, it _creates_ a segment that is really a proxy for a protected class.
+- **PDPA is the new union cap** — Week 4's MOM overtime circular → Week 5's PDPA under-18 browsing. Same rubric pressure (hard/soft constraint classification), different regulatory surface. Fires mid-Sprint-3 at 4:30 against the ALLOCATOR (re-run Phase 11 + 12).
+- **The campaign allocator is the new route plan** — Week 4 optimised delivery routes under vehicle/driver constraints. Week 5 optimises campaign allocation under touch budget + PDPA + inventory constraints. Phase 12 asks the same questions: feasibility, optimality gap, pathologies (concentration? dead campaigns?), accept / re-tune / fall back / redesign.
 
 ## 8. Where to go next
 
-- `START_HERE.md` — student manual with the opening prompt and the Phase 1 entrypoint.
-- `PLAYBOOK.md` — the 14-phase procedure, adapted for unsupervised + recommender.
+- `START_HERE.md` — student manual with the opening prompt, the COC-wrapped clock, and the four-sprint flow.
+- `PLAYBOOK.md` — the universal 14-phase procedure with teaching blocks (SML lens + USML lens + Optimization lens + Your levers + Transfer to next project) per phase.
+- `SCAFFOLD_MANIFEST.md` — every pre-built file, who writes it, who reads it.
 - `src/retail/data/arcadia_*.csv` — the retail datasets (customers, products, transactions).
 - `src/retail/data/segment_baseline.json` + `segment_candidates.json` — pre-built K=3 baseline + pre-baked K-sweep reference.
 - `src/retail/data/drift_baseline.json` — registered drift reference distribution.
 - `src/retail/data/scenarios/` — mid-session injection payloads (`pdpa_redline.json`, `catalog_drift.json`).
+- `journal/skeletons/` — fill-in-the-blank per-phase templates; copy into `journal/phase_N_*.md` at the start of each phase.

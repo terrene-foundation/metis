@@ -221,12 +221,14 @@ function isExcluded(filePath) {
   // (Nexus, kailash-ml) are what students commission VIA the Playbook, not
   // what backs the scaffold itself. See workspaces/metis/<week>/PLAYBOOK.md
   // "Common failure modes" for the explicit justification per week.
+  // Exclusion is an EXPLICIT allowlist per domain — add new training
+  // scaffolds (finance / media / manufacturing) here as they ship.
   if (
-    /[\\/]src[\\/]retail[\\/]/.test(filePath) ||
-    /[\\/]src[\\/]supply_chain[\\/]/.test(filePath) ||
-    /[\\/]src[\\/][^\\/]+[\\/](backend|scripts|data)[\\/]/.test(filePath) ||
+    /[\\/]src[\\/](retail|supply_chain|finance|media|manufacturing)[\\/]/.test(
+      filePath,
+    ) ||
     /[\\/]workspaces[\\/]metis[\\/]/.test(filePath) ||
-    /[\\/]apps[\\/]/.test(filePath)
+    /[\\/]apps[\\/](web|mobile)[\\/]/.test(filePath)
   )
     return true;
 

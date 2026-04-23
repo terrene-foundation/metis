@@ -42,6 +42,10 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Arcadia Retail — Metis Week 5", lifespan=_lifespan)
+    # CORS: localhost-only training scaffold on synthetic data. The wildcard
+    # is acceptable HERE because the backend binds to 127.0.0.1 by default
+    # (see config.py) and the dataset contains no real PII. Do NOT copy this
+    # CORS configuration into a production service.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
