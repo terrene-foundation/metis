@@ -310,11 +310,78 @@ Declaring — in writing, before any code runs — exactly who is in scope, over
 
 What is the target, the population, the horizon, the cost of being wrong?
 
-### Prompt template — universal
+### Paste this
 
-> _"Read the product brief. I need a clear problem statement for [module]. Tell me: what exactly are we [predicting/discovering/deciding], for which population, over what window, and what it costs when we get it wrong in each direction. [Cost asymmetry]. Don't assume anything — if the brief is vague on scope, ask me."_
+```
+I'm entering Playbook Phase 1 — Frame. The scaffold pre-committed to the
+product (retail intelligence suite) and the sprint structure (USML →
+SML → Opt → MLOps); my decision here is the written frame for Sprint 1
+segmentation — target, population, horizon, operational ceiling, and
+the cost asymmetry in dollars that every later phase will anchor to.
 
-> **For tonight's product (Arcadia Retail, Sprint 1):** _"I need the segmentation problem statement. Who are we segmenting (18,000 active customers in last 90 days), how many segments can marketing actually run (the ceiling), and what it costs when we place a customer in the wrong segment ($45) vs run redundant campaigns ($3 per touch). Flag anything ambiguous."_
+Copy journal/skeletons/phase_1_frame.md into
+workspaces/metis/week-05-retail/journal/phase_1_frame.md and fill in
+the blanks as we go. Leave fields I have not decided yet as TODO — do
+NOT propose values for me.
+
+Draft the frame for me to edit. Produce these pieces, in order:
+
+1. Target — one sentence naming WHAT is predicted/discovered, the unit
+   (per customer, per session), and the window in days or months.
+2. Population — inclusions AND explicit exclusions (staff accounts,
+   bot accounts, test accounts, customers with <3 transactions).
+3. Horizon — named in days or months, not "near-term".
+4. Primary cost term AND secondary cost term. The two retail cost
+   terms that anchor Sprint 1 are the wrong-segment campaign cost
+   and the per-customer touch cost. Quote BOTH lines verbatim from
+   PRODUCT_BRIEF.md §2 — the row and the exact dollar value. If you
+   cannot find the line, say so; do NOT invent a number.
+5. Operational ceiling — how many segments marketing can actually run
+   in parallel, and WHO owns that ceiling (a role, not "the team").
+
+Then answer one framing question in plain language: at a plausible
+monthly mis-segmentation volume, what is the dollar exposure per
+month if we ship the wrong K? Show the arithmetic using only numbers
+from PRODUCT_BRIEF.md §2 — no invented counts.
+
+Do NOT use the word "blocker" without naming the specific next step
+I cannot take. Fuzzy scope is not a blocker; it's a to-do for me.
+
+When the journal file has the five items drafted and the arithmetic
+shown, stop and wait for me to review.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names what the scaffold committed to (product + sprint order) and what remains my call (the written frame) — protects against agent drift into greenfield framing.
+- Show-the-brief is mandatory on the two cost terms ($45 wrong-segment, $3 touch) because the cost anchor carries through every later phase — a Phase 1 without a quoted brief line is a 1/4 on rubric D1.
+- Forbidding value proposals on target, K, and ceiling keeps the agent as a drafter, not a decider — the Trust Plane stays with me.
+- The "dollar exposure per month" arithmetic is required BEFORE Phase 4 so the ceiling and cost asymmetry graduate from words to a number the CMO would recognize.
+- No-fake-blockers guard is one line because Phase 1 has no real blockers — only fuzzy scope, which is a drafting task.
+
+### What to expect back
+
+- `journal/phase_1_frame.md` filled in for items 1–5 with blanks only where I still own the call.
+- Two verbatim quoted lines from `PRODUCT_BRIEF.md §2` — one for wrong-segment ($45), one for per-customer touch ($3).
+- A plain-language dollar-exposure arithmetic line (count × rate) using only brief-sourced numbers.
+- A one-sentence named operational ceiling with a role attached (e.g. "CMO owns the campaign-count ceiling").
+- A stop signal pending my review.
+
+### Push back if you see
+
+- A dollar figure with no quoted brief line — "which row of `PRODUCT_BRIEF.md §2` is this from? paste the row."
+- A target like "discover patterns" or "understand customers" — "please rewrite in the form 'behavioural segment per active customer over an N-month window'."
+- An operational ceiling without a role owner — "who owns the ceiling? the CMO, the CX Lead, the agency? name the role."
+- A horizon phrased as "near-term" or "recent" — "please express horizon in days or months."
+- A proposed K anywhere in the frame — "please remove the K; that's Phase 6's decision, not Phase 1's."
+
+### Adapt for your next domain
+
+- Change `wrong-segment campaign cost ($45)` to your domain's primary cost term.
+- Change `per-customer touch cost ($3)` to the secondary / operational cost.
+- Change `marketing ceiling on parallel campaigns` to the ceiling your ops team owns.
+- Change `active customers in last 90 days` to your scope — inclusions and exclusions.
+- Change `PRODUCT_BRIEF.md §2` to the brief section that holds your cost table.
 
 ### Evaluation checklist
 
@@ -404,11 +471,91 @@ Before you point any algorithm at the data, challenge whether the data is trustw
 
 Is this data trustworthy? Which features are available at prediction time, leaky, or ethically loaded?
 
-### Prompt template — universal
+### Paste this
 
-> _"Audit the [dataset] before we train anything. I need to know: is the data trustworthy? Check for duplicates, staff/bot contamination, singleton observations, outliers, label-in-disguise columns, and missingness. For each finding, tell me the row or column affected and the count. Recommend a disposition — cap, log, exclude, flag — for each outlier pattern and each contamination. I'll approve the dispositions."_
+```
+I'm entering Playbook Phase 2 — Data Audit. The scaffold pre-committed
+to the dataset shape (5,000 customers × 14 features, 400 SKUs, 120,000
+transactions under src/retail/data/arcadia_*.csv); my decision here is
+the disposition per audit finding — cap, log-transform, exclude, flag,
+or leave. I am not validating the data; I am deciding what to do with
+what you find.
 
-> **For tonight's product (Arcadia Retail):** _"Audit the Arcadia customer dataset — 5,000 customers, 14 features. Flag the six audit categories with specifics: row X, column Y, count Z. Pay special attention to (a) customers with <3 transactions who cannot be honestly clustered, (b) the top-1% spenders who will dominate distance-based clustering, (c) any column that is really a pre-existing segment label. Recommend; I decide."_
+Copy journal/skeletons/phase_2_data_audit.md into
+workspaces/metis/week-05-retail/journal/phase_2_data_audit.md. Fill
+the blanks as we go; leave dispositions as TODO — those are my calls.
+
+Run the six-category audit against the three CSVs under
+src/retail/data/. For every finding in every category:
+
+1. Duplicates — exact customer_id or transaction_id repeats. Report
+   count + the customer_id / transaction_id of the first 3 offenders.
+2. Contamination — staff, bot, test, or integration accounts. Cite
+   the column and rule that flags them (e.g. "rows where email
+   domain ends in @arcadia-internal.sg"). If the column doesn't
+   exist, say so.
+3. Sparsity — customers with fewer than 3 transactions. Report the
+   count and the fraction.
+4. Outliers — top-1% on any numeric feature (especially
+   total_spend, visits_per_week). Report the threshold and count.
+5. Labels-in-disguise — any column that is itself a pre-existing
+   segment assignment, tier, or rule output (e.g. a legacy
+   loyalty_tier column). Report column name + unique-value count.
+6. Missingness — per-column NaN rate; flag any column >5% missing.
+
+For every claim in the audit, cite the exact file and the specific
+column or function you used — e.g. "from arcadia_customers.csv
+column 'total_spend_sgd', or from customer_features() in
+src/retail/backend/ml_context.py". If you cannot cite a file and a
+column, delete the claim.
+
+For every dollar figure you mention (if any), quote the line from
+PRODUCT_BRIEF.md §2. The audit itself is not priced in dollars, but
+the $45 wrong-segment and $3 touch costs come up if you describe the
+business impact of skipping the audit.
+
+Propose a disposition per finding — cap, log-transform, exclude,
+flag, or leave — with a one-line reason each. I approve or overrule
+per finding. Do NOT apply any disposition yet.
+
+Do NOT use the word "blocker" unless you name the specific next phase
+I cannot run. A 7% NaN rate on one column is a finding, not a blocker.
+
+When the audit table is complete with cited findings and proposed
+dispositions, stop and wait for me to approve per finding.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names what the scaffold decided (dataset shape, CSV paths) and what's still mine (the disposition per finding) — this prevents the agent from proposing dispositions as facts.
+- Cite-or-cut is tightened to "file + column or function" because data audit claims without a column citation are the #1 source of invented findings in Week 4.
+- Six categories enumerated, each with a concrete what-to-report shape — prevents vague "everything looks fine" summaries that score 0 on rubric D3.
+- Label-in-disguise gets its own numbered slot because in USML it's the difference between discovering structure and re-deriving the 2020 rulebook.
+- "Do NOT apply any disposition yet" is load-bearing — the agent applying a log-transform before I approve corrupts the Phase 4 candidate sweep.
+
+### What to expect back
+
+- `journal/phase_2_data_audit.md` with findings filled in for all six categories and disposition blanks held as TODO.
+- Per-category findings with counts and first-offender IDs, each cited to `src/retail/data/arcadia_*.csv` or a function in `src/retail/backend/ml_context.py`.
+- A proposed disposition (cap / log / exclude / flag / leave) with a one-line reason per finding.
+- A list of columns that look like pre-existing segment labels, if any exist.
+- A stop signal pending per-finding approval.
+
+### Push back if you see
+
+- A finding without a column or function citation — "which file and which column produced this? please cite or delete."
+- "The data looks fine" / "no major issues" without per-category evidence — "please walk through all six categories; each needs a count even if the count is 0."
+- A disposition applied before my approval (e.g. "I log-transformed total_spend") — "please revert; dispositions are my call, not yours."
+- A contamination rule without the column it runs on — "which column flags staff accounts? if no such column exists, say so."
+- A dollar figure not quoted from `PRODUCT_BRIEF.md §2` — "please quote the §2 row."
+
+### Adapt for your next domain
+
+- Change `staff, bot, test, integration accounts` to the contamination pattern in your domain (QA testers, partner API calls, demo users).
+- Change `legacy loyalty_tier column` to your domain's pre-existing rule output (risk tier, triage tier, severity band).
+- Change `customers with <3 transactions` to your sparsity floor (sessions, encounters, orders).
+- Change `top-1% on total_spend` to your domain's dominant-outlier signal.
+- Change `arcadia_customers.csv` to your source dataset paths.
 
 ### Evaluation checklist
 
@@ -497,11 +644,91 @@ Every candidate input column classified on four independent axes: (a) available 
 
 Which features are safe, which are leaky, which are ethically loaded?
 
-### Prompt template — universal
+### Paste this
 
-> _"Classify every candidate feature on four axes: (1) available at prediction time? (2) leaky from the label or from future data? (3) ethically loaded, regulatorily sensitive, or a proxy for a protected class — name the regime? (4) raw or engineered, and if engineered, what's the one-line derivation? Run a proxy-drop test on every demographic feature: re-cluster with and without, report the reassignment rate. I'll approve which features go in."_
+```
+I'm entering Playbook Phase 3 — Feature Framing. The scaffold
+pre-committed to the raw feature set loaded in
+src/retail/backend/ml_context.py (customer-level behavioural and
+demographic columns); my decision here is which features go into
+Sprint 1 clustering and which stay out — especially the ones that
+look behavioural but are really proxies for protected class.
 
-> **For tonight's product (Arcadia Retail):** _"Classify Arcadia's 14 customer features on the four axes. Pay special attention to: postal_district (proxy for income?), age_band (proxy for under-18 under PDPA?), and any column you wouldn't defend to the CMO if asked. Run the proxy-drop reassignment rate for the two strongest candidates. Recommend in / out; I approve."_
+Copy journal/skeletons/phase_3_features.md into
+workspaces/metis/week-05-retail/journal/phase_3_features.md.
+
+For each candidate feature, classify on four axes:
+
+1. Available at prediction time? (yes / no — if no, leakage risk)
+2. Leaky from the label or from future data? (a transaction_date
+   >= decision_date is future-data leakage)
+3. Ethically loaded or regulatorily sensitive? Name the regime —
+   PDPA §13 for under-18 personalised-history (Singapore), GDPR
+   Art. 9 for sensitive categories (EU), HIPAA for health. If the
+   feature is age-band-derived, postal-district-derived, or
+   category-purchase-derived (implying health or belief), flag it.
+4. Raw or engineered? If engineered, one-line derivation.
+
+For every feature you classify, cite the source — either the column
+in src/retail/data/arcadia_customers.csv OR the function in
+src/retail/backend/ml_context.py that derives it. If you cannot cite,
+delete the claim.
+
+Then run the proxy-drop test on the two strongest demographic
+candidates (postal_district AND age_band):
+
+A. Fit the clustering with the demographic feature IN.
+B. Fit the clustering with the demographic feature OUT.
+C. Report the reassignment rate — what fraction of customers
+   changed segment between A and B.
+
+Cite the exact function and endpoint you used (likely /segment/fit
+per src/retail/backend/routes/segment.py). Report the reassignment
+percentage — do NOT compare it to a threshold. My call.
+
+Any dollar figure mentioned (e.g. $220 per under-18 PDPA record from
+PRODUCT_BRIEF.md §2) must be quoted verbatim — do NOT invent.
+
+Recommend IN / OUT per feature with a one-line reason. I decide.
+Do NOT apply the feature set yet.
+
+Do NOT use "blocker" without naming the specific phase blocked.
+
+When classification, proxy-drop test, and recommendations are in the
+journal, stop and wait for my per-feature approval.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names the scaffold's raw-feature commitment and keeps the in/out decision with me — the agent drafts, doesn't decide.
+- Cite-or-cut is required per feature to prevent invented columns — common Week 4 failure where the agent claims `weekend_browse_fraction` exists when it's actually `weekend_sessions` in the source.
+- PDPA/GDPR/HIPAA are named explicitly because "ethically loaded" without a regime name scores 1/4 on rubric D4.
+- The proxy-drop test is mechanical (A/B/report) to prevent the agent from "interpreting" the result — interpretation is my job, not theirs.
+- Show-the-brief on the $220 PDPA figure is mandatory because the feature-out decision has teeth only when the dollar exposure is on the page.
+
+### What to expect back
+
+- `journal/phase_3_features.md` with every candidate feature on the four-axis table.
+- The proxy-drop reassignment percentage for `postal_district` and for `age_band`, with the endpoint / function cited.
+- A recommended IN / OUT per feature with reason, no thresholds applied.
+- A named regime (PDPA §13, GDPR Art. 9, HIPAA, ECOA) for every feature flagged ethically loaded.
+- A stop signal pending my per-feature approval.
+
+### Push back if you see
+
+- "Ethically loaded: unclear" or "possibly sensitive" with no named regime — "which regime? PDPA §13, GDPR Art. 9, HIPAA, or ECOA? if none applies, say so."
+- A proxy-drop test reported as "passed" or "failed" — "please remove the pass/fail; report the reassignment percentage only. threshold is mine."
+- An engineered feature with no one-line derivation — "what's the formula? cite the function or column combination."
+- A feature list with no source citation — "which column in `arcadia_customers.csv` or which function in `ml_context.py` produces this?"
+- A $220 figure not quoted from `PRODUCT_BRIEF.md §2` — "please paste the §2 row for the under-18 PDPA cost."
+
+### Adapt for your next domain
+
+- Change `postal_district and age_band` to your domain's strongest demographic proxies (zip code, birth year, country of origin).
+- Change `PDPA §13 for under-18 personalised-history` to your jurisdiction's minor-protection regime.
+- Change `arcadia_customers.csv` to your candidate-feature source.
+- Change `category-purchase-derived (health / belief)` to the inferred-sensitive pattern in your data.
+- Change the proxy-drop target (clustering) to your downstream model (classifier, recommender).
 
 ### Evaluation checklist
 
@@ -587,11 +814,98 @@ Trying a fair range of approaches before committing — not to find "the best," 
 
 Which 3–5 approaches are reasonable for this problem, and does the sweep produce comparable numbers?
 
-### Prompt template — universal
+### Paste this
 
-> _"Run a candidate sweep for the [module]. Three families spanning different assumptions — one [linear/blob-expecting], one [tree-based/density-based], one [ensemble/hierarchical]. Use the same features, same stability protocol, same held-out set across all candidates. Include a naive baseline. Produce a leaderboard comparing them on the 3–5 signals I care about. Don't optimise hyperparameters yet — that's Phase 5 if one wins."_
+```
+I'm entering Playbook Phase 4 — Candidates. The scaffold pre-committed
+to the family mix I will sweep — for Sprint 1 USML the clustering
+families behind /segment/fit, for Sprint 2 SML the three-family
+leaderboard behind /predict/leaderboard/{churn,conversion}. My
+decision here is nothing yet; the pick happens in Phase 5. My job is
+to commission a comparable sweep and read the numbers.
 
-> **For tonight's product (Sprint 1 USML):** _"Run a clustering sweep on Arcadia's active-customer behavioural features. Three algorithm shapes: K-Means at K=3, 5, 7; DBSCAN with two densities; one spectral approach. Same 7 features across all. Compare on silhouette, stability (re-seed Jaccard), and segment-size distribution. Also compare against the pre-baked K-sweep reference on disk. I'll pick the count and algorithm in Phase 5."_
+First, tell me which sprint I'm in:
+- Sprint 1 USML → use /segment/fit and /segment/candidates. Write
+  to journal/phase_4_usml.md (skeleton in journal/skeletons/).
+- Sprint 2 SML → use /predict/leaderboard/churn AND
+  /predict/leaderboard/conversion. Write to
+  journal/phase_4_sml.md (skeleton in journal/skeletons/).
+
+If Sprint 1: do NOT use AutoMLEngine for clustering. kailash-ml 0.17.0
+raises ValueError on task_type='clustering'. Use /segment/fit
+directly per src/retail/backend/routes/segment.py. Spending ten
+minutes on an AutoML detour is a known trap and costs us the clock.
+
+For whichever sprint I'm in, run the sweep with:
+
+1. Three families spanning different assumptions.
+   - USML: K-Means at K=3, 5, 7; DBSCAN at two density settings;
+     one spectral approach at K=5.
+   - SML: logistic regression, random forest, gradient-boosted
+     (the ensemble).
+2. Identical features across all candidates (no silent feature
+   drift between rows of the leaderboard).
+3. Identical stability protocol across all candidates — same
+   seeds, same held-out set, same resample count.
+4. Include a NAIVE BASELINE — for USML that's the pre-baked K=3
+   reference at src/retail/data/segment_baseline.json; for SML
+   that's majority-class prediction. Without the baseline the
+   leaderboard winner is not defensible.
+
+For every algorithm or method you name (K-means, DBSCAN, GBM,
+logistic regression, isotonic calibration), cite the specific file
+and function you read it from — e.g. "K-means, per
+train_baseline_segmentation in src/retail/backend/ml_context.py". If
+you cannot cite, say "I did not read the source for this — marking
+the claim uncertain until I check."
+
+Produce a leaderboard table. For USML: silhouette, bootstrap Jaccard
+stability, segment-size distribution. For SML: AUC, PR-AUC, Brier
+score, precision + recall at a default threshold, top-5 feature
+importance. Same columns for every row, including the baseline.
+
+Do NOT pick a winner. Do NOT propose K or threshold. Phase 5 picks;
+Phase 6 sets thresholds / floors. Your job is a comparable
+leaderboard, not a decision.
+
+Do NOT use "blocker" without naming the blocked next step. A DBSCAN
+density that returns 0 clusters is a finding, not a blocker.
+
+When the leaderboard is in the journal with every row cited, stop
+and wait for me to run Phase 5.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening distinguishes what the scaffold pre-committed (family mix, endpoint) from what's still open (which family wins — Phase 5) — prevents agent from skipping straight to a recommendation.
+- One prompt serves both USML (Sprint 1) and SML (Sprint 2) because the shape is identical — family-diverse sweep + shared protocol + baseline + comparable numbers — and the sprint branch is handled by an explicit choice at the top.
+- The AutoML prohibition is called out explicitly with the `ValueError` symptom because this is a documented 10-minute trap.
+- Cite-or-cut on every algorithm name prevents the agent from inventing "collaborative filtering" or "NMF" when the code actually does K-means — a documented Week 5 hallucination pattern.
+- Forbidding picks at Phase 4 protects the Phase 5 (implications) / Phase 6 (floors) decision structure; a Phase 4 winner becomes post-hoc floor pressure.
+
+### What to expect back
+
+- `journal/phase_4_usml.md` or `journal/phase_4_sml.md` depending on sprint.
+- A leaderboard table with identical columns across rows, including the naive baseline (K=3 or majority class).
+- Every family name cited to a function in `src/retail/backend/`.
+- Numeric observations but NO winner proposed and NO K / threshold named.
+- A stop signal pending Phase 5.
+
+### Push back if you see
+
+- `AutoMLEngine` named in a Sprint 1 USML context — "please use `/segment/fit` directly; `AutoMLEngine` doesn't support clustering in kailash-ml 0.17.0."
+- A leaderboard without a baseline row — "where is the baseline row? I need the naive baseline (K=3 reference or majority class) on the same table."
+- A winner proposed at Phase 4 ("recommend K=5" or "GBM wins") — "Phase 4 has no decision; please remove the pick. Phase 5 is where I choose."
+- An algorithm name with no function citation — "which file and function in `src/retail/backend/` produces this?"
+- Different feature counts across leaderboard rows — "these candidates aren't on the same features; please re-run with identical features across every row."
+
+### Adapt for your next domain
+
+- Change `K=3, 5, 7` to your K range.
+- Change `DBSCAN, spectral` to your domain's alternative clustering families.
+- Change `/segment/fit` and `/predict/leaderboard/` to your domain's sweep endpoints.
+- Change `segment_baseline.json` to your pre-built naive baseline location.
+- Change `majority-class prediction` to your SML naive baseline (mean prediction for regression, last-value for forecasting).
 
 ### Evaluation checklist
 
@@ -673,11 +987,94 @@ Look at the Phase 4 leaderboard and make the human call: which approach, at whic
 
 Given the leaderboard, which approach do I stake my name on and why?
 
-### Prompt template — universal
+### Paste this
 
-> _"Compare the candidates on the leaderboard. For each, tell me: how [accurate / well-separated], how stable across [time / seed / resample], how complex, and how long to train. Profile each cluster/class in plain business language — one paragraph each. Then recommend one — explain the trade-offs as if briefing someone who doesn't know what [silhouette / AUC / gini] is. I make the final pick."_
+```
+I'm entering Playbook Phase 5 — Implications. The scaffold
+pre-committed to the leaderboard I'm about to read (produced in
+Phase 4); my decision here is the pick — which candidate I stake my
+name on, named in one paragraph of business language each, with every
+rejected alternative given a reason.
 
-> **For tonight's product (Sprint 1):** _"Compare the five candidates on silhouette + stability + segment-size balance. For the winning candidate at each K value, profile each cluster in one paragraph of plain English ('these customers shop...') — no column names. Then recommend K and algorithm. Rank K=3 (the baseline) against K=5 and K=7 on all three signals. I'll pick."_
+Copy the Phase 5 skeleton from journal/skeletons/phase_5_implications.md
+into workspaces/metis/week-05-retail/journal/phase_5_implications.md
+(Sprint 1 USML). If this is the Sprint 2 SML replay, use
+journal/phase_5_sml.md.
+
+Read the Phase 4 leaderboard I just produced. Then:
+
+1. For each candidate on the leaderboard (including the baseline),
+   state: how well-separated (USML) or how accurate (SML), how
+   stable across seeds / folds, how complex to train, how
+   interpretable. One row per candidate, same columns.
+
+2. For the top 2 USML candidates, profile EACH cluster in one
+   paragraph of plain business language — no column names, no
+   numbers. "Customers who shop on weekends and ignore promos" is
+   a profile; "segment with high weekend_browse_fraction and
+   low_promo_resp" is a statistical artefact.
+
+   For SML, profile each model family the same way: which
+   behaviours does this family predict well? which does it miss?
+   What would the CX Lead hear if they asked "why did it pick
+   this customer for retention?"
+
+3. Recommend ONE candidate. For USML: weight stability over
+   separation — 0.62 silhouette with 88% stability beats 0.71
+   silhouette with 62% stability, because the second reshuffles
+   every month and the CMO cannot campaign on a moving target.
+   For SML: weight interpretability-over-AUC within 1 AUC point
+   — the CX Lead will not ship a model she cannot explain to the
+   retention team.
+
+4. For every alternative you reject, give a one-sentence reason. A
+   rejected alternative with no reason is "Claude Code said so",
+   which does not ship.
+
+Do NOT propose floors, thresholds, or K values. The pick is mine —
+you write the recommendation and the rationale; I sign or overrule
+in my journal. The floors go in Phase 6 and are pre-registered
+BEFORE we revisit the leaderboard there.
+
+Do NOT use "blocker" without naming the specific phase blocked. A
+leaderboard where two candidates are within 1 point is a decision I
+need to make, not a blocker.
+
+When the recommendation and one-paragraph profiles are in the
+journal, stop and wait for my pick.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening distinguishes the leaderboard (scaffold-produced via Phase 4) from the pick (my call at Phase 5) — prevents the agent from merging Phase 4 observation and Phase 5 decision.
+- Plain-language cluster profiles are load-bearing because Phase 5 failure mode #3 is "cluster names read like column dumps" — CMO cannot act on `high_weekend_browse_fraction`.
+- Stability-over-separation (USML) and interpretability-over-AUC (SML) are stated explicitly because the agent will default to the leaderboard top row unless told not to.
+- "Rejected alternative with no reason is 'Claude Code said so'" is the anti-outsourcing clause — protects my Trust Plane call.
+- Forbidding floors here preserves the Phase 6 pre-registration — any floor named in Phase 5 becomes post-hoc in Phase 6.
+
+### What to expect back
+
+- `journal/phase_5_implications.md` (or `_sml.md`) with a leaderboard-shape table plus a recommendation.
+- One-paragraph plain-language profile per cluster (USML) or per model family (SML).
+- A rejection reason for every non-recommended alternative.
+- An explicit stability-or-interpretability framing for the recommendation.
+- A stop signal pending my pick.
+
+### Push back if you see
+
+- Cluster profile that includes column names or numeric feature values — "please rewrite in plain language; no column names, no numbers. would a CMO recognize this segment on the street?"
+- Recommendation based only on the top-of-leaderboard metric — "did you weigh stability (USML) or interpretability (SML)? top-of-leaderboard isn't automatic."
+- Rejected alternative with no reason — "why was this rejected? one sentence, please."
+- A proposed floor or threshold — "please remove; Phase 6 pre-registration is corrupted if I see a floor proposed here."
+- "Recommend K=5" without the segment profiles — "profile every segment first; actionability comes before counting."
+
+### Adapt for your next domain
+
+- Change `weekend_browse_fraction / promo_resp` cluster-language examples to your domain's behavioural vocabulary.
+- Change `CMO / CX Lead / retention team` stakeholders to the ones on your approval chain.
+- Change `stability-over-separation` weighting for USML to your domain's trump dimension.
+- Change `interpretability-over-AUC within 1 point` to your SML trade-off band.
+- Change `Sprint 1 / Sprint 2` framing to your lifecycle naming.
 
 ### Evaluation checklist
 
@@ -761,11 +1158,109 @@ When there is no label, there is no single accuracy number to optimise. This pha
 
 Which floors, at what values, tied to what dollar lift versus the incumbent?
 
-### Prompt template — universal
+### Paste this
 
-> _"Given [cost asymmetry], which [metric / floors] should we commit to BEFORE seeing the leaderboard? Propose [three / one] pre-registration floor(s) with defensible values. Then compute the dollar lift counterfactual against the incumbent system. If peak season changes the economics, flag that. I pre-register the floors, then you compare against the leaderboard. I pick."_
+```
+I'm entering Playbook Phase 6 — Metric + Threshold. The scaffold
+pre-committed to the shape of the commitment (three-floor
+pre-registration for USML, PR-curve + calibration for SML); my
+decision here is the FLOORS and the THRESHOLD — and I am
+pre-registering them in writing BEFORE we re-open the leaderboard.
 
-> **For tonight's product (Sprint 1 USML):** _"Given $45 wrong-segment × 18,000 customers, propose the three USML floors (separation, stability, actionability) pre-registration. Set silhouette at 0.25, Jaccard at 0.80, actionability at 'one distinct marketing action per segment, tested by naming each'. Compute dollar lift of each K candidate vs the 2020 rulebook assuming a 5% mis-segmentation rate in the rulebook. I'll pick the K that clears all three floors AND maximises lift."_
+Which sprint am I in?
+- Sprint 1 USML → I pre-register THREE floors (separation,
+  stability, actionability). Skeleton:
+  journal/skeletons/phase_6_metric_threshold.md → write
+  journal/phase_6_usml.md.
+- Sprint 2 SML → I pre-register a THRESHOLD-SELECTION RULE on the
+  PR curve AND a Brier-score calibration floor. Write
+  journal/phase_6_sml.md (same skeleton).
+
+Here is how I want you to help me pre-register — I am the one
+writing the values. You:
+
+1. First, CONFIRM that you have not yet reopened the Phase 4
+   leaderboard. If you have already seen the winning K or the
+   winning family in the last two messages, say so — we must
+   record that the floors were set post-hoc and treat the rubric
+   accordingly. Honesty first; do not conceal the order.
+
+2. USML path — draft the three floor definitions (NOT values) in
+   the journal:
+   (a) Separation floor — silhouette (or equivalent) measured how?
+   (b) Stability floor — bootstrap Jaccard over how many re-seeds?
+   (c) Actionability floor — named as a TEST ("one distinct
+       marketing action per segment, tested by writing the action
+       in one sentence per segment"), not a number.
+
+3. SML path — draft the threshold-selection RULE (NOT the
+   threshold value):
+   (a) Curve to read — PR (for rare-positive churn and conversion),
+       not ROC. Name the endpoint that produces the curve (per
+       src/retail/backend/routes/predict.py).
+   (b) Cost asymmetry — quote the $3 per-customer touch cost from
+       PRODUCT_BRIEF.md §2 verbatim; the $120 CAC is in
+       PLAYBOOK.md Phase 6 SML (not in the brief) — cite the
+       Playbook line, not §2.
+   (c) Calibration floor — Brier score cutoff; if breached, run
+       isotonic calibration BEFORE threshold selection.
+
+4. Compute the counterfactual dollar lift framework — NOT the
+   number, the formula. "If K=N moves X customers off the
+   $45/wrong-segment path, the monthly lift is $45 × X." I plug
+   X when I see the leaderboard.
+
+5. Timestamp the pre-registration — record the wall-clock time in
+   the journal header. This is the only evidence that the floors
+   preceded the results.
+
+Do NOT propose floor values (0.25 silhouette, 0.80 Jaccard, 0.3
+threshold). I write those values myself in the journal, at a
+timestamp that precedes my next leaderboard read. If you propose a
+value I use, my pre-registration is corrupted.
+
+Any dollar figure you mention must be quoted from PRODUCT_BRIEF.md §2
+(or PLAYBOOK.md Phase 6 SML for the $120 CAC). Do NOT invent.
+
+Do NOT use "blocker" without a specific blocked action. An
+un-set floor is not a blocker; it is the phase I am currently running.
+
+When the journal has floor DEFINITIONS (USML) or the threshold-rule
+FRAME (SML), a timestamp, and the lift-formula skeleton, stop and
+wait for me to write the values.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening separates the SHAPE of commitment (three floors / PR+calibration, pre-committed by the scaffold and rubric) from the VALUES (mine to write) — this is the anti-post-hoc architecture of the phase.
+- The "confirm you have not seen the winner" honesty clause is the pre-registration mechanic; without it, a silently-seen leaderboard leaks into the floor values.
+- One paste serves both USML (3 floors) and SML (threshold rule + calibration) because Phase 6 is the single phase of the night where both tracks live — branching keeps students from running two different prompts and losing the pre-registration clock.
+- Show-the-brief split — $3 from §2, $120 from `PLAYBOOK.md` Phase 6 SML — is called out because the rubric rewards correct citation and 0/4s a $120-from-§2 claim.
+- Forbidding value proposals and requiring a timestamp is the D2 (metric→cost linkage) and D5 (reversal) guard together — floors without a timestamp score 0/4 on D2.
+
+### What to expect back
+
+- `journal/phase_6_usml.md` with separation / stability / actionability floor DEFINITIONS and a timestamp (USML), OR `journal/phase_6_sml.md` with the PR-curve + calibration rule and a timestamp (SML).
+- An honest note of whether the leaderboard has been seen yet (ideally: "not yet").
+- A lift-formula skeleton with brief-sourced unit costs and placeholder customer counts.
+- Correct citation split: $3 → brief §2, $120 → `PLAYBOOK.md` Phase 6 SML.
+- A stop signal pending my value-writing.
+
+### Push back if you see
+
+- A proposed floor value ("silhouette ≥ 0.25", "threshold 0.3") — "please remove the value; I write those myself. your job is the definition."
+- No timestamp on the journal entry — "please add wall-clock time to the header so the order is auditable."
+- $120 CAC cited to `PRODUCT_BRIEF.md §2` — "that's in `PLAYBOOK.md` Phase 6 SML, not the brief. please re-cite."
+- ROC named as the SML threshold curve — "churn and conversion are rare-positive; please use PR, not ROC."
+- Actionability floor expressed as a number (e.g. "0.6 on some actionability index") — "actionability is a test — 'one distinct action per segment', not a number."
+
+### Adapt for your next domain
+
+- Change `separation / stability / actionability` (USML) to your domain's three quality dimensions.
+- Change `PR curve + Brier calibration` (SML) to the threshold-selection tool for your target (ROC if balanced; lift chart if ranking matters more than decisions).
+- Change `$3 per touch / $120 CAC` cost asymmetry to your domain's FN / FP cost pair.
+- Change `counterfactual vs 2020 rulebook` to counterfactual vs your incumbent baseline.
+- Keep the timestamp + no-proposed-values mechanic as-is — it's domain-independent.
 
 ### Evaluation checklist
 
@@ -855,11 +1350,111 @@ Actively try to break the model before deployment does it for you. AI Verify fra
 
 How does this fail? What breaks it?
 
-### Prompt template — universal
+### Paste this
 
-> _"Try to break this [model]. Three dimensions: (1) Transparency — what is it relying on most? Can you explain one prediction / one segment to a non-technical manager? (2) Robustness — where does it fail worst? Which subgroups, which months, which conditions? (3) Safety — if this silently went wrong for a week, what's the dollar damage and who gets hurt? Name every finding with severity. Fairness is deferred to Week 7 — flag any concerns and move on."_
+```
+I'm entering Playbook Phase 7 — Red-team. The scaffold pre-committed
+to the three red-team sweeps for USML (re-seed churn, proxy
+leakage, operational collapse) and — in the SML replay — two for
+SML (calibration-per-subgroup, feature-ablation). My decision here
+is the disposition per finding (accept / mitigate / re-do); your
+job is to run the sweeps and report numbers against my
+pre-registered floors, not propose new ones.
 
-> **For tonight's product (Sprint 1 USML):** _"Red-team the segmentation on three unsupervised-specific sweeps: (a) re-seed with 3 different random seeds and report the distribution of per-segment Jaccard stability, (b) drop-one-demographic proxy test on postal_district and age_band, (c) operational-collapse simulation: on Black-Friday-shaped data, does any segment shrink below 2%? Rank findings by severity in $."_
+Copy journal/skeletons/phase_7_red_team.md into
+workspaces/metis/week-05-retail/journal/phase_7_red_team.md (Sprint
+1) or journal/phase_7_sml.md (Sprint 2 replay).
+
+USML sweeps (Sprint 1):
+
+1. RE-SEED CHURN. Run /segment/fit 3 times with different random
+   seeds, hold features and K constant. Report the per-segment
+   Jaccard stability distribution — not the mean, the distribution.
+   Cite the endpoint and function (src/retail/backend/routes/
+   segment.py + the fit function in ml_context.py).
+
+2. PROXY LEAKAGE. Drop postal_district, then drop age_band, then
+   drop both. Re-cluster each time. Report the fraction of
+   customers who changed segment vs the Phase 5 winning clustering.
+   Cite the source columns in src/retail/data/arcadia_customers.csv.
+
+3. OPERATIONAL COLLAPSE. Filter transactions to post-Black-Friday
+   shapes (volume spike + mix shift, using src/retail/data/
+   scenarios/catalog_drift.json if helpful). Re-cluster. Report
+   the size of the smallest segment as a fraction of customers.
+
+SML sweeps (Sprint 2 replay):
+
+A. CALIBRATION-PER-SUBGROUP. Compute Brier score per customer
+   segment for both churn and conversion classifiers. Cite the
+   endpoint that returns calibration (per routes/predict.py).
+   Report the subgroup with the worst calibration.
+
+B. FEATURE-ABLATION. Drop the top-importance feature for each
+   classifier, re-train, report the AUC drop. If the drop is >3
+   points, that feature was doing more work than the rest
+   combined.
+
+For every claim — algorithm name, metric, endpoint, column — cite
+the file and function. If you cannot cite, say so explicitly and
+mark the finding uncertain.
+
+For every dollar figure, quote the PRODUCT_BRIEF.md §2 line. The
+relevant §2 costs for red-team ranking are $45 wrong-segment, $14
+wasted impression, $220 under-18 PDPA, $8 cold-start.
+
+CRITICAL: do NOT propose new thresholds or floors. The floors were
+pre-registered in Phase 6; this phase MEASURES against them. If
+re-seed Jaccard comes back at 0.74 and my Phase 6 floor was 0.80,
+the finding is "below my pre-registered floor — Phase 8 gate
+failure candidate", not "let me propose 0.70 as the new floor".
+
+Rank findings by severity in dollars using §2 quotes. Tag each
+finding as ACCEPT (accepted risk), MITIGATE (action before ship),
+or RE-DO (a phase must re-run). My call on dispositions; your
+recommendation in writing first.
+
+Do NOT use "blocker" without naming the specific ship-action
+blocked. "Segmentation unstable" is not a blocker; "cannot ship
+the allocator because its input reshuffles every week" is.
+
+When all five sweeps are in the journal with cited numbers, §2
+quotes, and disposition recommendations, stop and wait for my
+call per finding.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names which sweeps are pre-committed (five, split 3+2 across USML and SML) and keeps the disposition call with me — the Trust Plane stays clean.
+- Cite-or-cut is enforced because red-team findings without citations become un-auditable "the model failed" claims that score 1/4 on D3.
+- "Do NOT propose new thresholds" is the load-bearing anti-cheat — without it the agent lowers floors post-hoc to pass the red team, destroying Phase 6's pre-registration value.
+- ACCEPT / MITIGATE / RE-DO triage is explicit so the disposition vocabulary matches what `/redteam` expects at the COC-level close.
+- One paste covers both USML (Sprint 1) and SML (Sprint 2 replay) because the disposition discipline is identical and separating them doubles the paste load.
+
+### What to expect back
+
+- `journal/phase_7_red_team.md` (Sprint 1) or `journal/phase_7_sml.md` (Sprint 2) with five cited findings.
+- Per-segment Jaccard distribution (not just mean) from the re-seed sweep.
+- Proxy-drop reassignment percentages for postal_district, age_band, and both combined.
+- Brier-score-per-subgroup for churn and conversion classifiers.
+- A ranked finding list with §2-quoted dollar severity and ACCEPT/MITIGATE/RE-DO tags.
+- A stop signal pending my disposition call.
+
+### Push back if you see
+
+- A new threshold proposed ("I suggest lowering the stability floor to 0.70") — "my Phase 6 floor was X; this is a failure against that floor, not a floor adjustment."
+- A finding without a file-and-function citation — "which file and function produced this?"
+- A dollar severity without a §2 quote — "please quote the §2 row for this cost."
+- Mean Jaccard only, without the distribution — "please report the distribution across seeds, not the mean."
+- "Blocker: the model is unstable" — "which ship-action is blocked?"
+
+### Adapt for your next domain
+
+- Change `re-seed / proxy / operational collapse` USML sweeps to your domain's unsupervised stress tests.
+- Change `calibration-per-subgroup / feature-ablation` SML sweeps to your domain's classifier stress tests.
+- Change `postal_district, age_band` to your domain's protected-proxy candidates.
+- Change `post-Black-Friday filter` to your domain's known regime-shift scenario.
+- Change the `$45 / $14 / $220 / $8` §2 costs to your own cost table's equivalents.
 
 ### Evaluation checklist
 
@@ -943,11 +1538,103 @@ The go/no-go. Write the criteria that must hold for this artefact to ship, the s
 
 Ship or don't ship, and on what monitoring?
 
-### Prompt template — universal
+### Paste this
 
-> _"Write the go/no-go gate for deploying this [model]. Include: (1) what [metric thresholds / three floors] must hold, tied to the numbers from Phase 6, (2) what we monitor on day one — specific signals + alert thresholds + cadence, (3) what triggers automatic rollback — specific measurable signal, not 'if things look bad'. Then promote the model from trial to shadow via the registry."_
+```
+I'm entering Playbook Phase 8 — Deployment Gate. The scaffold
+pre-committed to the registry state machine (staging → shadow →
+production) and the /segment/promote endpoint; my decision here is
+ship-or-no-ship against my Phase 6 pre-registered floors, plus the
+day-one monitoring plan and the rollback trigger. I am not
+proposing new criteria; I am checking my pre-registered ones.
 
-> **For tonight's product (Sprint 1):** _"Write the deployment gate for the chosen K=5 segmentation. Go/no-go on the three Phase-6 floors (0.25 / 0.80 / actionability). Monitoring: segment-size distribution weekly + per-segment reassignment monthly. Rollback trigger: any segment drops below 2% in one month. Promote K=5 from staging to shadow via /segment/promote."_
+Copy journal/skeletons/phase_8_gate.md into
+workspaces/metis/week-05-retail/journal/phase_8_gate.md (Sprint 1
+USML) or journal/phase_8_sml.md (Sprint 2 SML).
+
+Your job:
+
+1. Read my Phase 6 floors from phase_6_usml.md (or phase_6_sml.md)
+   — the three USML floors OR the SML threshold rule + Brier
+   calibration floor. Quote the values I wrote, verbatim. Do NOT
+   propose or "suggest" values.
+
+2. Read my Phase 7 red-team findings from phase_7_red_team.md (or
+   phase_7_sml.md). For every MITIGATE or RE-DO finding, flag it —
+   I cannot ship through an unmitigated red-team finding.
+
+3. Measure the current artefact (K=N chosen / classifier family
+   chosen) against each floor. Report PASS or FAIL per floor. No
+   threshold adjustments. If a floor fails, the gate is NO-GO
+   unless I explicitly override in writing.
+
+4. Draft the day-one monitoring plan. For each signal, name:
+   (a) the signal,
+   (b) the cadence (weekly / monthly / daily),
+   (c) the alert threshold — GROUNDED IN VARIANCE, not a round
+       number. "15% because the rolling variance's 95th percentile
+       is 12%" is D5 = 4/4; "15% because it feels big" is D5 =
+       1/4. Compute the variance from the observed Phase 7 sweep
+       numbers I just produced, or from the scaffold's drift
+       reference at src/retail/data/drift_baseline.json.
+   (d) the owner (role — E-com Ops Lead for segmentation, CX Lead
+       for classifier).
+
+5. Draft the rollback trigger — one specific signal + threshold
+   + duration window. "Any segment drops below 2% of customers in
+   one month" is specific; "if things go wrong" is 0/4 on D5.
+
+6. Draft the rollback TARGET — the artefact we fall back to. For
+   Sprint 1 USML, the known-working rollback is the 2020
+   rule-based 5-segment system (not a previous clustering). For
+   Sprint 2 SML, the rollback is the previous threshold or the
+   rule-based flag logic — whichever is known to work.
+
+7. Do NOT execute /segment/promote yet. I sign the GO/NO-GO based
+   on the PASS/FAIL table, then call /segment/promote myself (or
+   authorize you to).
+
+For every technical claim — endpoint, file, function — cite.
+For every dollar figure (rare here), quote the §2 line.
+
+Do NOT use "blocker" without naming the specific ship-action.
+
+When the PASS/FAIL table, monitoring plan with variance-grounded
+thresholds, rollback trigger, and rollback target are in the
+journal, stop and wait for my GO/NO-GO call.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names the scaffold's registry commitment and keeps the GO/NO-GO with me — the agent does not "pass" the gate on my behalf.
+- Reading my Phase 6 values verbatim rather than re-proposing them is the structural defence of pre-registration — floors written in Phase 6 are the floors checked in Phase 8, unchanged.
+- Variance-grounded monitoring thresholds are explicitly required with a 4/4-vs-1/4 scoring example, because the #1 D5 failure is "15% because it feels big".
+- Forbidding `/segment/promote` until my GO is the structural anti-auto-ship — the agent does not decide to push staging → shadow.
+- Rollback TARGET being the 2020 rulebook (USML) or previous threshold (SML) is named explicitly so the agent doesn't invent a "previous model version" that doesn't exist.
+
+### What to expect back
+
+- `journal/phase_8_gate.md` (or `_sml.md`) with a PASS/FAIL table of the Phase 6 floors.
+- A day-one monitoring plan with signal / cadence / variance-grounded threshold / owner per line.
+- A one-line rollback trigger (specific signal + threshold + duration).
+- A named rollback target known to work today (2020 rulebook for USML; previous threshold for SML).
+- A stop signal pending my GO/NO-GO — no `/segment/promote` call yet.
+
+### Push back if you see
+
+- A monitoring threshold without variance grounding — "what's the 95th percentile of historical variance? ground the number or remove it."
+- A rollback target that's "a previous version of the model" without proof it exists — "is there actually a previous promoted model in the registry, or is this hypothetical?"
+- Floors re-proposed ("recommend lowering stability to 0.75") — "my Phase 6 floor was 0.80; the gate checks against that, not a new value."
+- `/segment/promote` called before I said GO — "please revert the promotion; GO is my call."
+- Monitoring prose without a signal/cadence/threshold/owner — "please rewrite as a table with those four columns."
+
+### Adapt for your next domain
+
+- Change `/segment/promote` to your registry's promotion endpoint.
+- Change `staging → shadow → production` to your registry's state machine.
+- Change `drift_baseline.json` to your variance reference file.
+- Change `2020 rulebook` (USML rollback) to your domain's incumbent / no-ML fallback.
+- Change `E-com Ops Lead / CX Lead` to your monitoring owners.
 
 ### Evaluation checklist
 
@@ -1023,9 +1710,9 @@ Before you close the laptop, separate the lessons that transfer to any future ML
 
 What transfers to the next domain?
 
-### Prompt template — universal
+### Paste this
 
-> _"Looking back at all four sprints — what did we learn that applies to ANY ML product we build next week? Give me 3 transferable lessons. And 2 things that are specific to [this paradigm / domain] that won't transfer. Each lesson names the near-miss that motivated it. Append transferables to the Playbook appendix; write domain-specific to the domain's skill file."_
+> The `/codify` COC workflow phase shares this Playbook Phase 9. **Paste the `/codify` prompt from `START_HERE.md` §6.8** — that prompt drives Phase 9 at both the COC-workflow-entry and Playbook-phase-detail levels, so there is nothing additional to paste here. Return to §6.8 when you reach Close.
 
 ### Evaluation checklist
 
@@ -1107,11 +1794,9 @@ Same structure as Phase 4 USML — multi-family sweep — but now with labels. T
 
 Which 3 model families give me a fair leaderboard for this SML task?
 
-### Prompt template — universal
+### Paste this
 
-> _"Run an SML candidate sweep for [target]. Three family-diverse candidates: linear (e.g., logistic regression), tree bag (e.g., random forest), ensemble gradient-boosted (the usual winner for tabular). Same features, same stratified CV, same held-out test set. Report AUC, precision and recall at a default threshold, Brier score (calibration), and feature importance. Include a majority-class baseline. I'll pick."_
-
-> **For tonight's product (Sprint 2 SML):** _"Run the sweep for CHURN (label = days_since_last_visit > 90) on the 7 non-leakage behavioural features. Then re-run for CONVERSION (label = customer-category interaction in last 90 days). Same three families each time: logistic regression + random forest + gradient-boosted. I'll compare Sprint 2's ensembles vs linear baseline."_
+> The paste-ready prompt for Phase 4 **covers both USML (Sprint 1) and SML (Sprint 2)** via an explicit sprint branch at the top. See **§Phase 4 — Candidates** above. This SML-replay section retains its teaching content (SML lens, family families, evaluation) as reference; the prompt itself is the same one you pasted when you entered Sprint 2 /implement.
 
 ### Evaluation checklist
 
@@ -1180,11 +1865,9 @@ The SML variant that Week 4 couldn't go deep on. This is the classifier's thresh
 
 At what threshold does this classifier earn its dollars?
 
-### Prompt template — universal
+### Paste this
 
-> _"Given [cost_FN] per false negative and [cost_FP] per false positive, pick the decision threshold for [target]. Show me the PR curve. Compute expected cost across threshold values from 0.1 to 0.9 in 0.05 steps. Recommend the cost-minimising threshold. If the model is miscalibrated (Brier > [floor]), run calibration and redo. I set the threshold; you set the operating point."_
-
-> **For tonight's product (Sprint 2 SML churn):** _"Churn cost structure: $120 CAC to reacquire a churned customer vs $3 to send them a retention touch. Pick the threshold on the PR curve that minimises expected cost. If Brier score is > 0.04, run isotonic calibration. Default to 0.30 if calibration is already good."_
+> The paste-ready prompt for Phase 6 **covers both USML (Sprint 1 three-floor pre-registration) and SML (Sprint 2 PR-curve + Brier calibration)** via an explicit sprint branch at the top. See **§Phase 6 — Metric + Threshold** above. This SML-replay section retains its teaching content (PR vs ROC, cost-based threshold selection, calibration) as reference; the prompt itself is the same one you pasted when you reached Phase 6 in Sprint 2.
 
 ### Evaluation checklist
 
@@ -1286,11 +1969,103 @@ Defining "good" for a product that has a secondary optimization layer. "Good" is
 
 Single-objective (revenue only, with coverage as constraint) or multi-objective (revenue AND reach AND diversity with weights)? What are the weights, and what does each framing sacrifice?
 
-### Prompt template — universal
+### Paste this
 
-> _"Design the objective for [secondary layer]. Name the competing signals (expect 3–5). Show me two framings: single-objective (weighted sum, with secondary signals as constraint floors) and multi-objective (separate scores, Pareto frontier). For each, state what it sacrifices. Recommend one with defensible weights; I approve."_
+```
+I'm entering Playbook Phase 10 — Objective Function. The scaffold
+pre-committed to the LP allocator shape and the endpoints
+(/allocate/objective GET + POST, /allocate/campaigns,
+/allocate/solve per src/retail/backend/routes/allocate.py); my
+decision here is the OBJECTIVE WEIGHTS — single vs multi-objective,
+and the specific weight per term — defended in dollars.
 
-> **For tonight's product (Sprint 3):** _"Objective for campaign allocator: expected revenue ($18 per converted click, $14 per wasted impression) + reach (customers touched) + diversity (cross-segment coverage). Single-objective with diversity as a coverage floor (Phase 11) is the default; propose multi-objective framings only if single loses more than 10% revenue. Show me shadow prices on the touch budget + PDPA constraint."_
+Copy journal/skeletons/phase_10_objective.md into
+workspaces/metis/week-05-retail/journal/phase_10_objective.md.
+
+Your job:
+
+1. Name the 3–5 competing signals the objective needs to reason
+   across. For Arcadia's allocator these are: expected revenue,
+   reach (customers touched), diversity (cross-segment coverage),
+   touch spend. If you add a fifth (fairness, serendipity), name
+   it as a PROXY for long-term revenue, not a direct term.
+
+2. For each term, quote the dollar rate VERBATIM from
+   PRODUCT_BRIEF.md §2:
+   - Expected revenue per converted click — $18 (row: basket lift)
+   - Wasted impression — $14 per session
+   - Per-customer touch cost — $3 per contact
+   - Cold-start session fallback — $8 per new-user session
+   If you cannot find a row, say so; do NOT invent rates.
+
+3. Draft BOTH framings side by side:
+   (a) Single-objective: expected revenue maximisation, with
+       diversity / reach as constraint floors (those go in Phase
+       11). Formula:
+       max Σ x × (P(convert) × $18 − $14 × wasted − $3 × touches)
+   (b) Multi-objective: separate scores on revenue, reach,
+       diversity, each scaled. Pareto frontier sketch.
+
+4. Compute the SHADOW PRICE for the two most important constraints
+   (touch budget and the PDPA under-18 exclusion). Shadow price =
+   "how much extra revenue per unit of constraint relaxation". Run
+   /allocate/solve once and read the solver output. Cite the
+   solver function in src/retail/backend/routes/allocate.py.
+
+5. Recommend ONE framing with defensible weights — but do NOT
+   set the weight values. Your job is the shape and the rationale
+   ("single-objective because stakeholders agree revenue is the
+   headline"); my job is the weight numbers I paste into
+   /allocate/objective.
+
+6. Name what each framing SACRIFICES. Single-objective sacrifices
+   explicit reach / diversity visibility; multi-objective
+   sacrifices a single go/no-go number. No free lunch — state it.
+
+Do NOT call /allocate/objective to POST new weights yet. That is
+my action. You run /allocate/solve with the current / default
+weights to expose the shadow prices, then stop.
+
+Do NOT propose weight VALUES (0.7 revenue, 0.2 reach, 0.1 diversity).
+Your job is the framing and the dollar rates; I pick the weights.
+
+Do NOT use "blocker" without naming the specific ship-action.
+
+When framings, shadow prices, and sacrifices are drafted with §2
+quotes, stop and wait for my weight decision.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names the scaffold's LP shape and endpoints and keeps the WEIGHTS with me — the objective is where the CMO's preferences live, so the agent drafts and I number.
+- Show-the-brief is mandatory on the four rates because an invented $19 or $15 corrupts the objective and scores 0/4 on D1.
+- Single- AND multi-objective framings both required because Phase 10 checklist says both must be presented — skipping multi is a 2/4 on D3 (hidden trade-off).
+- Shadow price on touch budget and PDPA is required up front so the "cost of compliance" conversation starts before the injection, not after.
+- Forbidding the POST to `/allocate/objective` is the structural guard against auto-picking weights — the agent cannot set the objective by side effect.
+
+### What to expect back
+
+- `journal/phase_10_objective.md` with the 3–5 signals named, each with a §2 quote.
+- Both single- and multi-objective framings drafted side by side.
+- Shadow prices for touch-budget and PDPA constraints, read from a real `/allocate/solve` run.
+- A recommended framing with sacrifice stated, NO weight values.
+- A stop signal pending my weight decision.
+
+### Push back if you see
+
+- A weight value proposed ("weight_revenue = 0.7") — "please remove; I own weights, you own framing."
+- A dollar rate not quoted from §2 — "please quote the §2 row for this rate."
+- Only one framing (single OR multi, not both) — "please draft both; I need to see what each sacrifices."
+- Shadow price stated without running the solver — "please run `/allocate/solve` first; shadow prices come from the solver output."
+- A POST to `/allocate/objective` already made — "please revert; I set the weights, not you."
+
+### Adapt for your next domain
+
+- Change `expected revenue / reach / diversity / touches` to your domain's objective terms.
+- Change the four §2 dollar rates to your domain's cost table rows.
+- Change `/allocate/objective`, `/allocate/solve` to your optimization endpoints.
+- Change `touch budget + PDPA` shadow-price pair to your domain's binding-constraint pair.
+- Keep the "draft both framings, sacrifice named" mechanic — it's domain-independent.
 
 ### Evaluation checklist
 
@@ -1369,15 +2144,110 @@ For each rule the system must respect, classify **hard** (law, physics, contract
 
 Hard or soft for each rule? Penalty for each soft?
 
-### Prompt template — universal (first pass)
+### Paste this
 
-> _"List every rule the [system] must respect. For each: hard (law/physics/contract) or soft (preference with penalty)? For soft, propose a dollar penalty per unit of violation. Justify each classification. Show me which pairs (objective × constraint) would change if I demoted a hard to soft or vice versa."_
+```
+I'm entering Playbook Phase 11 — Constraint Classification. The
+scaffold pre-committed to the constraint list (touch budget,
+per-segment fatigue cap, PDPA under-18 browsing, inventory
+availability, brand exclusion) exposed at /allocate/constraints
+per src/retail/backend/routes/allocate.py; my decision here is
+HARD vs SOFT per rule, plus the DOLLAR PENALTY on every soft
+constraint. This is also where the PDPA mid-sprint injection
+re-fires — I run Phase 11 twice, saving both passes.
 
-> **Universal (post-injection re-run):** _"[Regulatory event] changes [rule] — re-classify. Document the change in a separate journal entry. Show the old pass and the new pass side by side. Explain the cost of the new hard classification in $ (shadow price)."_
+First pass (pre-injection):
 
-> **For tonight's product (first pass):** _"Classify Arcadia allocator rules — touch budget, per-segment fatigue cap, PDPA under-18 browsing, inventory availability, brand exclusion list. Hard or soft with penalty. Defend each."_
+Copy journal/skeletons/phase_11_constraints.md into
+workspaces/metis/week-05-retail/journal/phase_11_constraints.md.
 
-> **For tonight's product (PDPA injection):** _"Legal has classified under-18 browsing history as a PDPA §13 hard exclusion (was soft before). Re-classify. Re-solve the allocator with the new hard constraint. Report the dollar cost of compliance (shadow price). Save `phase_11_postpdpa.md`."_
+For each constraint, classify:
+
+1. Touch budget cap — hard (contract with marketing) or soft
+   (over-spend at $X penalty)?
+2. Per-segment fatigue cap — almost always soft; what's the
+   dollar penalty per over-touch? Cite the per-customer touch
+   cost ($3) from PRODUCT_BRIEF.md §2 verbatim as the floor
+   on the penalty.
+3. PDPA under-18 browsing — classify as SOFT or HARD (first
+   pass; legal has not fired yet). Note the $220 per under-18
+   record exposure from PRODUCT_BRIEF.md §2 verbatim.
+4. Inventory availability — hard (physical): you cannot sell
+   what you don't have.
+5. Brand exclusion list — contract hard: you cannot push brand
+   X to segment Y.
+
+For every classification, name WHY — the regime (PDPA §13, MAS
+circular, contract clause, physical limit) or the stakeholder
+(CMO preference, Ops preference).
+
+For every dollar figure, quote PRODUCT_BRIEF.md §2 verbatim. The
+two §2 rows that drive Phase 11 are the $3 touch cost and the
+$220 PDPA exposure. The $8 cold-start fallback is also a §2 row
+and may appear as a penalty.
+
+Do NOT propose penalty VALUES. Your job is the shape
+("soft-with-penalty-per-unit-over-cap"); my job is the number.
+
+Post-injection re-run (when instructor fires PDPA at ~4:30):
+
+When I paste the injection payload (src/retail/data/scenarios/
+pdpa_redline.json), copy the skeleton AGAIN into
+journal/phase_11_postpdpa.md. Do not overwrite the first pass —
+the rubric scores BOTH files.
+
+In the re-run:
+- Re-classify the PDPA under-18 rule as HARD (PDPA §13).
+- Quote the $220 per under-18 record from PRODUCT_BRIEF.md §2
+  verbatim as the compliance anchor.
+- Save a before / after table showing what changed.
+- Note that Phase 12 must now re-run — the LP in
+  data/allocator_last_plan.json must be re-solved under the new
+  hard constraint. Writing phase_11_postpdpa.md alone is a D3
+  zero; Phase 12 re-solve is non-negotiable.
+
+Do NOT POST /allocate/constraints until I approve per rule. The
+classifications are my call; you draft, I sign.
+
+Do NOT use "blocker" without naming the specific blocked
+ship-action.
+
+When first-pass classifications are drafted with §2 quotes and
+cited regimes, stop and wait for me. When PDPA fires, repeat
+into phase_11_postpdpa.md and stop again.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names the scaffold's constraint list and endpoint, keeping the hard-vs-soft call with me — constraint classification is the #1 rubric-teeth moment of Sprint 3.
+- Show-the-brief is mandatory on $3 and $220 because these are the two §2 rows where the rubric has 4/4 vs 1/4 scoring on D4.
+- Mid-sprint injection is baked into the same paste so I don't lose the clock hunting for a second paste when the instructor fires — the postpdpa flow is a reentrant re-run, not a new prompt.
+- "Writing `phase_11_postpdpa.md` alone is a D3 zero" is the load-bearing anti-trap sentence — it names the single most common Sprint 3 failure and attaches it to the rubric directly.
+- Forbidding the `/allocate/constraints` POST before my approval prevents the agent from silently locking in a soft PDPA classification.
+
+### What to expect back
+
+- `journal/phase_11_constraints.md` with hard/soft per rule + regime cited + §2 dollar quotes.
+- Later (post-injection): `journal/phase_11_postpdpa.md` with PDPA re-classified as HARD, plus a before / after table and a note that Phase 12 must re-run.
+- Penalty SHAPES (not values) drafted for every soft constraint.
+- A stop signal pending my per-rule approval — no `/allocate/constraints` POST yet.
+- After the injection: an explicit cue that Phase 12 re-solve is next.
+
+### Push back if you see
+
+- A proposed penalty value ("$5 per over-touch") — "please remove; I set the value, you set the shape."
+- $220 or $3 not quoted from `PRODUCT_BRIEF.md §2` — "please quote the §2 row."
+- PDPA classified as SOFT in the post-injection pass — "PDPA §13 is a legal hard line; re-classify as HARD."
+- Post-injection journal written but no note about Phase 12 re-solve — "the LP plan must re-run; please flag that Phase 12 is next."
+- `/allocate/constraints` POSTed before my approval — "please revert; approval is my call per rule."
+
+### Adapt for your next domain
+
+- Change `touch budget / fatigue cap / PDPA / inventory / brand exclusion` to your domain's five constraints.
+- Change `PDPA §13` to your jurisdiction's equivalent regulatory anchor.
+- Change the `$220 / $3` §2 quotes to your domain's compliance + operational rates.
+- Change `pdpa_redline.json` to your domain's mid-sprint injection payload.
+- Change the regime hierarchy (contract / law / physics / preference) to match your constraint vocabulary.
 
 ### Evaluation checklist
 
@@ -1454,11 +2324,117 @@ The solver runs. It returns a plan. You check: feasibility (every hard constrain
 
 Is the solution feasible, optimal, edge-case safe, and pathology-free?
 
-### Prompt template — universal
+### Paste this
 
-> _"Run the [solver] with the Phase 10 objective and Phase 11 constraints. Report: (a) feasibility per hard constraint, (b) optimality gap, (c) pathologies — concentration, dead variables, boundary solutions, (d) sensitivity: perturb weights by 10% and re-solve. Recommend accept / re-tune / fall back / redesign; I decide. Save the plan."_
+```
+I'm entering Playbook Phase 12 — Solver Acceptance. The scaffold
+pre-committed to the LP solver behind /allocate/solve and the
+last-plan persistence at data/allocator_last_plan.json per
+src/retail/backend/routes/allocate.py; my decision here is
+ACCEPT / RE-TUNE / FALL-BACK / REDESIGN on the solved plan,
+checked for feasibility AND pathologies. I run this twice — once
+with the first-pass constraints, once after the PDPA injection.
 
-> **For tonight's product (Sprint 3):** _"Run the allocator with the current objective + constraints. Report: PDPA active yes/no, touch budget used / remaining, per-segment concentration, dead campaigns. Run sensitivity: weight_revenue ± 0.05. Pathology list. Decide: accept the plan, re-tune weights, demote PDPA (don't!), or redesign."_
+Copy journal/skeletons/phase_12_accept.md into
+workspaces/metis/week-05-retail/journal/phase_12_accept.md.
+
+Your job, first pass:
+
+1. POST to /allocate/solve with the current Phase 10 objective
+   and Phase 11 constraints. Save the response to
+   data/allocator_last_plan.json (the endpoint does this
+   automatically per allocate.py). Cite the solver function.
+
+2. Report FEASIBILITY per hard constraint — which constraints are
+   satisfied (e.g. "touch budget used: X of Y", "inventory: no
+   SKU allocated beyond availability"). If any hard constraint
+   is violated, the plan is infeasible and my disposition is
+   REDESIGN or FALL-BACK.
+
+3. Report the OPTIMALITY GAP — the distance from the LP optimum.
+   If >5%, name it as a finding.
+
+4. Check four PATHOLOGIES:
+   (a) Concentration — is any segment getting >10% of the
+       plan disproportionately? I set the threshold; you report
+       the concentration percentage per segment.
+   (b) Dead campaigns — any campaign with 0 allocation across
+       all segments.
+   (c) Boundary — any decision at 100% of a budget when I
+       expected 80%.
+   (d) Sensitivity — perturb weights by ±10% and re-solve.
+       Does the top-concentration segment flip? Does a dead
+       campaign come alive? Report the change in allocations.
+
+5. Compute prior-plan comparison — if a prior /allocate/last_plan
+   exists, what's the expected-revenue delta in dollars?
+   Quote the $18 basket-lift and $14 wasted-impression rates
+   from PRODUCT_BRIEF.md §2 verbatim for the calculation.
+
+Do NOT propose pathology THRESHOLDS. The 10% concentration, the
+5% optimality gap, the ±10% sensitivity band — I set those. Your
+job is to report the measured values; I compare to my floors.
+The point is pre-registered pathology floors, not post-hoc ones.
+
+Do NOT decide ACCEPT / RE-TUNE / FALL-BACK / REDESIGN. That is my
+call per pass. You recommend with rationale; I sign.
+
+Post-injection re-run (when PDPA fires):
+
+After phase_11_postpdpa.md is written, POST /allocate/solve AGAIN
+with the new hard PDPA constraint. Save the new plan — the file
+at data/allocator_last_plan.json MUST BE DIFFERENT from the
+first-pass plan. If the file is byte-identical, the solver did
+not pick up the new constraint and something is wrong.
+
+Copy the skeleton into phase_12_postpdpa.md (do not overwrite
+phase_12_accept.md). Report the same four pathologies. Compute
+the SHADOW PRICE of the new hard PDPA constraint — "the dollar
+revenue lost to compliance". Quote the $220 line from
+PRODUCT_BRIEF.md §2 to anchor the shadow price in per-record
+terms.
+
+For every claim, cite the file and function. For every dollar
+figure, quote §2. Do NOT invent.
+
+Do NOT use "blocker" without the specific blocked ship-action.
+
+When feasibility, gap, pathology report, and sensitivity are in
+the journal, stop and wait for my disposition. When PDPA fires,
+re-run and stop again.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names the scaffold's solver and plan-persistence commitments and keeps the disposition with me — "feasible" is not the same as "shippable" and only I say so.
+- Four pathologies are enumerated because Phase 12 checklist says all four must be checked; missing one is a 2/4 on D3.
+- Forbidding pathology THRESHOLD proposals is the anti-post-hoc guard — the agent reporting "concentration 12% which is below the 15% threshold" post-hoc is exactly the failure Phase 6 pre-registration was supposed to prevent.
+- The byte-identical-plan check is the disk-level proof that the PDPA re-solve actually fired — the #1 rubric trap of the night is writing `phase_12_postpdpa.md` while the solver never re-ran.
+- Show-the-brief on $18 / $14 / $220 is required so expected-revenue delta and shadow-price claims are audit-traceable.
+
+### What to expect back
+
+- `journal/phase_12_accept.md` with feasibility per hard constraint + optimality gap + four-pathology report + ±10% sensitivity.
+- Later: `journal/phase_12_postpdpa.md` after the injection, with a DIFFERENT `data/allocator_last_plan.json` and a quoted shadow price.
+- Expected-revenue delta vs prior plan in dollars, sourced from §2 rates.
+- A disposition RECOMMENDATION with rationale — not a decision.
+- A stop signal pending my ACCEPT / RE-TUNE / FALL-BACK / REDESIGN call.
+
+### Push back if you see
+
+- A proposed pathology threshold ("concentration limit = 10%") — "please remove; I set pathology floors in my journal, not you."
+- `phase_12_postpdpa.md` written but `data/allocator_last_plan.json` byte-identical to the first pass — "the solver didn't re-run; please re-POST `/allocate/solve` and confirm the plan file changed."
+- A "feasible plan" claim without the four-pathology check — "did you check concentration, dead campaigns, boundary, and sensitivity? feasible alone is 1/4 on D3."
+- Shadow price quoted without a $ unit — "shadow price of what, in dollars per what unit?"
+- Disposition decided on my behalf ("I recommend accept, accepting the plan") — "please state disposition as a recommendation only; the sign is mine."
+
+### Adapt for your next domain
+
+- Change `/allocate/solve` and `data/allocator_last_plan.json` to your optimization endpoints and plan persistence.
+- Change the four pathologies (concentration / dead / boundary / sensitivity) to your domain's pathology taxonomy.
+- Change `$18 / $14 / $220` to your domain's §2-equivalent rates.
+- Change `PDPA injection` to your domain's mid-sprint regulatory event.
+- Keep the byte-identical-plan check as-is — it's domain-independent structural proof.
 
 ### Evaluation checklist
 
@@ -1548,11 +2524,121 @@ Setting up monitoring for the day after launch. Reference data registered; curre
 
 When do we retrain? What is the rule?
 
-### Prompt template — universal
+### Paste this
 
-> _"Set up drift monitoring for [model(s)]. First confirm reference data is registered. For each model, name: (1) primary drift signals (at least one distributional, one performance), (2) thresholds grounded in historical variance, (3) duration window that distinguishes drift from seasonality, (4) human-in-the-loop-vs-automatic for first trigger. If multiple models, separate rules per model. Flag any seasonal dates in the reference window that should be excluded."_
+```
+I'm entering Playbook Phase 13 — Drift. The scaffold pre-committed
+to drift reference data registered at startup and the endpoints
+/drift/status/{model_id}, /drift/check, /drift/retrain_rule per
+src/retail/backend/routes/drift.py; my decision here is THREE
+RETRAIN RULES — one per model, grounded in historical variance,
+with human-in-the-loop disposition. Not one rule for three models;
+three rules, three cadences.
 
-> **For tonight's product (Sprint 4):** _"Three drift rules: (a) segmentation = monthly segment-membership churn, threshold = 12% grounded in the training window's weekly variance; (b) churn classifier = weekly calibration error + AUC decay > 3 points; (c) allocator = daily constraint-violation rate, threshold = 5%. Duration: 2 consecutive triggers for segmentation, 1 for classifier, 3 for allocator. HITL on first trigger for all three. Exclude Nov–Dec from the segmentation baseline."_
+Copy journal/skeletons/phase_13_retrain.md into
+workspaces/metis/week-05-retail/journal/phase_13_retrain.md.
+
+Your job:
+
+1. Confirm the drift reference is registered for each of the
+   three models:
+   - Segmentation (customer_segmentation)
+   - Churn classifier (churn)
+   - Conversion classifier (conversion)
+   Run GET /drift/status/customer_segmentation and confirm
+   "reference_set": true. If not, STOP — do NOT attempt to
+   re-seed; that is the scaffold's responsibility.
+
+2. Run /drift/check against two windows — recent_30d AND
+   catalog_drift (per src/retail/data/scenarios/
+   catalog_drift.json). Report the OBSERVED VARIANCE per signal.
+   I need the 50th, 95th, 99th percentile of the historical
+   variance to ground my thresholds in.
+
+3. Draft the SHAPE of three rules — one per model — each with:
+   - Signal(s): segmentation = membership churn; churn
+     classifier = calibration error + AUC decay + feature
+     PSI; conversion classifier = same; allocator (if
+     applicable) = constraint-violation rate.
+   - Cadence: segmentation monthly; classifiers weekly;
+     allocator daily.
+   - Threshold grounding: "to be set by the student at the
+     95th percentile of observed variance from step 2".
+   - Duration window: 1 day is seasonality, 7 days is real,
+     30 days is definitive. Segmentation needs 2 consecutive
+     triggers; classifier needs 1; allocator needs 3. Name
+     the rationale.
+   - HITL disposition: first trigger is ALWAYS human-in-the-
+     loop. After 3 consecutive clean re-trains, the operator
+     may opt into auto-retrain — but the default is HITL.
+   - Seasonal exclusions: quote PRODUCT_BRIEF.md §2 Nov–Dec
+     (Black Friday / Year-End) row verbatim. Peak season is
+     seasonality, not drift.
+
+4. Cite the drift signal functions in src/retail/backend/
+   routes/drift.py. For every signal (PSI, Jaccard, Brier,
+   constraint-violation rate), name the function. If you cannot
+   cite, say so.
+
+Do NOT propose THRESHOLD VALUES. I write the numbers grounded in
+the observed variance you reported in step 2. A threshold you
+proposed that happens to match the 95th percentile is still
+post-hoc — the discipline is that I set the number.
+
+Do NOT use "auto-retrain when X" phrasing. Retrain is a human
+decision. The monitor reports; the operator pulls. Reframe any
+"auto-retrain" as "signal fires → operator decides".
+
+Do NOT POST /drift/retrain_rule until I approve per rule. The
+classifications are my call.
+
+Any dollar figure cited — including any §2 cost (e.g. $45 for
+wrong-segment, driving the segmentation drift urgency) — must be
+quoted verbatim from §2. Drift thresholds themselves are
+variance-grounded (not $-grounded), but any downstream dollar
+claim ("below this threshold, the wrong-segment cost climbs
+above $X/month") must be §2-sourced.
+
+Do NOT use "blocker" without naming the specific ship-action.
+
+When the reference is confirmed registered, the observed-variance
+table is populated from both windows, and the three rule shapes
+are drafted with cadence / HITL / seasonal exclusion, stop and
+wait for me to write the threshold values.
+```
+
+### Why this prompt is written this way
+
+- Inheritance-framed opening names the scaffold's drift reference and endpoints and keeps the three threshold values with me — three rules, three cadences is the load-bearing structural insight.
+- Variance-grounded thresholds are required with explicit percentile language so the agent reports variance rather than picking a round number.
+- "Do NOT attempt to re-seed" is the load-bearing anti-trap from Phase 13 common failure #1 — re-seeding masks a scaffold issue as a drift problem.
+- No-auto-retrain phrasing enforces the `.claude/rules/agent-reasoning.md` principle that retrain stays with the human — monitor reports, operator pulls.
+- Show-the-brief on Nov–Dec seasonal exclusion is mandatory because without it the first Black Friday spike triggers a retrain on known seasonality.
+
+### What to expect back
+
+- `journal/phase_13_retrain.md` with three rule skeletons (segmentation / churn / conversion).
+- An observed-variance table with 50th / 95th / 99th percentile per signal from the two `/drift/check` windows.
+- `"reference_set": true` confirmations for each model.
+- Every signal cited to a function in `src/retail/backend/routes/drift.py`.
+- A quoted Nov–Dec seasonal exclusion line from `PRODUCT_BRIEF.md §2`.
+- A stop signal pending my threshold values.
+
+### Push back if you see
+
+- A proposed threshold value ("15% membership churn") — "please remove; I write the values from the observed variance you reported."
+- "Auto-retrain when X > Y" phrasing — "please reframe as 'signal fires → operator decides'. retrain is a human call."
+- One combined rule for three models — "the three models have different cadences; please split into three rules."
+- An attempt to re-register drift reference data — "please don't re-seed; if `reference_set` is false, that's a scaffold issue — hand up instead."
+- Missing Nov–Dec exclusion — "please quote the §2 Nov–Dec row; peak-season spikes are seasonality, not drift."
+
+### Adapt for your next domain
+
+- Change the three models (segmentation / churn / conversion) to your domain's deployed artefacts.
+- Change `PSI / Jaccard / Brier / constraint-violation rate` signals to your domain's drift signals.
+- Change `Nov–Dec Black Friday` to your domain's known seasonality window.
+- Change `monthly / weekly / daily` cadences to match your models' observable drift timescales.
+- Change `/drift/status/{model_id}` etc. to your domain's drift endpoints.
 
 ### Evaluation checklist
 
