@@ -4,294 +4,125 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
 https://creativecommons.org/licenses/by/4.0/
 -->
 
-# The ML Decision Playbook — Universal Edition (Week 5 instantiation: Arcadia Retail)
+# The Week 5 Playbook — Navigation
 
 **Version:** 2026-04-23 · **License:** CC BY 4.0
 
----
-
-## 0. How to read this Playbook
-
-This is the same 14-phase procedure you run on **every** ML product you commission — tonight, next week, and in your career after this course. The body of each phase reads as **universal**: it names the decisions, the levers, the failure modes, and the vocabulary that apply to any ML paradigm. Retail examples live in `> For tonight's product` sidebars and illustrate how the universal body instantiates for Arcadia.
-
-Read it cold: skim sections 1–8 before class. During class, jump to the phase you are running. After the course, take this file into your next project and swap the sidebars for your domain.
-
-Every phase has the same shape:
-
-- **Orientation frame** — where you are in the value chain, the sprint, the clock
-- **Concept** — the ML idea this phase teaches in one sentence
-- **Why it matters (SML lens / USML lens / Optimization lens)** — vocabulary you bring back into any future project
-- **Your levers this phase** — what to pull, what to ignore; the orchestrator's toolkit
-- **Trust-plane question** — the single decision you own
-- **Prompt template** — universal first, retail-flavoured sidebar second
-- **Evaluation checklist** — how you judge the output
-- **Journal schema** — what you record
-- **Common failure modes** — the 2–3 ways this phase usually goes wrong
-- **Artefact** — the file on disk that proves the phase happened
-- **Instructor pause point** — what your instructor stops to discuss live in class
-- **Transfer to your next project** — three questions you ask when you open this Playbook on a non-retail product
+Everything you paste tonight lives in this folder. Open the files in the chronological run order below. Each file is self-contained: paste prompt → signals to check → concept refresher → handoff to the next file.
 
 ---
 
-## 1. The ML Value Chain — one product, four paradigms, one Playbook
+## 0. Two flows
 
-Tonight is the whole traditional ML value chain in one product. Four paradigms, composed:
+1. **`../START_HERE.md`** — read once before class for the overview (what Week 5 is, the product, the two planes, the hygiene toolkit, the grading rubric). Start by pasting the opening prompt in §9 to boot the environment.
+2. **This folder, file-by-file** — after the environment is booted, open `workflow-01-analyze.md` and follow the `**Next file:**` pointer at the bottom of each file. Don't skip.
 
-```
-                    THE ML VALUE CHAIN
-
-  STAKEHOLDER  │ QUESTION                       │ PARADIGM      │ SPRINT  │ PHASES     │ ARTEFACT
-  ─────────────┼────────────────────────────────┼───────────────┼─────────┼────────────┼──────────────────────
-  CMO          │ Who are my customers, really?  │ USML          │ 1 (45m) │ 1→8        │ Segmentation (K, named)
-  CX Lead      │ Which SKU for which customer?  │ SML           │ 2 (45m) │ 4→8 (×2)   │ Churn + Conversion models
-  CMO + Ops    │ How to allocate fixed budget?  │ Optimization  │ 3 (40m) │ 10→12      │ Campaign allocator
-  Ops Lead     │ When does any of this lie?     │ MLOps         │ 4 (20m) │ 13         │ Drift × 3 models
-
-  Discover ──▶ Predict ──▶ Decide ──▶ Monitor
-     │            │           │           │
-     └── segments feed cold-start of the recommender;
-         recommender feeds response probs into allocator;
-         allocator output is what MLOps monitors.
-
-  Skip a link, the chain breaks at your weakest stakeholder.
-```
-
-**Why this structure.** In the real world ML is not a model, it is a value chain. Unsupervised learning discovers structure; supervised learning predicts behaviour; optimization decides actions under constraints; MLOps catches drift. Any product you build in your career will touch at least two of these four. Tonight you touch all four, end to end, in one sitting — and the Playbook is what you take to the next project.
+Deep ML concept reference lives in `appendix/` — use it after class, or whenever the in-file §4 quick reference isn't enough.
 
 ---
 
-## 2. How to use this Playbook
+## 1. Tonight's run order (open these files in order)
 
-You are a **commissioner, not a coder.** Your Playbook fires inside the COC `/implement` phase (see §5). During each Playbook phase, you prompt Claude Code in plain language, evaluate the output against the phase's checklist, make the Trust-plane decision, and write a journal entry.
+The viewer at `http://localhost:3000` auto-refreshes as each phase writes artifacts. Glance at it after every phase; if nothing new rendered, Claude Code described the work instead of running it.
 
-- **Trust Plane** is you: framing, judging, approving. The decisions.
-- **Execution Plane** is Claude Code plus the scaffold: code, trained models, leaderboards, dashboards. The execution.
+| #   | File                                   | What happens                                                       |
+| --- | -------------------------------------- | ------------------------------------------------------------------ |
+| 1   | `../START_HERE.md` §9 opening prompt   | Boot the backend, viewer, and preflight                            |
+| 2   | `workflow-01-analyze.md`               | Inheritance audit — what the scaffold committed to                 |
+| 3   | `workflow-02-todos.md`                 | Tracked plan, one todo per Playbook phase (human gate)             |
+| 4   | `workflow-03-sprint-1-usml-boot.md`    | Boot Sprint 1 · USML · Discover                                    |
+| 5   | `phase-01-frame.md`                    | Target, population, horizon, cost asymmetry                        |
+| 6   | `phase-02-data-audit.md`               | Six-category audit                                                 |
+| 7   | `phase-03-features.md`                 | Feature framing — availability, leakage, proxy                     |
+| 8   | `phase-04-candidates.md` (USML pass)   | Multi-family clustering sweep                                      |
+| 9   | `phase-05-implications.md` (USML)      | Name the segments, declare per-segment action                      |
+| 10  | `phase-06-metric-threshold.md` (USML)  | Three pre-registered floors (separation, stability, actionability) |
+| 11  | `phase-07-redteam.md` (USML)           | Stability / proxy / operational-collapse sweeps                    |
+| 12  | `phase-08-gate.md` (USML gate)         | Deployment gate, PASS/FAIL against floors                          |
+| 13  | `workflow-04-sprint-2-sml-boot.md`     | Boot Sprint 2 · SML · Predict                                      |
+| 14  | `phase-04-candidates.md` (SML replay)  | Same file — now for churn + conversion classifiers                 |
+| 15  | `phase-05-implications.md` (SML)       | Pick the family for each classifier                                |
+| 16  | `phase-06-metric-threshold.md` (SML)   | PR curve + cost-based threshold + calibration                      |
+| 17  | `phase-07-redteam.md` (SML)            | Classifier-specific red-team sweeps                                |
+| 18  | `phase-08-gate.md` (SML gate)          | Deployment gate for both classifiers                               |
+| 19  | `workflow-05-sprint-3-opt-boot.md`     | Boot Sprint 3 · Optimization · Decide                              |
+| 20  | `phase-10-objective.md`                | Allocator objective weights                                        |
+| 21  | `phase-11-constraints.md` (first pass) | Hard vs soft constraints                                           |
+| 22  | `phase-12-acceptance.md` (first pass)  | LP solve + feasibility + pathology checks                          |
+| 23  | **PDPA injection fires** (~4:30pm)     | Instructor-triggered — Legal flags under-18 browsing               |
+| 24  | `phase-11-constraints.md` (re-run)     | Re-classify under-18 as hard with $220/record penalty              |
+| 25  | `phase-12-acceptance.md` (re-run)      | Re-solve the LP — the plan MUST change visibly                     |
+| 26  | `workflow-06-sprint-4-mlops-boot.md`   | Boot Sprint 4 · MLOps · Monitor                                    |
+| 27  | `phase-13-drift.md`                    | Three retrain rules (one per model)                                |
+| 28  | `workflow-07-redteam.md`               | Cross-sprint cascade red-team                                      |
+| 29  | `workflow-08-codify.md`                | Phase 9 Codify — 3 transferable + 2 domain lessons                 |
+| —   | End of workshop                        | `/wrapup` writes `.session-notes`                                  |
 
-If a question is _what_ or _how_, route it to Execution. If it is _which_, _whether_, _who wins_, or _is it good enough to ship_, it stays with you.
+**Replays are intentional.** Phase-04 through phase-08 are opened TWICE (once USML in Sprint 1, once SML in Sprint 2). Phase-11 and phase-12 are opened twice (first pass + post-PDPA re-run). Each phase file has branched `§1 Tonight-specific` and `§2 Signals` blocks — follow the one that matches your current pass.
 
----
+**Phase 9 (Codify) is NOT in the run order as `phase-09-codify.md`.** It runs at close via `workflow-08-codify.md`. The `phase-09-codify.md` file is a pointer that explains this.
 
-## 3. How to prompt — the delegation skill
-
-This is the single most important skill the course teaches. Every prompt you write contains these 5 elements:
-
-1. **Objective** — business outcome in plain language
-2. **Boundaries** — what matters, what doesn't, what costs what
-3. **Expected output** — what deliverable you want back
-4. **Checks** — what could go wrong, what would flip your decision
-5. **Decision authority** — what YOU will decide vs. what Claude Code executes
-
-**What your prompt should NEVER contain:** library names, class names, function signatures, import paths, code snippets, API parameter objects.
-
-Claude Code has the frameworks, the skills, the documentation. It knows which library to call and how. **If you tell it how, you're doing its job. If you tell it what and why, you're doing yours.**
-
-> **Bad prompt** (doing CC's job): _"Using sklearn.cluster.KMeans with n_clusters=5, fit on the RFM feature matrix..."_
->
-> **Good prompt** (doing yours): _"Cluster Arcadia's active customers into behavioural segments. Try three different approaches — one that expects round blobs, one that finds dense pockets, one that builds a nested tree — and compare them on stability and on how interpretable the resulting segments are. I'll pick the count."_
-
----
-
-## 4. The ML Vocabulary Menu (one-page orchestrator reference)
-
-You do not write code. You do speak ML. Here is the vocabulary an orchestrator needs — enough for comfort and assurance, not implementation depth.
-
-### 4.1 Supervised families (you have labels)
-
-| Family                              | When to reach for it                                                                                    | Cost                                                         |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **Linear**                          | Fast, interpretable, strong baseline. Always include one.                                               | Misses non-linear interactions.                              |
-| **Tree**                            | Handles non-linear without feature engineering. Single tree = cheap explanation.                        | Single tree overfits; use bags or boosts.                    |
-| **Ensemble (the king for tabular)** | Gradient-boosted trees (XGBoost, LightGBM, sklearn GBM) or random forests. Default-winning for tabular. | Slower to train; less interpretable; watch for overfitting.  |
-| **Neural**                          | Only for very large data, complex interactions, or heterogeneous inputs (text + image + tabular).       | Opaque, expensive, unnecessary most of the time for tabular. |
-
-> **Default pick for any new tabular classification/regression**: logistic/linear as a baseline + random forest as a tree check + a gradient-boosted model as the serious contender. Unless you have a specific reason, the gradient-boosted family wins.
-
-### 4.2 Unsupervised families (no labels)
-
-| Family               | What it assumes                                       | When it fails                                                |
-| -------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| **K-means**          | Round blobs of similar size around a centre           | Elongated, nested, or unequal-sized shapes                   |
-| **DBSCAN / HDBSCAN** | Dense pockets with gaps; flags outliers as unassigned | Sensitive to density parameters; can leave 10–25% unassigned |
-| **Hierarchical**     | A nested tree you can cut at any level                | Slow on large data; cut decision is arbitrary                |
-| **Spectral**         | Connectivity / graph-affinity structure               | Expensive (eigendecomp); needs good similarity measure       |
-| **GMM**              | Soft membership; probabilistic assignments            | Slow convergence; can find spurious components               |
-
-### 4.3 Optimization families
-
-| Family                      | When to reach for it                                       | Watch out for                                      |
-| --------------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
-| **Linear programming (LP)** | Linear objective, linear constraints, continuous decisions | Integer decisions need rounding or a harder solver |
-| **Integer / Mixed-integer** | Yes/no decisions (which customer to touch)                 | Can be NP-hard; use MIP solver or heuristics       |
-| **Constraint satisfaction** | Feasibility first, optimality second                       | Infeasibility requires you to demote a constraint  |
-| **Greedy heuristic**        | When LP is overkill; cheap, defensible default             | Can be 10–30% off optimum; good enough often wins  |
-
-### 4.4 Evaluation instruments — read them, don't compute them
-
-- **Confusion matrix** — TP / FP / TN / FN at a chosen threshold. Read precision = TP/(TP+FP) and recall = TP/(TP+FN).
-- **ROC curve** — how well does the score rank? AUC = area under the curve, 0.5 = random, 1.0 = perfect. Insensitive to class imbalance.
-- **PR curve** — precision vs recall across thresholds. Use this for rare positives (fraud, churn, conversion).
-- **Calibration plot** — if the model says 30% probability, do 30% of those cases actually happen? A well-calibrated model lines up along the diagonal.
-- **Brier score** — mean squared error of predicted probabilities. Lower = better calibration.
-- **Silhouette score** (USML) — how crisp are the clusters? Near 1 is tight/separated, near 0 is overlapping, negative is wrong cluster assignment.
-- **Bootstrap Jaccard** (USML) — re-cluster on a different sample; what fraction of customer pairs stay in the same pair? ≥0.80 is shippable.
-- **Precision@k** (rec) — of the top-k you recommended, how many did the customer engage with?
-- **PSI (Population Stability Index)** (drift) — how far has this feature's distribution moved since training? >0.25 is severe.
-
-### 4.5 Common diagnoses you should recognise
-
-| You see...                                                    | You are looking at...                                                    |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Train-test gap (train AUC much higher than test)              | **Overfitting**                                                          |
-| Good AUC but bad Brier / bad calibration                      | Model **ranks right, probabilities are miscalibrated**                   |
-| One feature importance dominates 80%                          | Likely **leakage** — that feature is the label in disguise               |
-| High precision, low recall                                    | Threshold set too high; catching few but catching them right             |
-| High recall, low precision                                    | Threshold set too low; catching most but also many false positives       |
-| Silhouette high but stability (bootstrap Jaccard) low         | Pattern exists in this sample but doesn't hold up on new samples         |
-| Clusters explain a demographic variable better than behaviour | **Proxy leakage** — the segmentation is income/age/postcode in disguise  |
-| Solver returns feasible but one segment gets 90% of the plan  | **Pathology**: feasible ≠ shippable                                      |
-| Drift severity high for one feature but segment-churn low     | Distributional shift without behavioural shift — may not need retraining |
-
-### 4.6 The lever taxonomy — what you pull each phase
-
-| Phase                | Levers (big one first)                                                              |
-| -------------------- | ----------------------------------------------------------------------------------- |
-| 1 Frame              | scope · horizon · operational ceiling · cost asymmetry                              |
-| 2 Data Audit         | outlier handling · missingness · contamination filters · sampling                   |
-| 3 Feature Framing    | availability · leakage · proxy-for-protected-class · engineered derivation          |
-| 4 Candidates         | model family mix · sweep breadth · cross-validation · baseline inclusion            |
-| 5 Implications       | complexity-vs-interpretability · stability-vs-accuracy · speed-vs-performance       |
-| 6 Metric + Threshold | primary metric · threshold · class imbalance · calibration                          |
-| 7 Red-team           | subgroups · adversarial perturbations · proxy tests · acceptance                    |
-| 8 Deployment Gate    | monitoring cadence · rollback channel · alert thresholds · promotion criteria       |
-| 10 Objective         | single-vs-multi · weight assignment · proxy metrics · coverage / diversity floors   |
-| 11 Constraints       | hard-vs-soft · penalty calibration · demotion rules · regulatory triggers           |
-| 12 Solver Acceptance | held-out choice · pathology detection · accept/retune/redesign · rollback readiness |
-| 13 Drift             | signal choice · threshold grounding · duration window · HITL-vs-auto                |
+**Phase 14 (Fairness) is deferred to Week 7.** `phase-14-fairness.md` is a deferred stub.
 
 ---
 
-## 5. The Playbook runs inside `/implement` (COC wrap)
+## 2. File types
 
-The 14-phase Playbook is not a replacement for the COC phases you already know — it is the **content** of your `/implement` phase. Routine is the scaffold; decisions are the content.
+- **`workflow-NN-*.md`** (8 files) — boot one COC-level step (analyze, todos, 4 sprint boots, redteam, codify). Sets context for the phase walk that follows.
+- **`phase-NN-*.md`** (14 files) — run one Playbook ML decision phase. `phase-09` is a pointer, `phase-14` is a deferred stub; the other 12 are full 6-section files.
+- **`appendix/`** (themed by ML lifecycle) — passive reference. Don't open during class unless §4 in-file refresher isn't enough.
 
-| Clock     | COC phase             | Sprint / paradigm                        | Playbook phases inside          | Output                                                                 |
-| --------- | --------------------- | ---------------------------------------- | ------------------------------- | ---------------------------------------------------------------------- |
-| 2:00–2:10 | (opening)             | narrative + preflight                    | —                               | green viewer banner                                                    |
-| 2:10–2:25 | `/analyze`            | frame the 4-module cascade               | (pre-phase)                     | `01-analysis/failure-points.md`, `assumptions.md`, `decisions-open.md` |
-| 2:25–2:30 | `/todos`              | draft phases · instructor gate           | —                               | `todos/active/phase_N_*.md` (13 phases; Phase 14 deferred)             |
-| 2:30–3:15 | `/implement` Sprint 1 | **USML — Discover**                      | Phases 1, 2, 3, 4, 5, 6, 7, 8   | Segmentation; `journal/phase_{1..8}_usml.md`                           |
-| 3:15–4:00 | `/implement` Sprint 2 | **SML — Predict**                        | Phases 4, 5, 6, 7, 8 (replayed) | Churn + Conversion classifiers; `journal/phase_{4..8}_sml.md`          |
-| 4:00–4:30 | `/implement` Sprint 3 | **Optimization — Decide**                | Phases 10, 11, 12               | Campaign allocator; `journal/phase_{10..12}_*.md`                      |
-| 4:30–4:40 | mid-sprint injection  | PDPA red-line                            | Phase 11 + 12 re-run            | `journal/phase_11_postpdpa.md`, `phase_12_postpdpa.md`                 |
-| 4:40–5:00 | `/implement` Sprint 4 | **MLOps — Monitor**                      | Phase 13                        | Drift × 3 models; `journal/phase_13_*.md`                              |
-| 5:00–5:15 | `/redteam`            | stability · proxy · operational collapse | —                               | `04-validate/redteam.md`                                               |
-| 5:15–5:30 | `/codify` + `/wrapup` | Phase 9                                  | Phase 9                         | `.claude/skills/project/week-05-lessons.md`, `.session-notes`          |
-
-`/analyze` and `/todos` are short (15 minutes together) and not busywork: they force you to declare what the pre-built baseline commits to (K=3, content recommender, drift reference registered) and what remains open. Week 4's students lost the lifecycle to scaffolding; Week 5 keeps both.
+Legacy files `appendix-a-lessons.md` and `appendix-b-dashboard.md` remain for transferable-lessons accumulation — they're not part of tonight's run order.
 
 ---
 
-## 6. The five Trust-Plane decision moments (universalized)
+## 3. Navigation within every file (workflow + phase)
 
-Tonight collapses into five high-pressure decisions. These are where the rubric has teeth. The universal shape first; the retail instantiation in the sidebar.
+Each file has exactly six sections:
 
-1. **Pick the primary operating point and defend it in the declared unit of harm.**
+1. **Paste this into Claude Code** — the prompt, split into "Universal core" (transfers to any ML project) + "Tonight-specific additions" (Week 5 retail hooks)
+2. **Signals the output is on track** — ✓ success bullets and ✗ drift bullets, including viewer checks
+3. **Things you might not understand in this phase** — scannable list of concepts (5–7 bullets)
+4. **Quick reference (30 sec, generic)** — ~80-word distilled entry per concept, with a link to the deeper appendix file
+5. **Ask CC, grounded in our project (2 min)** — paste-ready template. Fill in the concept name from §3; CC reads our codebase and explains in plain language grounded in Arcadia state
+6. **Gate / next** — checklist of concrete outcomes + bolded `**Next file:**` pointer
 
-   > _Retail instantiation: pick K for segmentation and defend in $ of wrong-campaign cost + marketing capacity. Not "silhouette said 5"; "5 because marketing runs 5 campaigns; 7 costs $X in setup with no realistic lift; stability drops below 0.80 at K=7."_
-
-2. **Commit to a distinct downstream action per output class; collapse duplicates.**
-
-   > _Retail instantiation: if two segments get the same marketing campaign, they are one segment with noise. Collapse to lower K or defend the difference in dollars._
-
-3. **Choose the model strategy with an explicit fallback for the cold / low-confidence / no-signal regime.**
-
-   > _Retail instantiation: collaborative / content-based / hybrid for the recommender — AND for new customers with no history, say what happens: segment modal basket, catalogue popularity, or editorial curation._
-
-4. **Classify hard-vs-soft constraints under regulatory pressure and justify the penalty.**
-
-   > _Retail instantiation: mid-Sprint-2, Legal flags PDPA exposure on under-18 browsing history. Re-run Phase 11 (re-classify as hard) AND Phase 12 (re-solve with the new constraint). Not just the journal entry._
-
-5. **Set the retrain rule: signal + threshold grounded in historical variance + duration window + human-in-the-loop on first trigger.**
-   > _Retail instantiation: three separate rules, one per model (segmentation churn, churn predictor calibration decay, allocator constraint-violation rate)._
-
-Decision moments 4 and 5 are where Week 4 students hit the wall. They are the parts the rubric scores hardest.
+When you're lost, scan §3 first. Decide whether a 30-second §4 read fixes it or whether you want CC to go deeper via §5.
 
 ---
 
-## 7. Workshop clock (4 sprints, 3.5 hours)
+## 4. Where's the overview? Where's the textbook?
 
-```
-2:00  opening narrative + preflight green
-2:10  /analyze  (10m)
-2:25  /todos    (5m)   ── instructor gate ──
-2:30  ┌───────────────────────────────────────────────────┐
-      │ SPRINT 1 · USML · Discover · Phases 1→8           │ 45m
-3:15  ├───────────────────────────────────────────────────┤
-      │ SPRINT 2 · SML · Predict · Phases 4→8 (×2)        │ 45m
-4:00  ├───────────────────────────────────────────────────┤
-      │ SPRINT 3 · Opt · Decide · Phases 10→12            │ 30m
-4:30  │    PDPA injection fires (re-run Phase 11 + 12)    │ 10m
-4:40  ├───────────────────────────────────────────────────┤
-      │ SPRINT 4 · MLOps · Monitor · Phase 13             │ 20m
-5:00  ├───────────────────────────────────────────────────┤
-      │ /redteam                                           │ 15m
-5:15  │ /codify + /wrapup                                  │ 15m
-5:30  └───────────────────────────────────────────────────┘
-```
+- **Overview of the workshop** — `../START_HERE.md` (what Week 5 is, product cascade, Trust/Execution planes, hygiene toolkit, grading, opening prompt)
+- **Deep-dive reference on ML concepts** — `appendix/` (themed by ML lifecycle: 01 framing → 02 data → 03 modeling → 04 evaluation → 05 deployment → 06 monitoring → 07 governance)
+- **Plain-language explanation grounded in our project** — paste the §5 template in any phase file
 
 ---
 
-## 8. Phase summary & disposition
+## 5. Playbook file inventory
 
-Which phases **keep** as-is across ML problems, which **adapt** to the paradigm, which are **replaced** for USML/recommender vs SML, which **defer**:
-
-| #   | Phase                      | Disposition                     | Sprint | Artefact                                                   |
-| --- | -------------------------- | ------------------------------- | ------ | ---------------------------------------------------------- |
-| 1   | Frame                      | KEEP                            | 1      | `journal/phase_1_frame.md`                                 |
-| 2   | Data audit                 | KEEP (+ proxy chk)              | 1      | `journal/phase_2_data_audit.md`                            |
-| 3   | Feature framing (UNFOLDED) | KEEP (live this wk)             | 1      | `journal/phase_3_features.md`                              |
-| 4   | Candidates                 | ADAPT (USML/SML)                | 1, 2   | `data/segment_leaderboard.json`, `predict/leaderboard/*`   |
-| 5   | Implications               | ADAPT                           | 1, 2   | `journal/phase_5_*.md`                                     |
-| 6   | Metric + Threshold         | **REPLACE** (USML three floors) | 1, 2   | `journal/phase_6_usml.md`, `phase_6_sml.md`                |
-| 7   | Red-team                   | ADAPT                           | 1, 2   | `journal/phase_7_*.md`                                     |
-| 8   | Deployment Gate            | KEEP                            | 1, 2   | `journal/phase_8_*.md` + registry transition               |
-| 9   | Codify                     | KEEP                            | close  | `.claude/skills/project/week-05-lessons.md`                |
-| 10  | Objective                  | **REPLACE** (optimization)      | 3      | `journal/phase_10_objective.md`                            |
-| 11  | Constraints                | ADAPT                           | 3      | `journal/phase_11_constraints.md` + `phase_11_postpdpa.md` |
-| 12  | Solver Acceptance          | **REPLACE** (LP)                | 3      | `data/allocator_last_plan.json` + `journal/phase_12_*.md`  |
-| 13  | Drift                      | ADAPT (× 3 models)              | 4      | `data/drift_report_*.json` + `journal/phase_13_*.md`       |
-| 14  | Fairness                   | DEFER to Week 7                 | —      | (deferred)                                                 |
-
-**Phases 10–12 are deferrable** when your product has no secondary optimization or ranking layer (e.g., a pure clustering or pure classification product). Tonight Arcadia has both — USML segments feed SML predictors feed the optimization allocator — so all three phases run. On your next project, ask: is there a decision to optimize given the model's output? If no, skip 10–12.
-
----
-
-# SPRINT 1 — USML · Discover · Phases 1–9
-
----
-
-
----
-
-## Playbook file inventory
-
-| File | Contents |
-| --- | --- |
-| [phase-01-frame.md](./phase-01-frame.md) | Frame — target, population, horizon, operational ceiling, cost asymmetry |
-| [phase-02-data-audit.md](./phase-02-data-audit.md) | Data Audit — six-category audit with dispositions |
-| [phase-03-features.md](./phase-03-features.md) | Feature Framing — four-axis classification + proxy-drop test (unfolded this week) |
-| [phase-04-candidates.md](./phase-04-candidates.md) | Candidates — multi-family sweep (USML + SML replay) |
-| [phase-05-implications.md](./phase-05-implications.md) | Implications — pick the candidate; name the segments / families |
-| [phase-06-metric-threshold.md](./phase-06-metric-threshold.md) | Metric + Threshold — USML three floors + SML PR-curve + calibration |
-| [phase-07-redteam.md](./phase-07-redteam.md) | Red-Team — stability / proxy leakage / operational collapse |
-| [phase-08-gate.md](./phase-08-gate.md) | Deployment Gate — PASS/FAIL floors + monitoring + rollback |
-| [phase-09-codify.md](./phase-09-codify.md) | Codify — transferable lessons + Week 5 appendix update (also /codify workflow phase) |
-| [phase-10-objective.md](./phase-10-objective.md) | Objective Function — LP weights + shadow prices |
-| [phase-11-constraints.md](./phase-11-constraints.md) | Constraint Classification — hard/soft + PDPA injection re-run |
-| [phase-12-acceptance.md](./phase-12-acceptance.md) | Solver Acceptance — feasibility + pathologies + PDPA re-solve |
-| [phase-13-drift.md](./phase-13-drift.md) | Drift — three retrain rules, one per model |
-| [phase-14-fairness.md](./phase-14-fairness.md) | Fairness — deferred to Week 7 |
-| [appendix-a-lessons.md](./appendix-a-lessons.md) | Transferable lessons accumulating across weeks (accretive) |
-| [appendix-b-dashboard.md](./appendix-b-dashboard.md) | Build your own value-chain dashboard at your next job |
-
-**How to navigate during class:** when you enter a Playbook phase (after `/implement` boots the sprint from `START_HERE.md` §6), open the matching `phase-NN-*.md` file in the folder above. Each phase file is self-contained — spine (Concept / lens / levers / Trust-plane question) on top, paste-ready prompt in the middle, evaluation / journal schema / failure modes / Transfer at the bottom.
+| File                                 | Type     | Runs at step | What it contains                                         |
+| ------------------------------------ | -------- | ------------ | -------------------------------------------------------- |
+| `workflow-01-analyze.md`             | Workflow | 2            | `/analyze` — inheritance audit                           |
+| `workflow-02-todos.md`               | Workflow | 3            | `/todos` — tracked plan + human gate                     |
+| `workflow-03-sprint-1-usml-boot.md`  | Workflow | 4            | Sprint 1 boot (USML, clustering)                         |
+| `workflow-04-sprint-2-sml-boot.md`   | Workflow | 13           | Sprint 2 boot (SML, churn + conversion)                  |
+| `workflow-05-sprint-3-opt-boot.md`   | Workflow | 19           | Sprint 3 boot (LP allocator)                             |
+| `workflow-06-sprint-4-mlops-boot.md` | Workflow | 26           | Sprint 4 boot (drift × 3 models)                         |
+| `workflow-07-redteam.md`             | Workflow | 28           | `/redteam` — cross-sprint cascade stress                 |
+| `workflow-08-codify.md`              | Workflow | 29           | `/codify` — Phase 9 transferable lessons                 |
+| `phase-01-frame.md`                  | Phase    | 5            | Target / population / horizon / cost asymmetry           |
+| `phase-02-data-audit.md`             | Phase    | 6            | Six-category audit with dispositions                     |
+| `phase-03-features.md`               | Phase    | 7            | Feature framing — availability / leakage / proxy         |
+| `phase-04-candidates.md`             | Phase    | 8, 14        | Multi-family sweep (USML in S1, SML in S2)               |
+| `phase-05-implications.md`           | Phase    | 9, 15        | Pick candidate, name segments (USML) / pick family (SML) |
+| `phase-06-metric-threshold.md`       | Phase    | 10, 16       | USML three floors · SML PR-curve + calibration           |
+| `phase-07-redteam.md`                | Phase    | 11, 17       | Per-sprint red-team sweeps                               |
+| `phase-08-gate.md`                   | Phase    | 12, 18       | Deployment gate (PASS/FAIL, rollback, promotion)         |
+| `phase-09-codify.md`                 | Pointer  | —            | Explains that Phase 9 runs via `workflow-08-codify.md`   |
+| `phase-10-objective.md`              | Phase    | 20           | LP allocator objective weights + shadow prices           |
+| `phase-11-constraints.md`            | Phase    | 21, 24       | Hard vs soft constraints · PDPA re-classification        |
+| `phase-12-acceptance.md`             | Phase    | 22, 25       | LP acceptance · PDPA re-solve                            |
+| `phase-13-drift.md`                  | Phase    | 27           | Three retrain rules (one per model)                      |
+| `phase-14-fairness.md`               | Stub     | —            | Deferred to Week 7                                       |
+| `appendix/`                          | Folder   | —            | Deep-dive concept reference, themed by ML lifecycle      |

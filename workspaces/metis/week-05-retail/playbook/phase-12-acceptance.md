@@ -1,203 +1,261 @@
 <!--
 Copyright (c) 2026 Terrene Foundation (Singapore CLG)
 Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+https://creativecommons.org/licenses/by/4.0/
 -->
 
-_[← Playbook index (README)](./README.md)_
+# Phase 12 — Solver Acceptance
 
-## Phase 12 — Solver Acceptance (REPLACED for Optimization)
+> **What this phase does:** Run the solver, check that the plan is feasible AND pathology-free, and make one of four dispositions: accept, re-tune, fall back, or redesign. Run this twice if the PDPA injection has fired.
+> **Why it exists:** A feasible plan is not the same as a shippable plan. Concentration, dead campaigns, and boundary solutions are plan failures the solver won't flag on its own.
+> **You're here because:** Phase 11 set the constraints (`phase-11-constraints.md`). The solver can now run. If the PDPA injection fired, Phase 12 runs again after `phase_11_postpdpa.md` is written.
+> **Key concepts you'll see:** feasibility vs optimality, optimality gap, solver pathologies (concentration, dead campaigns), accept/retune/fall-back/redesign, PDPA re-solve discipline
 
-```
-──────────────────────────────────────────────────────────────────
- VALUE CHAIN:   Analyze ▸ Todos ▸ USML ✓ ▸ SML ✓ ▸ **Opt ◉** ▸ MLOps ▸ Close
- THIS PHASE:    Sprint 3 · Phase 12 of 12 — Solver Acceptance
- LEVERS:        held-out choice · pathology detection · accept/retune/redesign · rollback readiness
-──────────────────────────────────────────────────────────────────
-```
+---
 
-### Concept
+## 1. Paste this into Claude Code
 
-The solver runs. It returns a plan. You check: feasibility (every hard constraint satisfied), optimality (how close to the LP optimum), pathologies (one segment getting 90% of the plan, dead campaigns with zero allocation). Decide: accept, re-tune (change weights or penalties), fall back (demote a hard constraint), or redesign (the problem is ill-posed).
-
-### Why it matters (Optimization lens — the DEPTH Week 4 skipped)
-
-- **Feasibility first, optimality second.** An infeasible LP returns no plan. A feasible-but-pathological plan returns an unusable one. Both are failures; the diagnosis differs.
-- **Optimality gap.** Distance from the LP optimum (or the LP relaxation upper bound for MIP). Gap > 5% → either tighten the solver or accept the sub-optimality with a reason.
-- **Pathology detection.** Feasible plans can still be wrong: concentration (one output gets the whole plan), dead variables (unused campaigns / SKUs / routes), boundary cases (the solver chose an extreme corner of the polytope).
-- **Sensitivity analysis.** How robust is the plan to small changes in the objective weights or constraint values? If weight_revenue = 0.95 gives plan A but weight_revenue = 0.93 gives plan B, your plan is fragile.
-
-### Your levers this phase
-
-- **Lever 1 (the big one): pathology detection.** Concentration (one segment > 60%), dead campaigns (0 allocation), boundary solutions (activity at 100% of budget when you expected 80%).
-- **Lever 2 (the decision):** accept, re-tune, fall back, redesign. Don't default to accept; the solver being feasible is not the same as the plan being shippable.
-- **Lever 3 (the rollback readiness):** the prior plan. Is the current plan better than the prior plan by the dollar lift you expected? If not, stay with the prior.
-- **Lever 4 (the sensitivity):** perturb the weights by ±10% and re-solve. If the plan is stable, ship. If it flips, your decision is on a knife edge.
-
-### Trust-plane question
-
-Is the solution feasible, optimal, edge-case safe, and pathology-free?
-
-### Paste this
+**Universal core** (transfers to any ML project):
 
 ```
-I'm entering Playbook Phase 12 — Solver Acceptance. The scaffold
-pre-committed to the LP solver behind /allocate/solve and the
-last-plan persistence at data/allocator_last_plan.json per
-src/retail/backend/routes/allocate.py; my decision here is
-ACCEPT / RE-TUNE / FALL-BACK / REDESIGN on the solved plan,
-checked for feasibility AND pathologies. I run this twice — once
-with the first-pass constraints, once after the PDPA injection.
+I'm entering Playbook Phase 12 — Solver Acceptance. My decision
+here is ACCEPT / RE-TUNE / FALL-BACK / REDESIGN on the solved
+plan. I check feasibility first, then pathologies, then make a
+disposition. I am NOT deciding in advance — I wait for the data.
 
-Copy journal/skeletons/phase_12_accept.md into
-workspaces/metis/week-05-retail/journal/phase_12_accept.md.
+Your job:
 
-Your job, first pass:
+1. Run the solver with the current Phase 10 objective and Phase 11
+   constraints. Save the response to the plan persistence file.
+   Cite the solver function.
 
-1. POST to /allocate/solve with the current Phase 10 objective
-   and Phase 11 constraints. Save the response to
-   data/allocator_last_plan.json (the endpoint does this
-   automatically per allocate.py). Cite the solver function.
-
-2. Report FEASIBILITY per hard constraint — which constraints are
-   satisfied (e.g. "touch budget used: X of Y", "inventory: no
-   SKU allocated beyond availability"). If any hard constraint
-   is violated, the plan is infeasible and my disposition is
-   REDESIGN or FALL-BACK.
+2. Report FEASIBILITY per hard constraint — name each hard
+   constraint and report whether the solved plan satisfies it
+   (e.g. "touch budget used: X of Y", "inventory: no SKU over
+   availability"). If any hard constraint is violated, the plan
+   is infeasible — my disposition is REDESIGN or FALL-BACK.
 
 3. Report the OPTIMALITY GAP — the distance from the LP optimum.
-   If >5%, name it as a finding.
+   If > 5%, name it as a finding. Quote the solver's reported gap,
+   not an estimate.
 
 4. Check four PATHOLOGIES:
-   (a) Concentration — is any segment getting >10% of the
-       plan disproportionately? I set the threshold; you report
-       the concentration percentage per segment.
-   (b) Dead campaigns — any campaign with 0 allocation across
-       all segments.
-   (c) Boundary — any decision at 100% of a budget when I
-       expected 80%.
-   (d) Sensitivity — perturb weights by ±10% and re-solve.
-       Does the top-concentration segment flip? Does a dead
-       campaign come alive? Report the change in allocations.
+   (a) Concentration — report the percentage of the plan going
+       to the top segment or output. I set the threshold; you
+       report the measured value.
+   (b) Dead variables — any campaign, SKU, or route with zero
+       allocation across all outputs.
+   (c) Boundary — any decision at 100% of a budget when 80% was
+       expected.
+   (d) Sensitivity — perturb the objective weights by ±10% and
+       re-solve. Does the top-concentration output flip? Does a
+       dead variable come alive? Report the change.
 
-5. Compute prior-plan comparison — if a prior /allocate/last_plan
-   exists, what's the expected-revenue delta in dollars?
-   Quote the $18 basket-lift and $14 wasted-impression rates
-   from PRODUCT_BRIEF.md §2 verbatim for the calculation.
+5. Compute a prior-plan comparison — if a prior plan exists in
+   the persistence file, what is the expected-revenue delta in
+   dollars? Use only sourced dollar rates for the calculation.
 
-Do NOT propose pathology THRESHOLDS. The 10% concentration, the
-5% optimality gap, the ±10% sensitivity band — I set those. Your
-job is to report the measured values; I compare to my floors.
-The point is pre-registered pathology floors, not post-hoc ones.
+6. Recommend ACCEPT / RE-TUNE / FALL-BACK / REDESIGN with a
+   rationale. Do NOT decide on my behalf — recommend only.
 
-Do NOT decide ACCEPT / RE-TUNE / FALL-BACK / REDESIGN. That is my
-call per pass. You recommend with rationale; I sign.
+Do NOT propose pathology thresholds. The concentration cutoff,
+gap cutoff, and sensitivity band are mine to set. You report
+the measured values; I compare to my pre-registered floors.
 
-Post-injection re-run (when PDPA fires):
+Do NOT use "blocker" without naming the specific ship-action.
 
-After phase_11_postpdpa.md is written, POST /allocate/solve AGAIN
-with the new hard PDPA constraint. Save the new plan — the file
-at data/allocator_last_plan.json MUST BE DIFFERENT from the
-first-pass plan. If the file is byte-identical, the solver did
-not pick up the new constraint and something is wrong.
+Post-injection re-run (when the regulatory event has fired):
 
-Copy the skeleton into phase_12_postpdpa.md (do not overwrite
-phase_12_accept.md). Report the same four pathologies. Compute
-the SHADOW PRICE of the new hard PDPA constraint — "the dollar
-revenue lost to compliance". Quote the $220 line from
-PRODUCT_BRIEF.md §2 to anchor the shadow price in per-record
-terms.
+After the post-injection Phase 11 journal file is written, run
+the solver AGAIN with the new hard constraint applied. Save the
+new plan to the persistence file. The plan MUST be different from
+the first-pass plan — if the file is byte-identical, the solver
+did not pick up the new constraint.
 
-For every claim, cite the file and function. For every dollar
-figure, quote §2. Do NOT invent.
+Copy the acceptance skeleton into a new post-injection journal
+file (e.g. phase_12_postpdpa.md). Run the same four-pathology
+check. Compute the SHADOW PRICE of the new hard constraint in
+dollars per unit of relaxation.
 
-Do NOT use "blocker" without the specific blocked ship-action.
+Do NOT overwrite the first-pass journal file — both must exist.
 
 When feasibility, gap, pathology report, and sensitivity are in
-the journal, stop and wait for my disposition. When PDPA fires,
-re-run and stop again.
+the journal, stop and wait for my disposition. When the injection
+fires, re-run and stop again.
 ```
 
-### Why this prompt is written this way
+**Tonight-specific additions** (Week 5 Arcadia Retail):
 
-- Inheritance-framed opening names the scaffold's solver and plan-persistence commitments and keeps the disposition with me — "feasible" is not the same as "shippable" and only I say so.
-- Four pathologies are enumerated because Phase 12 checklist says all four must be checked; missing one is a 2/4 on D3.
-- Forbidding pathology THRESHOLD proposals is the anti-post-hoc guard — the agent reporting "concentration 12% which is below the 15% threshold" post-hoc is exactly the failure Phase 6 pre-registration was supposed to prevent.
-- The byte-identical-plan check is the disk-level proof that the PDPA re-solve actually fired — the #1 rubric trap of the night is writing `phase_12_postpdpa.md` while the solver never re-ran.
-- Show-the-brief on $18 / $14 / $220 is required so expected-revenue delta and shadow-price claims are audit-traceable.
-
-### What to expect back
-
-- `journal/phase_12_accept.md` with feasibility per hard constraint + optimality gap + four-pathology report + ±10% sensitivity.
-- Later: `journal/phase_12_postpdpa.md` after the injection, with a DIFFERENT `data/allocator_last_plan.json` and a quoted shadow price.
-- Expected-revenue delta vs prior plan in dollars, sourced from §2 rates.
-- A disposition RECOMMENDATION with rationale — not a decision.
-- A stop signal pending my ACCEPT / RE-TUNE / FALL-BACK / REDESIGN call.
-
-### Push back if you see
-
-- A proposed pathology threshold ("concentration limit = 10%") — "please remove; I set pathology floors in my journal, not you."
-- `phase_12_postpdpa.md` written but `data/allocator_last_plan.json` byte-identical to the first pass — "the solver didn't re-run; please re-POST `/allocate/solve` and confirm the plan file changed."
-- A "feasible plan" claim without the four-pathology check — "did you check concentration, dead campaigns, boundary, and sensitivity? feasible alone is 1/4 on D3."
-- Shadow price quoted without a $ unit — "shadow price of what, in dollars per what unit?"
-- Disposition decided on my behalf ("I recommend accept, accepting the plan") — "please state disposition as a recommendation only; the sign is mine."
-
-### Adapt for your next domain
-
-- Change `/allocate/solve` and `data/allocator_last_plan.json` to your optimization endpoints and plan persistence.
-- Change the four pathologies (concentration / dead / boundary / sensitivity) to your domain's pathology taxonomy.
-- Change `$18 / $14 / $220` to your domain's §2-equivalent rates.
-- Change `PDPA injection` to your domain's mid-sprint regulatory event.
-- Keep the byte-identical-plan check as-is — it's domain-independent structural proof.
-
-### Evaluation checklist
-
-- [ ] Every hard constraint confirmed satisfied.
-- [ ] Optimality gap reported numerically.
-- [ ] Pathologies named (concentration, dead variables, boundary cases).
-- [ ] Sensitivity checked (perturb ± 10%).
-- [ ] Accept / re-tune / fall back / redesign decision defended.
-- [ ] Post-injection re-run: `phase_12_postpdpa.md` on disk alongside `phase_12_accept.md`.
-
-### Journal schema — universal
+_First pass (pre-injection):_
 
 ```
-Phase 12 — Solver Acceptance
-Feasibility per hard constraint: ____
-Optimality gap: ____
-Pathologies: ____
-Sensitivity (± 10%): plan stable? ____
-Decision: Accept / Re-tune / Fall back / Redesign
-Reason: ____
-Prior-plan comparison: expected lift = ____; actual lift = ____
-What would make me re-design: ____
+Journal file: copy journal/skeletons/phase_12_accept.md into
+  workspaces/metis/week-05-retail/journal/phase_12_accept.md.
+Solver endpoint: POST /allocate/solve per
+  src/retail/backend/routes/allocate.py.
+Plan persistence: data/allocator_last_plan.json (the endpoint
+  writes this automatically — cite the function).
+
+Dollar rates for prior-plan comparison — quote verbatim from
+PRODUCT_BRIEF.md §2:
+  - $18 basket lift per converted click
+  - $14 wasted impression per session
+
+Four pathologies for tonight's allocator:
+  (a) Concentration: report % of plan going to top segment.
+  (b) Dead campaigns: any campaign with 0 allocation across
+      all segments.
+  (c) Boundary: any decision at 100% of touch budget or
+      inventory cap.
+  (d) Sensitivity: perturb objective weights ±10%, re-solve,
+      report which segment changes concentration most.
+
+Do NOT propose thresholds (e.g. "concentration limit = 10%").
+I set those in my journal. You report measured values.
+
+Do NOT decide ACCEPT / RE-TUNE / FALL-BACK / REDESIGN on my
+behalf. You recommend; I sign.
 ```
 
-### Common failure modes
+_Post-injection re-run (when PDPA fires):_
 
-- Solver returns feasible but pathological plan (one segment 90%). Student accepts because "feasible" — 1/4 on D3.
-- Optimality gap not surfaced (solver reports it; student doesn't read it).
-- Sensitivity skipped — plan ships on a knife edge.
-- Post-injection plan overwrites pre-injection (state corruption).
+```
+When phase_11_postpdpa.md is written:
+  - POST /allocate/solve AGAIN with the new hard PDPA constraint.
+  - The file data/allocator_last_plan.json MUST be different from
+    the first-pass plan. If byte-identical, the solver did not
+    pick up the new constraint — do NOT proceed; flag this.
+  - Copy skeleton into:
+    workspaces/metis/week-05-retail/journal/phase_12_postpdpa.md
+    Do NOT overwrite phase_12_accept.md — both must exist.
+  - Run the same four-pathology check on the new plan.
+  - Compute the SHADOW PRICE of the PDPA hard constraint:
+    "dollar revenue lost to compliance." Quote the $220 per
+    under-18 record from PRODUCT_BRIEF.md §2 verbatim to anchor
+    the shadow price in per-record terms.
+  - The single most common D3 rubric failure tonight is writing
+    phase_11_postpdpa.md but NOT re-solving here. Writing
+    phase_12_postpdpa.md with a byte-identical plan is the same
+    failure. Both journal files on disk + a different plan file
+    = the rubric check passes.
+```
 
-### Artefact
-
-`POST /allocate/solve` response saved to `data/allocator_last_plan.json` + `journal/phase_12_accept.md` + `journal/phase_12_postpdpa.md`.
-
-### Instructor pause point
-
-- Show the 3-segment concentration plot. Ask: 70% of the plan in one segment — is this shippable?
-- Demonstrate: perturb weight_revenue by 10%. Plan changes? By how much?
-- Ask: PDPA re-solve shows $50K of shadow-price cost. Do we accept? What's the business defence?
-
-### Transfer to your next project
-
-1. Does my solver return **feasible** AND **pathology-free**? Did I check for concentration, dead variables, boundary solutions?
-2. What is the optimality gap, and is it tight enough for the decision's dollar stakes?
-3. Is my plan stable under ± 10% perturbation of the weights, or is it on a knife edge?
+**How to paste:** Use the universal core plus the first-pass block now. Keep the post-injection block ready for when the PDPA injection fires.
 
 ---
 
-# SPRINT 4 — MLOPS · Monitor · Phase 13
+## 2. Signals the output is on track
+
+**Signals of success (first pass):**
+
+- ✓ `journal/phase_12_accept.md` exists with feasibility confirmed per hard constraint, optimality gap quoted from solver output, and all four pathologies checked
+- ✓ Concentration, dead campaigns, boundary, and sensitivity all reported as measured values — not thresholds, not estimates
+- ✓ Sensitivity: solver actually re-ran with ±10% perturbed weights; results show whether plan is stable or fragile
+- ✓ Prior-plan revenue delta computed with §2-quoted dollar rates ($18 basket lift, $14 wasted impression)
+- ✓ A disposition RECOMMENDATION with rationale — not a decision signed on your behalf
+- ✓ Stop signal waiting for your ACCEPT / RE-TUNE / FALL-BACK / REDESIGN call
+- ✓ Viewer (http://localhost:3000) shows: allocator plan panel with feasibility status, solved plan (campaigns × segments grid), and pathology warnings if any
+
+**Signals of success (post-injection):**
+
+- ✓ `journal/phase_12_postpdpa.md` exists alongside `journal/phase_12_accept.md` — both present
+- ✓ `data/allocator_last_plan.json` is visibly different from the first-pass plan (different allocations, confirmed by the solver re-run)
+- ✓ PDPA shadow price computed in dollars per unit of relaxation, anchored to the $220 §2 quote
+- ✓ Same four-pathology check run on the post-injection plan
+- ✓ Viewer (http://localhost:3000) shows: the allocator plan panel VISIBLY CHANGED vs the first-pass view — different segment concentrations, the shadow price of PDPA constraint shown in dollars
+
+**Signals of drift — push back if you see:**
+
+- ✗ A proposed pathology threshold ("concentration limit = 10%") — "please remove; I set pathology floors, you report measured values"
+- ✗ `phase_12_postpdpa.md` written but `data/allocator_last_plan.json` byte-identical to the first pass — "the solver didn't re-run under the new hard constraint; please re-POST /allocate/solve and confirm the plan file changed"
+- ✗ A "feasible plan" claim without the four-pathology check — "did you check concentration, dead campaigns, boundary, and sensitivity? feasible alone is not enough"
+- ✗ Shadow price quoted without a dollar unit — "shadow price of what, in dollars per what unit?"
+- ✗ Disposition decided on your behalf ("accepting the plan") — "please state this as a recommendation only; the disposition signature is mine"
+- ✗ Viewer plan panel unchanged after the PDPA re-solve — the most critical viewer check: if the panel didn't change, the solver didn't re-run. Re-prompt: "show me the plan panel before and after the PDPA re-solve; are they different?"
 
 ---
 
+## 3. Things you might not understand in this phase
+
+_(v1 — if a concept you struggled with isn't here, flag it back to the author)_
+
+- **Feasibility vs optimality** — two separate checks: feasibility means no hard constraint is violated; optimality means how close to the best possible plan given the constraints
+- **Optimality gap** — the distance between the solver's solution and the theoretical LP optimum; if this is large, either the solver needs more time or the problem is harder than expected
+- **Solver pathologies (concentration, dead campaigns)** — plan failures that are feasible but unusable: all budget goes to one output, or some outputs get nothing despite being in the campaign list
+- **Accept/retune/fall-back/redesign** — the four dispositions; only one means the plan ships as-is; the others trigger changes before the plan is used
+- **PDPA re-solve discipline** — the requirement that Phase 12 re-run after Phase 11 PDPA re-classification, producing a different plan; without this, the constraint change is documented but not enforced
+
+---
+
+## 4. Quick reference (30 sec, generic)
+
+### Feasibility vs optimality
+
+Feasibility: the solver found a plan where every hard constraint is satisfied. Optimality: the plan is as good as it can be given those constraints (or close to it). You need both. An infeasible solver returns nothing. A feasible-but-suboptimal solver returns a plan that works but wastes budget. Tonight's check order: feasibility first (hard constraints satisfied?), then optimality gap (how much better could the plan be?), then pathologies (is the plan concentrating on one segment?).
+
+> **Deeper treatment:** [appendix/03-modeling/optimization-families.md](./appendix/03-modeling/optimization-families.md)
+
+### Optimality gap
+
+The percentage difference between the solver's solution and the LP relaxation upper bound. A 2% gap means the solver's plan is within 2% of the best possible outcome — acceptable. A 15% gap means the solver gave up early or the problem is hard — dig into why. The solver reports this number; you don't compute it by hand. If the gap is large, the options are: give the solver more time, relax a constraint, or accept the sub-optimality with a written reason.
+
+> **Deeper treatment:** [appendix/03-modeling/optimization-families.md](./appendix/03-modeling/optimization-families.md)
+
+### Solver pathologies (concentration, dead campaigns)
+
+Concentration: one segment gets a disproportionate share of the plan. If segment A gets 85% of all campaign touches, the other segments are effectively invisible — that's a product failure even if the plan is feasible. Dead campaigns: some campaigns have zero allocation across all segments — they are in the list but the solver chose not to use them. Boundary: a decision is at 100% of a budget when you expected the solver to use 70–80% — usually means a binding constraint is hiding an assumption. Sensitivity: perturb the weights slightly and see if the plan changes dramatically — if it does, the plan is on a knife edge.
+
+> **Deeper treatment:** [appendix/03-modeling/optimization-families.md](./appendix/03-modeling/optimization-families.md)
+
+### Accept/retune/fall-back/redesign
+
+Four dispositions. Accept: feasible, no pathologies, sensitivity stable — ship it. Re-tune: feasible but pathological or knife-edge — adjust objective weights or soft-constraint penalties and re-solve (stay in Phase 12). Fall back: infeasible under current hard constraints — demote one hard constraint to soft (back to Phase 11, then re-run Phase 12). Redesign: the problem as framed has no workable solution — return to Phase 10 and reframe the objective. Each disposition has a different next action; the disposition is yours to sign, not the agent's.
+
+> **Deeper treatment:** [appendix/05-deployment/deployment-gate.md](./appendix/05-deployment/deployment-gate.md)
+
+### PDPA re-solve discipline
+
+When Phase 11 reclassifies the under-18 PDPA rule from soft to hard, Phase 12 must re-run the solver under the new constraint. The plan file must change — the PDPA hard constraint removes some campaigns or allocations that were previously allowed. The post-injection journal (`phase_12_postpdpa.md`) is the audit record; the changed plan file is the proof. If the plan file is byte-identical after the re-solve, the new constraint was not passed to the solver — the compliance change is documented but not enforced. This is the single most common D3 rubric failure tonight.
+
+> **Deeper treatment:** [appendix/07-governance/pdpa-basics.md](./appendix/07-governance/pdpa-basics.md)
+
+---
+
+## 5. Ask CC, grounded in our project (2 min)
+
+Paste this if §4 isn't enough. CC will read our codebase and journal and tailor the explanation to Arcadia Retail.
+
+```
+You are helping me understand a concept from Metis Week 5, where I am
+building an ML system for Arcadia Retail. I'm currently in Playbook
+Phase 12 — Solver Acceptance.
+
+Read `workspaces/metis/week-05-retail/playbook/phase-12-acceptance.md` for
+what this phase does, and read `workspaces/metis/week-05-retail/journal/`
+for the current state of our work.
+
+Explain "<<< FILL IN: concept name, e.g. PDPA re-solve discipline >>>" to me:
+
+1. In plain language (I code but haven't studied ML formally)
+2. Why it matters for THIS project, grounded in our current Arcadia state
+3. Implications for the decision I'm about to make (or just made) in Phase 12
+4. What I should push back on if you later propose something related to this concept
+
+Keep under 400 words. No jargon without an immediate plain-language gloss.
+```
+
+---
+
+## 6. Gate / next
+
+Before moving on:
+
+- [ ] `journal/phase_12_accept.md` exists: feasibility per hard constraint, optimality gap, all four pathologies, sensitivity result, and a disposition recommendation
+- [ ] Dollar rates quoted from `PRODUCT_BRIEF.md §2` for the prior-plan revenue comparison
+- [ ] You signed your ACCEPT / RE-TUNE / FALL-BACK / REDESIGN disposition — not the agent's
+- [ ] If PDPA injection has fired: `journal/phase_12_postpdpa.md` also exists, `data/allocator_last_plan.json` is confirmed different from first-pass plan, and PDPA shadow price is quoted in dollars
+- [ ] Viewer plan panel changed between first-pass and PDPA re-run (if injection fired)
+
+**Next file:** [`workflow-06-sprint-4-mlops-boot.md`](./workflow-06-sprint-4-mlops-boot.md)
+
+Sprint 3 is complete. Sprint 4 (MLOps — drift monitoring) boots next. If PDPA injection fired and Phase 12 post-injection is not yet done, complete it before moving to the workflow.

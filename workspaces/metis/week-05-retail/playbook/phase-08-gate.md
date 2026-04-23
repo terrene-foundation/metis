@@ -1,106 +1,67 @@
 <!--
 Copyright (c) 2026 Terrene Foundation (Singapore CLG)
 Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+https://creativecommons.org/licenses/by/4.0/
 -->
 
-_[← Playbook index (README)](./README.md)_
+# Phase 8 — Deployment Gate
 
-## Phase 8 — Deployment Gate
+> **What this phase does:** Run a go/no-go check against the floors you pre-registered in Phase 6, write a variance-grounded day-one monitoring plan, and name a specific rollback target — then execute the registry stage transition only after you sign off.
+> **Why it exists:** "Feasible" is not the same as "shippable." Without a pre-registered check and a named rollback target, "deploy" is just a wish.
+> **You're here because:** Phase 7 red-team just completed (`phase-07-redteam.md`). This is the gate between sprint work and the registry. You open this file TWICE tonight — once at the end of Sprint 1 USML, once at the end of Sprint 2 SML.
+> **Key concepts you'll see:** deployment gate, PASS/FAIL floors, staging vs production, rollback channel, promotion criteria
 
-```
-──────────────────────────────────────────────────────────────────
- VALUE CHAIN:   Analyze ▸ Todos ▸ **USML ◉** ▸ SML ▸ Opt ▸ MLOps ▸ Close
- THIS PHASE:    Sprint 1 · Phase 8 of 8 — Deployment Gate
- LEVERS:        monitoring cadence · rollback channel · alert thresholds · promotion criteria
-──────────────────────────────────────────────────────────────────
-```
+---
 
-### Concept
+## 1. Paste this into Claude Code
 
-The go/no-go. Write the criteria that must hold for this artefact to ship, the signals you monitor on day one, the specific measurable condition that triggers rollback. Then move the artefact from trial to shadow (or staging to production) in the registry. Every criterion is a signal and a threshold — no vibes.
-
-### Why it matters (SML lens)
-
-- Reinforces Week 4's ModelRegistry state-machine: illegal transitions blocked by the framework so you don't jump staging → production by accident.
-- Reinforces Week 3's monitoring rule: "monitor production" means nothing; "monitor precision@50 weekly and alert when it drops below 0.62 for 2 consecutive weeks" is the point.
-- Reinforces Week 2's "rollback is a path, not a wish" — you cannot roll back to a state that was never preserved.
-
-### Why it matters (USML lens)
-
-- The go signals are the **three floors from Phase 6**, not a single accuracy cutoff — the pre-commitment follows through.
-- Monitoring signals include **segment-size stability**, **monthly reassignment rate**, and (where the segmentation feeds a recommender) **campaign open-rate-by-segment**. None of these exist in SML.
-- **Rollback target is the previous rule-based system**, not a previous version of the same model — in USML "previous version" is a different random seed and isn't necessarily better. Rolling back to the 2020 rulebook is the honest fallback.
-
-### Your levers this phase
-
-- **Lever 1 (the big one): monitoring cadence.** Segmentation re-scores monthly; recommender drifts weekly; allocator daily. One alarm cannot watch all three.
-- **Lever 2 (the rollback channel): shadow deployment.** Always promote to shadow before production. Production is the rollback channel's rollback channel.
-- **Lever 3 (the alert thresholds): variance-grounded, not round numbers.** "15% drift" because it feels right is 1/4 on D5. "15% drift because the historical rolling variance has 95th percentile at 12%" is 4/4.
-- **Lever 4 (the promotion criteria): the three floors re-tested, not re-declared.** The floors from Phase 6 must still hold on the deployment hold-out.
-
-### Trust-plane question
-
-Ship or don't ship, and on what monitoring?
-
-### Paste this
+**Universal core** (transfers to any ML project):
 
 ```
-I'm entering Playbook Phase 8 — Deployment Gate. The scaffold
-pre-committed to the registry state machine (staging → shadow →
-production) and the /segment/promote endpoint; my decision here is
-ship-or-no-ship against my Phase 6 pre-registered floors, plus the
-day-one monitoring plan and the rollback trigger. I am not
-proposing new criteria; I am checking my pre-registered ones.
-
-Copy journal/skeletons/phase_8_gate.md into
-workspaces/metis/week-05-retail/journal/phase_8_gate.md (Sprint 1
-USML) or journal/phase_8_sml.md (Sprint 2 SML).
+I'm entering Playbook Phase 8 — Deployment Gate. My decision here
+is GO / NO-GO against the pre-registered floors I wrote in Phase 6,
+plus the day-one monitoring plan and rollback trigger. I am
+NOT proposing new criteria — I am checking the ones I already wrote.
 
 Your job:
 
-1. Read my Phase 6 floors from phase_6_usml.md (or phase_6_sml.md)
-   — the three USML floors OR the SML threshold rule + Brier
-   calibration floor. Quote the values I wrote, verbatim. Do NOT
-   propose or "suggest" values.
+1. Read my Phase 6 floors from this sprint's journal file.
+   Quote the values verbatim — the three floors for USML or the
+   threshold rule + Brier calibration floor for SML. Do NOT
+   propose or "suggest" new values.
 
-2. Read my Phase 7 red-team findings from phase_7_red_team.md (or
-   phase_7_sml.md). For every MITIGATE or RE-DO finding, flag it —
-   I cannot ship through an unmitigated red-team finding.
+2. Read my Phase 7 red-team findings. For every MITIGATE or
+   RE-DO finding, flag it explicitly — I cannot ship through an
+   unmitigated red-team finding. Name each one.
 
-3. Measure the current artefact (K=N chosen / classifier family
-   chosen) against each floor. Report PASS or FAIL per floor. No
-   threshold adjustments. If a floor fails, the gate is NO-GO
-   unless I explicitly override in writing.
+3. Measure the current artefact against each floor. Report PASS
+   or FAIL per floor. If a floor fails, the gate is NO-GO unless
+   I explicitly override in writing.
 
 4. Draft the day-one monitoring plan. For each signal, name:
-   (a) the signal,
-   (b) the cadence (weekly / monthly / daily),
-   (c) the alert threshold — GROUNDED IN VARIANCE, not a round
-       number. "15% because the rolling variance's 95th percentile
-       is 12%" is D5 = 4/4; "15% because it feels big" is D5 =
-       1/4. Compute the variance from the observed Phase 7 sweep
-       numbers I just produced, or from the scaffold's drift
-       reference at src/retail/data/drift_baseline.json.
-   (d) the owner (role — E-com Ops Lead for segmentation, CX Lead
-       for classifier).
+   (a) the signal (what is measured)
+   (b) the cadence (weekly / monthly / daily)
+   (c) the alert threshold — grounded in variance from the Phase 7
+       sweep or from the scaffold's drift reference. "15% because
+       the rolling variance's 95th percentile is 12%" is the
+       correct form; "15% because it feels big" is not.
+   (d) the owner (a role, not "the team")
 
 5. Draft the rollback trigger — one specific signal + threshold
-   + duration window. "Any segment drops below 2% of customers in
-   one month" is specific; "if things go wrong" is 0/4 on D5.
+   + duration window. "Any segment drops below 2% of customers
+   in one month" is specific; "if things go wrong" is not.
 
-6. Draft the rollback TARGET — the artefact we fall back to. For
-   Sprint 1 USML, the known-working rollback is the 2020
-   rule-based 5-segment system (not a previous clustering). For
-   Sprint 2 SML, the rollback is the previous threshold or the
+6. Draft the rollback TARGET — the artefact to fall back to. This
+   must be something known to work today. For USML, the known
+   fallback is the prior rule-based system, not a previous model
+   version. For SML, the fallback is the previous threshold or
    rule-based flag logic — whichever is known to work.
 
-7. Do NOT execute /segment/promote yet. I sign the GO/NO-GO based
-   on the PASS/FAIL table, then call /segment/promote myself (or
-   authorize you to).
+7. Do NOT execute the registry stage transition yet. I sign the
+   GO/NO-GO based on the PASS/FAIL table, then authorise the
+   promotion myself.
 
 For every technical claim — endpoint, file, function — cite.
-For every dollar figure (rare here), quote the §2 line.
-
 Do NOT use "blocker" without naming the specific ship-action.
 
 When the PASS/FAIL table, monitoring plan with variance-grounded
@@ -108,79 +69,184 @@ thresholds, rollback trigger, and rollback target are in the
 journal, stop and wait for my GO/NO-GO call.
 ```
 
-### Why this prompt is written this way
+**Tonight-specific additions** (Week 5 Arcadia Retail):
 
-- Inheritance-framed opening names the scaffold's registry commitment and keeps the GO/NO-GO with me — the agent does not "pass" the gate on my behalf.
-- Reading my Phase 6 values verbatim rather than re-proposing them is the structural defence of pre-registration — floors written in Phase 6 are the floors checked in Phase 8, unchanged.
-- Variance-grounded monitoring thresholds are explicitly required with a 4/4-vs-1/4 scoring example, because the #1 D5 failure is "15% because it feels big".
-- Forbidding `/segment/promote` until my GO is the structural anti-auto-ship — the agent does not decide to push staging → shadow.
-- Rollback TARGET being the 2020 rulebook (USML) or previous threshold (SML) is named explicitly so the agent doesn't invent a "previous model version" that doesn't exist.
-
-### What to expect back
-
-- `journal/phase_8_gate.md` (or `_sml.md`) with a PASS/FAIL table of the Phase 6 floors.
-- A day-one monitoring plan with signal / cadence / variance-grounded threshold / owner per line.
-- A one-line rollback trigger (specific signal + threshold + duration).
-- A named rollback target known to work today (2020 rulebook for USML; previous threshold for SML).
-- A stop signal pending my GO/NO-GO — no `/segment/promote` call yet.
-
-### Push back if you see
-
-- A monitoring threshold without variance grounding — "what's the 95th percentile of historical variance? ground the number or remove it."
-- A rollback target that's "a previous version of the model" without proof it exists — "is there actually a previous promoted model in the registry, or is this hypothetical?"
-- Floors re-proposed ("recommend lowering stability to 0.75") — "my Phase 6 floor was 0.80; the gate checks against that, not a new value."
-- `/segment/promote` called before I said GO — "please revert the promotion; GO is my call."
-- Monitoring prose without a signal/cadence/threshold/owner — "please rewrite as a table with those four columns."
-
-### Adapt for your next domain
-
-- Change `/segment/promote` to your registry's promotion endpoint.
-- Change `staging → shadow → production` to your registry's state machine.
-- Change `drift_baseline.json` to your variance reference file.
-- Change `2020 rulebook` (USML rollback) to your domain's incumbent / no-ML fallback.
-- Change `E-com Ops Lead / CX Lead` to your monitoring owners.
-
-### Evaluation checklist
-
-- [ ] Go/no-go criteria are measurable (named metric thresholds, not "it looks good").
-- [ ] Monitoring plan names specific signals + alert thresholds + cadence.
-- [ ] Rollback trigger is automatable (specific signal, not "if things go bad").
-- [ ] Registry stage transition executed (shadow minimum).
-- [ ] Rollback target is known to work today (not "a prior version we'd roll back to").
-
-### Journal schema — universal
+_If this is your Sprint 1 USML pass (segmentation gate):_
 
 ```
-Phase 8 — Deployment Gate
-Go / No-Go: ____
-Monitoring (signal + threshold + cadence + owner): ____
-Rollback trigger (specific signal): ____
-Rollback target (known-working): ____
-Registry transition: staging → ____
+Sprint 1 USML gate.
+Journal file: copy journal/skeletons/phase_8_gate.md into
+  workspaces/metis/week-05-retail/journal/phase_8_gate.md.
+Phase 6 source: journal/phase_6_usml.md — the three USML floors
+  (silhouette, bootstrap Jaccard, reassignment rate).
+Phase 7 source: journal/phase_7_red_team.md — quote USML findings.
+Monitoring signals for segmentation:
+  - Segment-membership churn (monthly)
+  - Monthly reassignment rate (monthly)
+  - Campaign open-rate by segment (monthly, if feed a recommender)
+Variance grounding: use observed values from Phase 7 sweep AND
+  the scaffold drift reference at src/retail/data/drift_baseline.json.
+Rollback target: the 2020 rule-based 5-segment system — not a
+  previous clustering run. Previous random seeds are not rollback targets.
+Monitoring owner for segmentation: E-com Ops Lead.
+Registry endpoint to promote (after my GO): /segment/promote.
+Registry state machine: staging → shadow → production.
+Do NOT call /segment/promote until I say GO.
 ```
 
-### Common failure modes
+_If this is your Sprint 2 SML pass (classifier gate):_
 
-- Monitoring written as prose, no signals — grader cannot verify.
-- Rollback trigger tied to non-existent signal.
-- Rollback target is "a previous model" that doesn't exist / is worse than the baseline.
-- Illegal registry transition attempted (production → staging directly).
+```
+Sprint 2 SML gate.
+Journal file: copy journal/skeletons/phase_8_gate.md into
+  workspaces/metis/week-05-retail/journal/phase_8_sml.md.
+Phase 6 source: journal/phase_6_sml.md — the threshold rule +
+  Brier calibration floor.
+Phase 7 source: journal/phase_7_sml.md — quote SML findings.
+Monitoring signals for classifiers:
+  - Calibration decay (weekly — Brier score rolling)
+  - AUC decay (weekly)
+  - Feature PSI (weekly, top 5 features)
+Variance grounding: use Phase 7 sweep values and
+  src/retail/data/drift_baseline.json.
+Rollback target: the previous threshold or the rule-based flag
+  logic — whichever is known to work today.
+Monitoring owner for classifiers: CX Lead.
+Registry endpoint to promote (after my GO): /segment/promote (same
+  endpoint, different model_id).
+Do NOT call /segment/promote until I say GO.
+```
 
-### Artefact
-
-`workspaces/.../journal/phase_8_gate.md` + registry record at shadow or higher.
-
-### Instructor pause point
-
-- Ask: what signal fires the rollback this week? Can the monitoring system actually watch it? If "someone would notice" — it is not a signal.
-- Walk through registry states on the board. Why can trial → pre-production but not trial → production directly?
-- Demonstrate: show a monitoring plan as prose. Ask the class to rewrite as signal + threshold + cadence + owner. Count missing fields.
-
-### Transfer to your next project
-
-1. What specific signal — nameable by a monitoring system — fires my rollback, and have I verified the signal is actually collectable in my pipeline?
-2. What is my rollback _target_ — a prior model version, a rule-based system, or a no-op default — and is it known to work today?
-3. Have I executed the registry/artefact transition so the deployment is a recorded event, not an implicit understanding?
+**How to paste:** Use the USML block or the SML block alongside the universal core — whichever sprint you are closing.
 
 ---
 
+## 2. Signals the output is on track
+
+**Signals of success (Sprint 1 USML pass):**
+
+- ✓ `journal/phase_8_gate.md` exists with a PASS/FAIL table of Phase 6 USML floors, each quoted verbatim
+- ✓ Every Phase 7 MITIGATE / RE-DO finding named and addressed (or flagged as blocking GO)
+- ✓ Monitoring plan as a table: signal / cadence / variance-grounded threshold / owner — one row per signal
+- ✓ Alert threshold shows the variance computation ("95th percentile of historical drift variance = X%") not just the final number
+- ✓ Rollback trigger is a single sentence with a specific signal, a threshold, and a duration window
+- ✓ Rollback target is named and known to work today — not hypothetical
+- ✓ Stop signal waiting for your GO/NO-GO — no registry transition yet
+- ✓ Viewer (http://localhost:3000) shows: deployment-gate panel with a PASS/FAIL stamp against USML floors (silhouette, bootstrap Jaccard, reassignment rate), and registry state transition to shadow visible
+
+**Signals of success (Sprint 2 SML pass):**
+
+- ✓ `journal/phase_8_sml.md` exists with a PASS/FAIL table of Phase 6 SML floors (threshold rule + Brier floor), each quoted verbatim
+- ✓ Every Phase 7 SML MITIGATE / RE-DO finding named and addressed (or flagged as blocking GO)
+- ✓ Monitoring plan as a table: signal / cadence / variance-grounded threshold / owner — one row per signal for calibration decay, AUC decay, feature PSI
+- ✓ Rollback trigger specific to classifier (threshold or rule-based flag)
+- ✓ Stop signal waiting for your GO/NO-GO — no registry transition yet
+- ✓ Viewer (http://localhost:3000) shows: deployment-gate panel with PASS/FAIL stamp against SML floors, and classifier registry transition to shadow visible
+
+**Signals of drift — push back if you see:**
+
+- ✗ Viewer shows nothing new after CC reports the phase complete — CC may have described the work without running it. Re-prompt: "show me the deployment-gate panel in the viewer; what does it say?"
+
+- ✗ A monitoring threshold with no variance grounding ("15% feels about right") — ask "what is the 95th percentile of historical variance for this signal? ground the number or remove it"
+- ✗ A rollback target described as "a previous model version" with no proof it exists — ask "is there an actual promoted model in the registry, or is this hypothetical?"
+- ✗ A floor value different from what Phase 6 wrote — ask "my Phase 6 floor was X; the gate checks X, not a revised value"
+- ✗ `/segment/promote` called before you said GO — ask to revert; GO is your call
+- ✗ Monitoring plan written as prose with no signal/cadence/threshold/owner — ask for it as a four-column table
+- ✗ Red-team findings ignored — ask "which MITIGATE findings are still unaddressed?"
+
+---
+
+## 3. Things you might not understand in this phase
+
+_(v1 — if a concept you struggled with isn't here, flag it back to the author)_
+
+- **Deployment gate** — the formal go/no-go check where pre-registered floors are tested against the current artefact, with a binary outcome
+- **PASS/FAIL floors** — the specific metric thresholds you wrote in Phase 6; the gate checks them, not new ones proposed today
+- **Staging vs production** — the two live environments in the registry state machine; shadow sits between them and is the minimum safe promotion destination
+- **Rollback channel** — the specific artefact you fall back to if the deployed model degrades; must exist and work today, not in principle
+- **Promotion criteria** — the set of conditions (floors passed, red-team clear, monitoring in place) that must ALL be true before you authorise the registry transition
+
+---
+
+## 4. Quick reference (30 sec, generic)
+
+### Deployment gate
+
+A gate is a binary outcome on a pre-registered list. "Looks good" is not a gate. A gate has: a list of floors (written before the sprint), a measurement against each floor, a PASS or FAIL, and a human signature. The point of writing floors in Phase 6 is so the Phase 8 gate is not invented in Phase 8. Without pre-registration, every sprint auto-passes because the floor is set after the measurement.
+
+> **Deeper treatment:** [appendix/05-deployment/deployment-gate.md](./appendix/05-deployment/deployment-gate.md)
+
+### PASS/FAIL floors
+
+Floors are the minimum acceptable values for the metric(s) that determine whether a model is ready to deploy. You write them in Phase 6 before you see the final results; you check them in Phase 8 after. A floor that fails means NO-GO unless you override in writing with a reason. Override requires the business rationale, not a revised metric. An override without a reason is a gap in the audit trail.
+
+> **Deeper treatment:** [appendix/04-evaluation/pre-registered-floors.md](./appendix/04-evaluation/pre-registered-floors.md)
+
+### Staging vs production
+
+The registry state machine tonight is: trial → staging → shadow → production. You never jump staging to production directly. Shadow is the in-between: the model runs against live traffic but its outputs are not acted on — so you can observe it without consequence. Shadow is the minimum safe promotion; production is the rollback channel's rollback channel. Promotion is a one-way door unless you have a rollback target.
+
+> **Deeper treatment:** [appendix/05-deployment/shadow-staging-promotion.md](./appendix/05-deployment/shadow-staging-promotion.md)
+
+### Rollback channel
+
+The specific artefact you fall back to when the deployed model degrades. "We'd roll back to a prior version" is not a rollback channel; "we fall back to the 2020 rule-based 5-segment system currently running in staging" is. The rollback target must exist today, be known to work, and be reachable in one step. If you need to re-train to roll back, you don't have a rollback channel — you have a wish.
+
+> **Deeper treatment:** [appendix/05-deployment/rollback-patterns.md](./appendix/05-deployment/rollback-patterns.md)
+
+### Promotion criteria
+
+The AND-list that must all be true before you sign GO: floors all pass, red-team findings all mitigated, monitoring plan in place with variance-grounded thresholds, rollback target named and reachable. Any single FALSE makes it NO-GO. The criteria are yours — the agent checks and reports, but GO is your signature.
+
+> **Deeper treatment:** [appendix/05-deployment/deployment-gate.md](./appendix/05-deployment/deployment-gate.md)
+
+---
+
+## 5. Ask CC, grounded in our project (2 min)
+
+Paste this if §4 isn't enough. CC will read our codebase and journal and tailor the explanation to Arcadia Retail.
+
+```
+You are helping me understand a concept from Metis Week 5, where I am
+building an ML system for Arcadia Retail. I'm currently in Playbook
+Phase 8 — Deployment Gate.
+
+Read `workspaces/metis/week-05-retail/playbook/phase-08-gate.md` for
+what this phase does, and read `workspaces/metis/week-05-retail/journal/`
+for the current state of our work.
+
+Explain "<<< FILL IN: concept name, e.g. rollback channel >>>" to me:
+
+1. In plain language (I code but haven't studied ML formally)
+2. Why it matters for THIS project, grounded in our current Arcadia state
+3. Implications for the decision I'm about to make (or just made) in Phase 8
+4. What I should push back on if you later propose something related to this concept
+
+Keep under 400 words. No jargon without an immediate plain-language gloss.
+```
+
+---
+
+## 6. Gate / next
+
+Before moving on:
+
+- [ ] `journal/phase_8_gate.md` (Sprint 1) or `journal/phase_8_sml.md` (Sprint 2) exists with a PASS/FAIL table
+- [ ] Every Phase 6 floor quoted verbatim — no revised values
+- [ ] Every Phase 7 MITIGATE / RE-DO finding addressed (or GO explicitly overrides in writing)
+- [ ] Monitoring plan is a four-column table (signal / cadence / variance-grounded threshold / owner)
+- [ ] Rollback trigger: one sentence, specific signal + threshold + duration window
+- [ ] Rollback target: named artefact known to work today (2020 rulebook for USML; prior threshold or flag logic for SML)
+- [ ] You signed GO — and only then was /segment/promote called
+
+**If this is your Sprint 1 USML pass:**
+
+**Next file:** [`workflow-04-sprint-2-sml-boot.md`](./workflow-04-sprint-2-sml-boot.md)
+
+Sprint 1 is complete. Sprint 2 (SML — churn and conversion classifiers) boots next. You will re-open phase-04 through phase-08 for the SML sprint; the journal files will be suffixed `_sml.md`.
+
+**If this is your Sprint 2 SML pass:**
+
+**Next file:** [`workflow-05-sprint-3-opt-boot.md`](./workflow-05-sprint-3-opt-boot.md)
+
+Sprint 2 is complete. Sprint 3 (optimisation — LP allocator) boots next.
