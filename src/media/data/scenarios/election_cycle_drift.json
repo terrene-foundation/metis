@@ -1,0 +1,16 @@
+{
+  "scenario_id": "election_cycle_drift",
+  "sprint": 4,
+  "phase": "13",
+  "fires_at": "approx end of Sprint 3 / start of Sprint 4",
+  "event": "Singapore General Election cycle commences. Adversarial drift is observed on the text moderator \u2014 coordinated coded-language campaigns shift the token-frequency distribution by ~+30% on a 25% subset of inbound posts. The hate_speech and threats class PSI spikes from 0.04 (steady) to 0.31 (severe) within 18 hours. Per-class calibration on threats decays by 0.06 Brier.",
+  "expected_trust_plane_response": "(1) /drift/check?model_id=text&window=election_cycle_drift fires SEVERE on multiple features. (2) Re-train the text moderator (Phase 13 cadence: daily). (3) Phase 13 retrain rule for text MUST name the seasonal exclusion: election cycles + major news events are the trigger, not exception. (4) Image and fusion drift cadences (weekly / per-incident) are NOT re-tuned \u2014 they have different underlying signals. A universal 'auto-retrain when X' rule is BLOCKED.",
+  "mutates": {
+    "drift_text_subset_shift_sigma": 0.3,
+    "drift_text_affected_fraction": 0.25,
+    "drift_text_psi_jump": [
+      0.04,
+      0.31
+    ]
+  }
+}

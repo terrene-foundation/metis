@@ -1,0 +1,421 @@
+<!--
+Copyright (c) 2026 Terrene Foundation (Singapore CLG)
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MosaicHub Content Moderation — Metis Week 6 Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0f1720; --panel: #1a2332; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --ok: #3fb950; --warn: #d29922; --err: #f85149;
+      --done: #26a641; --current: #d29922; --upcoming: #3b4148;
+      --sprint1: #2188ff; --sprint2: #8957e5; --sprint3: #db61a2; --sprint4: #fb8500;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+      background: var(--bg); color: var(--text); }
+    h1 { font-size: 18px; margin: 0; }
+    .subtitle { color: var(--muted); font-size: 12px; }
+
+    .banner { background: var(--panel); padding: 14px 24px; border-bottom: 2px solid #30363d; }
+    .banner-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .pipeline { display: flex; gap: 6px; align-items: stretch; }
+    .stage { flex: 1 1 0; min-width: 110px; padding: 10px 8px; border-radius: 6px; text-align: center;
+      font-size: 11px; font-weight: 500; position: relative; }
+    .stage .label { display: block; font-weight: 700; }
+    .stage .desc { display: block; font-size: 10px; opacity: 0.85; margin-top: 2px; }
+    .stage.s1 { background: var(--sprint1); color: #fff; }
+    .stage.s2 { background: var(--sprint2); color: #fff; }
+    .stage.s3 { background: var(--sprint3); color: #fff; }
+    .stage.s4 { background: var(--sprint4); color: #fff; }
+    .stage.done { background: var(--done); color: #fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.18); }
+    .stage.done::after { content: "✓"; position: absolute; top: 4px; right: 8px; font-size: 12px; opacity: 0.85; }
+    .stage.current { background: var(--current); color: #000; box-shadow: 0 0 0 2px var(--current); animation: pulse 1.6s ease-in-out infinite; }
+    .stage.upcoming { background: var(--upcoming); color: var(--muted); }
+    .stage.dim { opacity: 0.55; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 2px rgba(210,153,34,1); } 50% { box-shadow: 0 0 0 4px rgba(210,153,34,0.45); } }
+    .clock { display: block; font-size: 9px; opacity: 0.75; margin-top: 2px; }
+
+    .decisions { margin-top: 10px; padding: 10px 14px; background: #0d131a; border-radius: 6px; }
+    .decisions-head { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .decision { display: flex; gap: 8px; font-size: 12px; margin: 3px 0; align-items: baseline; }
+    .decision .icon { width: 18px; }
+    .decision .text { flex: 1; }
+    .decision.done .icon { color: var(--ok); }
+    .decision.pending .icon { color: var(--muted); }
+
+    .dashboard { padding: 16px 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 12px; }
+    .card { background: var(--panel); border-radius: 8px; padding: 14px; border: 1px solid #30363d; }
+    .card h2 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+    .card .sub { color: var(--muted); font-size: 11px; margin: -6px 0 8px 0; }
+    .metric { display: flex; justify-content: space-between; margin: 4px 0; font-size: 12px; }
+    .metric .k { color: var(--muted); }
+    .metric .v { font-family: "SF Mono", "Monaco", monospace; }
+    .status-ok { color: var(--ok); }
+    .status-err { color: var(--err); }
+    .status-warn { color: var(--warn); }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #30363d; }
+    th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 10px; }
+    td.num { font-family: "SF Mono", "Monaco", monospace; text-align: right; }
+    .pill { display: inline-block; padding: 1px 6px; border-radius: 8px; font-size: 10px;
+      font-family: "SF Mono", "Monaco", monospace; }
+    .pill.ok { background: rgba(63,185,80,0.18); color: var(--ok); }
+    .pill.warn { background: rgba(210,153,34,0.18); color: var(--warn); }
+    .pill.err { background: rgba(248,81,73,0.18); color: var(--err); }
+    .floor-warn { background: rgba(248,81,73,0.10); color: var(--err); padding: 6px 8px;
+      border-radius: 4px; font-size: 11px; margin-top: 6px; }
+    .imda-banner { background: rgba(251,133,0,0.15); color: var(--sprint4); padding: 6px 8px;
+      border-radius: 4px; font-size: 11px; margin-top: 6px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="banner-head">
+      <div>
+        <h1>MosaicHub Content Moderation — Metis Week 6</h1>
+        <div class="subtitle">
+          Multi-modal moderation value chain · backend <code>:8000</code> · polls every 5 s
+        </div>
+      </div>
+      <div class="subtitle">see → read → fuse → monitor</div>
+    </div>
+    <div class="pipeline" id="pipeline">loading…</div>
+    <div class="current-detail" id="current-detail" style="margin-top:10px; padding:10px 14px; background:#0d131a; border-radius:6px; border-left:3px solid var(--current); font-size:12px; display:none">
+      <div><span class="k" style="color:var(--muted); font-size:10px; text-transform:uppercase">Current phase</span> <span class="v" id="cd-phase">—</span></div>
+      <div style="margin-top:4px"><span class="k" style="color:var(--muted); font-size:10px; text-transform:uppercase">Levers</span> <span class="v" id="cd-levers">—</span></div>
+    </div>
+    <div class="decisions">
+      <div class="decisions-head">The five Trust-Plane decision moments (rubric-anchored) · <span id="elapsed">0m elapsed</span></div>
+      <div id="decisions">loading…</div>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <div class="grid">
+      <div class="card" id="health-card">
+        <h2>Preflight · /health</h2>
+        <div id="health-body">loading…</div>
+      </div>
+
+      <div class="card">
+        <h2>Sprint 1 · Image moderator</h2>
+        <div class="sub">/moderate/image/leaderboard · /moderate/image/threshold</div>
+        <div id="image-body">loading…</div>
+      </div>
+
+      <div class="card">
+        <h2>Sprint 2 · Text moderator</h2>
+        <div class="sub">/moderate/text/leaderboard · /moderate/text/calibration</div>
+        <div id="text-body">loading…</div>
+      </div>
+
+      <div class="card">
+        <h2>Sprint 3 · Fusion moderator</h2>
+        <div class="sub">/moderate/fusion/leaderboard · /moderate/fusion/architecture</div>
+        <div id="fusion-body">loading…</div>
+      </div>
+
+      <div class="card">
+        <h2>Sprint 4 · Drift monitors</h2>
+        <div class="sub">/drift/status/{image|text|fusion} · /drift/retrain_rule</div>
+        <div id="drift-body">loading…</div>
+      </div>
+
+      <div class="card">
+        <h2>Reviewer queue allocator</h2>
+        <div class="sub">/queue/state · /queue/last_plan (Phase 11 + 12 re-run on IMDA)</div>
+        <div id="queue-body">loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+    const POLL_MS = 5000;
+
+    async function j(path, opts) {
+      try {
+        const r = await fetch(API + path, opts);
+        return await r.json();
+      } catch (e) {
+        return { _error: e.message };
+      }
+    }
+
+    function esc(s) {
+      if (s === null || s === undefined) return "";
+      return String(s).replace(/[&<>"']/g, c =>
+        ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    }
+
+    function metric(k, v, cls) {
+      cls = cls || "";
+      return `<div class="metric"><span class="k">${esc(k)}</span><span class="v ${esc(cls)}">${esc(v)}</span></div>`;
+    }
+
+    function pill(label, kind) {
+      return `<span class="pill ${esc(kind)}">${esc(label)}</span>`;
+    }
+
+    function fmtPct(x) { return (x * 100).toFixed(1) + "%"; }
+    function fmt3(x) { return Number(x).toFixed(3); }
+    function fmtElapsed(s) {
+      const m = Math.floor(s / 60); const r = s % 60;
+      return `${m}m ${r}s`;
+    }
+
+    async function renderBanner() {
+      const d = await j("/state/current");
+      const pipelineEl = document.getElementById("pipeline");
+      const decisionsEl = document.getElementById("decisions");
+      const detailEl = document.getElementById("current-detail");
+      if (d._error) {
+        pipelineEl.innerHTML = `<div class="status-err">backend unreachable — start with <code>bash src/media/scripts/run_backend.sh</code></div>`;
+        decisionsEl.innerHTML = "";
+        return;
+      }
+      const completedStages = new Set(d.completed_stages || []);
+      const currentStage = d.current && d.current.stage;
+      // Sprint stages get color class (s1..s4); non-sprint stages get neutral.
+      const sprintColor = { vision: "s1", text: "s2", fusion: "s3", mlops: "s4" };
+      const html = (d.pipeline || []).map((s) => {
+        let cls;
+        if (completedStages.has(s.id)) cls = "done";
+        else if (s.id === currentStage) cls = "current";
+        else cls = "upcoming";
+        // Layer the sprint color underneath when not done/current — gives a hint of palette before activation.
+        const sprintCls = sprintColor[s.id];
+        if (cls === "upcoming" && sprintCls) cls = `${sprintCls} dim`;
+        return `<div class="stage ${esc(cls)}">
+          <span class="label">${esc(s.label)}</span>
+          <span class="clock">${esc(s.clock || "")}</span>
+        </div>`;
+      }).join("");
+      pipelineEl.innerHTML = html;
+
+      // Current-phase detail (only show when a phase is active)
+      if (d.current && d.current.phase) {
+        detailEl.style.display = "block";
+        document.getElementById("cd-phase").textContent =
+          `Phase ${d.current.phase} of 14 — ${d.current.phase_name || "—"}` +
+          (d.current.sprint ? ` · Sprint ${d.current.sprint}` : "");
+        document.getElementById("cd-levers").textContent = d.current.phase_levers || "—";
+      } else {
+        detailEl.style.display = "none";
+      }
+
+      // Elapsed clock
+      const elapsedEl = document.getElementById("elapsed");
+      if (elapsedEl && d.elapsed) {
+        elapsedEl.textContent = `${fmtElapsed(d.elapsed.workshop_seconds)} elapsed`;
+      }
+
+      // Decision moments
+      const moments = (d.decision_moments || []).map((m) => {
+        const cls = m.completed ? "done" : "pending";
+        const icon = m.completed ? "✓" : "○";
+        return `<div class="decision ${esc(cls)}">
+          <span class="icon">${icon}</span>
+          <span class="text">${esc(m.id)}. ${esc(m.label)}
+            <span class="subtitle">(Sprint ${esc(m.sprint)} · Phase ${esc(m.phase)})</span>
+          </span>
+        </div>`;
+      }).join("");
+      decisionsEl.innerHTML = moments;
+    }
+
+    async function renderHealth() {
+      const d = await j("/health");
+      const el = document.getElementById("health-body");
+      if (d._error || d.status !== "ok") {
+        el.innerHTML = `<div class="status-err">✗ backend unreachable — start with <code>bash src/media/scripts/run_backend.sh</code></div>`;
+        return;
+      }
+      el.innerHTML = `
+        <div class="status-ok">✓ ${esc(d.status)}</div>
+        ${metric("posts", d.posts.toLocaleString())}
+        ${metric("image-bearing", d.image_posts.toLocaleString())}
+        ${metric("text-bearing", d.text_posts.toLocaleString())}
+        ${metric("multi-modal", d.multi_modal_posts.toLocaleString())}
+        ${metric("image baseline macro_f1", fmt3(d.image_baseline_macro_f1))}
+        ${metric("text baseline macro_f1", fmt3(d.text_baseline_macro_f1))}
+        ${metric("fusion baseline macro_f1", fmt3(d.fusion_baseline_macro_f1))}
+        ${metric("drift baselines registered", d.drift_baselines_registered + "/3")}
+      `;
+    }
+
+    async function renderImage() {
+      const d = await j("/moderate/image/leaderboard");
+      const t = await j("/moderate/image/threshold");
+      const el = document.getElementById("image-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
+      const csamFloor = (t && t.csam_adjacent_hard_floor) || 0.40;
+      const csamThresh = (t && t.thresholds && t.thresholds.csam_adjacent) || csamFloor;
+      const csamWarn = csamThresh < csamFloor;
+      let html = `
+        ${metric("chosen family", d.chosen_family)}
+        ${metric("macro_f1", fmt3(d.chosen_macro_f1))}
+        ${metric("stage", d.stage)}
+      `;
+      html += `<table><tr><th>class</th><th>P</th><th>R</th><th>F1</th><th>τ</th></tr>`;
+      const chosenEntry = d.candidates[d.chosen_family];
+      if (chosenEntry && chosenEntry.per_class) {
+        for (const [cname, m] of Object.entries(chosenEntry.per_class)) {
+          const tau = (t && t.thresholds && t.thresholds[cname]) ?? 0.5;
+          const isCsam = cname === "csam_adjacent";
+          const tauCls = isCsam && tau < csamFloor ? "status-err" : "";
+          html += `<tr>
+            <td>${esc(cname)}${isCsam ? " " + pill("IMDA hard", "warn") : ""}</td>
+            <td class="num">${fmt3(m.precision)}</td>
+            <td class="num">${fmt3(m.recall)}</td>
+            <td class="num">${fmt3(m.f1)}</td>
+            <td class="num ${tauCls}">${fmt3(tau)}</td>
+          </tr>`;
+        }
+      }
+      html += `</table>`;
+      if (csamWarn) {
+        html += `<div class="floor-warn">⚠ csam_adjacent threshold ${fmt3(csamThresh)} below IMDA hard floor ${fmt3(csamFloor)}</div>`;
+      }
+      el.innerHTML = html;
+    }
+
+    async function renderText() {
+      const d = await j("/moderate/text/leaderboard");
+      const el = document.getElementById("text-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
+      let html = `
+        ${metric("chosen family", d.chosen_family)}
+        ${metric("macro_f1", fmt3(d.chosen_macro_f1))}
+        ${metric("stage", d.stage)}
+      `;
+      html += `<table><tr><th>family</th><th>macro_f1</th></tr>`;
+      for (const [name, entry] of Object.entries(d.candidates)) {
+        const flag = name === d.chosen_family ? " " + pill("chosen", "ok") : "";
+        html += `<tr><td>${esc(name)}${flag}</td><td class="num">${fmt3(entry.macro_f1)}</td></tr>`;
+      }
+      html += `</table>`;
+      el.innerHTML = html;
+    }
+
+    async function renderFusion() {
+      const d = await j("/moderate/fusion/leaderboard");
+      const t = await j("/moderate/fusion/threshold");
+      const el = document.getElementById("fusion-body");
+      if (d._error) { el.innerHTML = `<div class="status-err">${esc(d._error)}</div>`; return; }
+      let html = `
+        ${metric("chosen architecture", d.chosen_architecture)}
+        ${metric("macro_f1", fmt3(d.chosen_macro_f1))}
+        ${metric("stage", d.stage)}
+        ${metric("threshold", fmt3((t && t.threshold) || 0.5))}
+      `;
+      html += `<table><tr><th>architecture</th><th>macro_f1</th><th>note</th></tr>`;
+      for (const arch of ["early_fusion","late_fusion","joint_embedding"]) {
+        const e = d.candidates[arch];
+        if (!e || !e.available) {
+          html += `<tr><td>${esc(arch)}</td><td class="num">—</td><td class="status-err">unavailable</td></tr>`;
+        } else {
+          const flag = arch === d.chosen_architecture ? " " + pill("chosen", "ok") : "";
+          html += `<tr>
+            <td>${esc(arch)}${flag}</td>
+            <td class="num">${fmt3(e.macro_f1)}</td>
+            <td class="subtitle">${esc(e.family_why || "")}</td>
+          </tr>`;
+        }
+      }
+      html += `</table>`;
+      el.innerHTML = html;
+    }
+
+    async function renderDrift() {
+      const el = document.getElementById("drift-body");
+      const rules = await j("/drift/retrain_rule");
+      const statuses = {};
+      for (const m of ["image", "text", "fusion"]) {
+        statuses[m] = await j("/drift/status/" + m);
+      }
+      let html = `<table><tr><th>model</th><th>cadence</th><th>ref</th><th>retrain rule</th></tr>`;
+      const cadenceMap = { image: "weekly", text: "daily", fusion: "per_incident" };
+      for (const m of ["image", "text", "fusion"]) {
+        const s = statuses[m];
+        const rule = rules.rules && rules.rules[m];
+        const cad = (s && s.cadence) || cadenceMap[m];
+        const refSet = s && s.reference_set;
+        const ruleSet = rule && rule.updated_at;
+        html += `<tr>
+          <td>${esc(m)}</td>
+          <td>${esc(cad)}</td>
+          <td>${refSet ? pill("registered", "ok") : pill("missing", "err")}</td>
+          <td>${ruleSet ? pill("set", "ok") : pill("not set", "warn")}</td>
+        </tr>`;
+      }
+      html += `</table>`;
+      const setCount = (rules && rules.set_count) || 0;
+      html += metric("rules set", setCount + "/3", setCount === 3 ? "status-ok" : "status-warn");
+      if (setCount < 3) {
+        html += `<div class="floor-warn">Phase 13 requires THREE independent rules — image / text / fusion.</div>`;
+      }
+      el.innerHTML = html;
+    }
+
+    async function renderQueue() {
+      const el = document.getElementById("queue-body");
+      const state = await j("/queue/state");
+      const plan = await j("/queue/last_plan");
+      if (state._error) { el.innerHTML = `<div class="status-err">${esc(state._error)}</div>`; return; }
+      let html = `
+        ${metric("reviewer headcount", state.total_headcount)}
+        ${metric("minutes available / day", state.total_minutes_available.toLocaleString())}
+        ${metric("tiers", state.tiers.length)}
+      `;
+      html += `<table><tr><th>tier</th><th>backlog</th><th>min/post</th><th>SLA</th></tr>`;
+      for (const t of state.tiers) {
+        const imdaPill = t.imda_critical ? " " + pill("IMDA", "warn") : "";
+        html += `<tr>
+          <td>${esc(t.id)}${imdaPill}</td>
+          <td class="num">${esc(t.expected_backlog)}</td>
+          <td class="num">${esc(t.minutes_per_post)}</td>
+          <td class="num">${esc(t.sla_seconds)}s</td>
+        </tr>`;
+      }
+      html += `</table>`;
+      if (plan.plan_exists === false) {
+        html += `<div class="subtitle">no plan solved yet — run <code>POST /queue/solve</code></div>`;
+      } else if (plan.feasibility) {
+        html += `<div class="metric"><span class="k">last solve</span><span class="v">${esc(plan.solved_at || "")}</span></div>`;
+        html += `<div class="metric"><span class="k">total SLA breach (min)</span><span class="v ${plan.total_sla_breach_minutes > 0 ? "status-warn" : "status-ok"}">${esc(plan.total_sla_breach_minutes)}</span></div>`;
+        html += `<div class="metric"><span class="k">reviewer cost</span><span class="v">$${esc((plan.reviewer_cost_total||0).toLocaleString())}</span></div>`;
+        if (plan.imda_active) {
+          html += `<div class="imda-banner">IMDA mandate ACTIVE · compliance cost $${esc((plan.compliance_cost_imda||0).toLocaleString())}</div>`;
+        }
+        if (plan.pathologies && plan.pathologies.length > 0) {
+          html += `<div class="floor-warn">⚠ ${plan.pathologies.map(esc).join("<br>⚠ ")}</div>`;
+        }
+      } else {
+        html += `<div class="status-err">infeasible: ${esc(plan.message || plan.hint || "unknown")}</div>`;
+      }
+      el.innerHTML = html;
+    }
+
+    async function renderAll() {
+      await Promise.all([
+        renderBanner(),
+        renderHealth(),
+        renderImage(),
+        renderText(),
+        renderFusion(),
+        renderDrift(),
+        renderQueue(),
+      ]);
+    }
+    renderAll();
+    setInterval(renderAll, POLL_MS);
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "scenario_id": "imda_csam_mandate",
+  "sprint": 3,
+  "phase": "11+12 re-run",
+  "fires_at": "approx 4:30pm during the workshop",
+  "event": "IMDA Online Safety Code clarification: ALL posts scoring > 0.40 on the csam_adjacent class MUST route to mandatory human review within 60 seconds AND must be auto-blurred in the meantime, regardless of any cost-balanced auto-remove threshold the platform set.",
+  "expected_trust_plane_response": "(1) Re-classify the csam_adjacent threshold from soft (cost-balanced) to hard (legally mandated) \u2014 the IMDA hard floor of 0.40 is now structurally non-negotiable. (2) Re-solve the queue allocator with imda_priority as a HARD constraint \u2014 sum_r x[imda_priority, r] >= backlog \u00d7 4.0 minutes MUST hold, regardless of cost. (3) Re-journal Phase 11 as phase_11_postimda.md AND Phase 12 as phase_12_postimda.md. The Phase 12 re-run is the most common D3 (trade-off honesty) zero \u2014 students forget the LP needs re-solving. (4) Quantify the compliance cost in $ of reviewer-time (the shadow price of the IMDA mandate) in phase_12_postimda.md.",
+  "mutates": {
+    "fusion_threshold_hard_floor": 0.4,
+    "queue_constraint_imda_priority_must_clear_within_sla": true
+  },
+  "compliance_cost_terms": {
+    "fn_csam_dollar_per_incident": 1000000,
+    "reviewer_dollar_per_minute_senior": 32.0
+  }
+}

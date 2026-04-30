@@ -1,0 +1,23 @@
+{
+  "image": {
+    "modality": "image",
+    "cadence": "weekly",
+    "feature_dim": 32,
+    "n_reference": 24000,
+    "rationale": "Visual style moves slowly; weekly is sufficient for image moderator drift."
+  },
+  "text": {
+    "modality": "text",
+    "cadence": "daily",
+    "feature_dim": 32,
+    "n_reference": 56000,
+    "rationale": "Slang and dogwhistles evolve daily; faster cadence is required."
+  },
+  "fusion": {
+    "modality": "fusion",
+    "cadence": "per_incident",
+    "feature_dim": 32,
+    "n_reference": 8000,
+    "rationale": "Adversaries probe joint seams in real time; per-incident retrain rule."
+  }
+}

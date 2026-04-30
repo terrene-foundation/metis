@@ -1,0 +1,54 @@
+{
+  "modality": "text",
+  "leaderboard": [
+    {
+      "family": "fine_tuned_bert",
+      "n_train": 42000,
+      "n_test": 14000,
+      "per_class": {
+        "hate_speech": {
+          "precision": 0.84,
+          "recall": 0.8,
+          "f1": 0.82,
+          "brier": 0.078
+        },
+        "harassment": {
+          "precision": 0.81,
+          "recall": 0.78,
+          "f1": 0.79,
+          "brier": 0.086
+        },
+        "threats": {
+          "precision": 0.86,
+          "recall": 0.83,
+          "f1": 0.84,
+          "brier": 0.071
+        },
+        "self_harm": {
+          "precision": 0.89,
+          "recall": 0.81,
+          "f1": 0.85,
+          "brier": 0.064
+        },
+        "safe": {
+          "precision": 0.94,
+          "recall": 0.95,
+          "f1": 0.94,
+          "brier": 0.041
+        }
+      },
+      "macro_f1": 0.848
+    },
+    {
+      "family": "fine_tuned_roberta",
+      "macro_f1": 0.842,
+      "note": "Comparable to BERT; ~30% slower fine-tune."
+    },
+    {
+      "family": "zero_shot_llm",
+      "macro_f1": 0.741,
+      "note": "Cheap baseline; weakest on rare classes (self_harm)."
+    }
+  ],
+  "chosen_family": "fine_tuned_bert"
+}

@@ -1,0 +1,149 @@
+{
+  "model_id": "image",
+  "modality": "image",
+  "cadence": "weekly",
+  "window": "recent_30d",
+  "checked_at": "2026-04-30T09:52:06.053875+00:00",
+  "n_features": 32,
+  "n_severe_features": 0,
+  "max_psi": 0.0068,
+  "per_feature_psi": {
+    "f0": {
+      "psi": 0.0038,
+      "severity": "none"
+    },
+    "f1": {
+      "psi": 0.0057,
+      "severity": "none"
+    },
+    "f2": {
+      "psi": 0.0021,
+      "severity": "none"
+    },
+    "f3": {
+      "psi": 0.0033,
+      "severity": "none"
+    },
+    "f4": {
+      "psi": 0.004,
+      "severity": "none"
+    },
+    "f5": {
+      "psi": 0.0029,
+      "severity": "none"
+    },
+    "f6": {
+      "psi": 0.0064,
+      "severity": "none"
+    },
+    "f7": {
+      "psi": 0.0043,
+      "severity": "none"
+    },
+    "f8": {
+      "psi": 0.0041,
+      "severity": "none"
+    },
+    "f9": {
+      "psi": 0.0035,
+      "severity": "none"
+    },
+    "f10": {
+      "psi": 0.0042,
+      "severity": "none"
+    },
+    "f11": {
+      "psi": 0.0062,
+      "severity": "none"
+    },
+    "f12": {
+      "psi": 0.0049,
+      "severity": "none"
+    },
+    "f13": {
+      "psi": 0.0054,
+      "severity": "none"
+    },
+    "f14": {
+      "psi": 0.0068,
+      "severity": "none"
+    },
+    "f15": {
+      "psi": 0.0014,
+      "severity": "none"
+    },
+    "f16": {
+      "psi": 0.0037,
+      "severity": "none"
+    },
+    "f17": {
+      "psi": 0.0013,
+      "severity": "none"
+    },
+    "f18": {
+      "psi": 0.0057,
+      "severity": "none"
+    },
+    "f19": {
+      "psi": 0.0019,
+      "severity": "none"
+    },
+    "f20": {
+      "psi": 0.0058,
+      "severity": "none"
+    },
+    "f21": {
+      "psi": 0.0011,
+      "severity": "none"
+    },
+    "f22": {
+      "psi": 0.0003,
+      "severity": "none"
+    },
+    "f23": {
+      "psi": 0.0027,
+      "severity": "none"
+    },
+    "f24": {
+      "psi": 0.0014,
+      "severity": "none"
+    },
+    "f25": {
+      "psi": 0.0047,
+      "severity": "none"
+    },
+    "f26": {
+      "psi": 0.0059,
+      "severity": "none"
+    },
+    "f27": {
+      "psi": 0.0011,
+      "severity": "none"
+    },
+    "f28": {
+      "psi": 0.0024,
+      "severity": "none"
+    },
+    "f29": {
+      "psi": 0.0026,
+      "severity": "none"
+    },
+    "f30": {
+      "psi": 0.0035,
+      "severity": "none"
+    },
+    "f31": {
+      "psi": 0.0008,
+      "severity": "none"
+    }
+  },
+  "per_class_calibration_decay": {
+    "nsfw": 0.0,
+    "violence": 0.0,
+    "weapons": 0.0,
+    "csam_adjacent": 0.0,
+    "safe": 0.0
+  },
+  "overall_severity": "none",
+  "interpretation": "PSI > 0.25 is severe drift on a single feature (retrain signal). >= 3 features at severe means structural drift, not noise. Calibration decay > 0.05 on any class indicates score reliability is degrading even when the distribution is stable."
+}

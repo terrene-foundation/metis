@@ -1,0 +1,23 @@
+{
+  "modality": "fusion",
+  "n_multimodal": 8000,
+  "architectures": [
+    {
+      "name": "early_fusion",
+      "macro_f1": 0.762,
+      "note": "Concat image+text features \u2192 single classifier \u2014 cheapest."
+    },
+    {
+      "name": "late_fusion",
+      "macro_f1": 0.781,
+      "note": "Per-modality scores \u2192 meta-classifier \u2014 modular."
+    },
+    {
+      "name": "joint_embedding",
+      "macro_f1": 0.823,
+      "note": "CLIP-style alignment in shared space \u2014 best on cross-modal harm; 3\u00d7 compute."
+    }
+  ],
+  "chosen_architecture": "joint_embedding",
+  "cross_modal_harm_base_rate": 0.22
+}
