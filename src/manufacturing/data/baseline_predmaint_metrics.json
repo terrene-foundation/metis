@@ -1,0 +1,13 @@
+{
+  "expected_leaderboard_ranking": [
+    "lightgbm_features",
+    "lstm_sequence",
+    "survival_forest_tte"
+  ],
+  "windows": [
+    3,
+    7,
+    14
+  ],
+  "rationale": "LightGBM on hand-engineered features wins at 10-machine scale."
+}

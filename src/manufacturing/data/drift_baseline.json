@@ -1,0 +1,14 @@
+{
+  "vision": {
+    "cadence": "weekly",
+    "registered": true
+  },
+  "predmaint": {
+    "cadence": "daily",
+    "registered": true
+  },
+  "rl": {
+    "cadence": "per_deployment",
+    "registered": true
+  }
+}

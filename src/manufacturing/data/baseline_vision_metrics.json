@@ -1,0 +1,12 @@
+{
+  "expected_leaderboard_ranking": [
+    "resnet50_lr_head",
+    "efficientnet_b0_rf_head",
+    "vit_small_gbm_head"
+  ],
+  "macro_f1_band": [
+    0.55,
+    0.92
+  ],
+  "rationale": "ResNet wins at 800-image scale; ViT undertrained on small data."
+}

@@ -1,0 +1,8 @@
+{
+  "expected_leaderboard_ranking": [
+    "ppo_continuous",
+    "dqn_discrete",
+    "random_baseline"
+  ],
+  "rationale": "PPO produces zero hard-floor violations; Random hits the floor frequently."
+}

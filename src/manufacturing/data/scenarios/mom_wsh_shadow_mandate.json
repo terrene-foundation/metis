@@ -1,0 +1,12 @@
+{
+  "trigger": "MOM/WSH Inspectorate near-miss audit",
+  "effective_iso": "2026-04-30T00:00:00+08:00",
+  "expires_iso": "2026-07-30T00:00:00+08:00",
+  "scope": [
+    "agent.setpoint_adjustment if line_speed > 60 boards/min OR reflow zone > 250 \u00b0C",
+    "agent.safety_alert if restricted-zone access pattern detected"
+  ],
+  "mandate": "shadow-mode only \u2014 recommend, human confirms",
+  "rationale": "Following near-miss at peer fabricator (industry-wide notice): any agent action affecting safety-relevant parameters MUST run in shadow mode for 90 days while MOM completes its audit.",
+  "estimated_compliance_shadow_price_dollars_per_day": 15000
+}

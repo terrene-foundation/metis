@@ -1,0 +1,8 @@
+{
+  "trigger": "Q4 automotive ramp + medical certification cycle",
+  "effective_iso": "2026-10-01T00:00:00+08:00",
+  "expires_iso": "2026-12-31T00:00:00+08:00",
+  "modality_affected": "predmaint",
+  "expected_psi_lift": 0.3,
+  "rationale": "Throughput target rises ~22% in Q4; sensor distributions shift outside the recent_30d window. Drift monitor MUST flag this without auto-retraining (seasonal exclusion in Phase 13)."
+}

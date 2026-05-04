@@ -217,14 +217,18 @@ function isExcluded(filePath) {
     return true;
 
   // Metis training scaffolds — `src/retail/`, `src/media/`, `src/supply_chain/`,
-  // and `apps/web/{retail,media,supply_chain}/` are intentionally raw FastAPI
-  // / sklearn / etc. They are pedagogical "before pictures": students see how
-  // a domain product looks pre-Kailash, then commission the lift to
-  // Nexus / DataFlow / Kaizen during the Playbook. The framework-first rule
-  // does NOT apply to these scaffolds.
+  // `src/manufacturing/`, and `apps/web/{retail,media,supply_chain,manufacturing}/`
+  // are intentionally raw FastAPI / sklearn / etc. They are pedagogical
+  // "before pictures": students see how a domain product looks pre-Kailash,
+  // then commission the lift to Nexus / DataFlow / Kaizen during the Playbook.
+  // The framework-first rule does NOT apply to these scaffolds.
   if (
-    /[\\/]src[\\/](retail|media|supply_chain)[\\/]/.test(filePath) ||
-    /[\\/]apps[\\/]web[\\/](retail|media|supply_chain)[\\/]/.test(filePath)
+    /[\\/]src[\\/](retail|media|supply_chain|manufacturing)[\\/]/.test(
+      filePath,
+    ) ||
+    /[\\/]apps[\\/]web[\\/](retail|media|supply_chain|manufacturing)[\\/]/.test(
+      filePath,
+    )
   )
     return true;
 

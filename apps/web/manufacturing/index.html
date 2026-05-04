@@ -1,0 +1,409 @@
+<!--
+  Copyright (c) 2026 Terrene Foundation (Singapore CLG)
+  Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+
+  LumenCircuit Industrial AI viewer (Week 7 — Manufacturing).
+  Polls /state/current + per-module endpoints every 5s. Read-only.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LumenCircuit Industrial AI — Week 7 Viewer</title>
+    <style>
+      :root {
+        --bg: #0e141b;
+        --panel: #16202a;
+        --panel-2: #1b2733;
+        --line: #243140;
+        --text: #e6edf3;
+        --muted: #8b98a5;
+        --green: #3fb950;
+        --amber: #d29922;
+        --red: #f85149;
+        --blue: #58a6ff;
+        --purple: #bc8cff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 4px 0;
+        font-weight: 600;
+      }
+      h2 {
+        font-size: 13px;
+        margin: 0 0 8px 0;
+        color: var(--muted);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 12px;
+      }
+      .pipeline {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin-bottom: 12px;
+      }
+      .sprints {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 6px;
+      }
+      .sprint {
+        padding: 8px 10px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--muted);
+        border-radius: 4px;
+      }
+      .sprint.complete { border-left-color: var(--green); }
+      .sprint.partial { border-left-color: var(--amber); }
+      .sprint .name { font-weight: 600; }
+      .sprint .progress { color: var(--muted); font-size: 11px; }
+      .decisions {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .decision {
+        padding: 6px 8px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .decision.resolved { color: var(--green); border-color: var(--green); }
+      .decision .star { margin-right: 4px; }
+      .banner-mom {
+        background: #4a1f00;
+        border: 1px solid var(--amber);
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+        font-size: 12px;
+      }
+      .banner-mom strong { color: var(--amber); }
+      .banner-wsh {
+        background: #3a0a0a;
+        border: 1px solid var(--red);
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+        font-size: 12px;
+      }
+      .banner-wsh strong { color: var(--red); }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 12px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      th, td {
+        text-align: left;
+        padding: 4px 6px;
+        border-bottom: 1px solid var(--line);
+      }
+      th { color: var(--muted); font-weight: 500; }
+      .pill {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-size: 10px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+      }
+      .pill.green { background: #062b14; color: var(--green); border-color: var(--green); }
+      .pill.amber { background: #3a2700; color: var(--amber); border-color: var(--amber); }
+      .pill.red { background: #3a0a0a; color: var(--red); border-color: var(--red); }
+      .footer {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 11px;
+        text-align: center;
+      }
+      .num { font-feature-settings: "tnum"; }
+      .err { color: var(--red); }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>LumenCircuit Industrial AI · Week 7 Viewer</h1>
+      <div id="last-poll" class="footer"></div>
+    </div>
+
+    <div id="banner-mom" style="display:none"></div>
+
+    <div class="pipeline">
+      <h2>Pipeline · 4 sprints · 5 ★ decision moments</h2>
+      <div id="sprints" class="sprints"></div>
+      <div id="decisions" class="decisions"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card" id="card-vision">
+        <h2>Sprint 1 · Vision QC (Transfer Learning)</h2>
+        <div id="vision-body"></div>
+      </div>
+      <div class="card" id="card-predmaint">
+        <h2>Sprint 2 · Predictive Maintenance</h2>
+        <div id="predmaint-body"></div>
+      </div>
+      <div class="card" id="card-rl">
+        <h2>Sprint 3 · Process Optimization (RL)</h2>
+        <div id="rl-body"></div>
+      </div>
+      <div class="card" id="card-agent">
+        <h2>Sprint 4 · Coordination Agent</h2>
+        <div id="agent-body"></div>
+      </div>
+      <div class="card" id="card-drift">
+        <h2>Sprint 4 · Drift Monitor × 3</h2>
+        <div id="drift-body"></div>
+      </div>
+      <div class="card" id="card-queue">
+        <h2>Inspector Queue Allocator</h2>
+        <div id="queue-body"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      LumenCircuit · Singapore PCBA · IPC-A-610 Class 3 · BizSAFE Level 4 · Polling every 5 s
+    </div>
+
+    <script>
+      const BACKEND = (() => {
+        const p = new URLSearchParams(location.search);
+        return p.get("backend") || "http://127.0.0.1:8000";
+      })();
+
+      const fmt = (n, d = 3) => (n == null ? "—" : Number(n).toFixed(d));
+      const fmtPct = (n) => (n == null ? "—" : (Number(n) * 100).toFixed(1) + "%");
+      const setHTML = (id, html) => (document.getElementById(id).innerHTML = html);
+
+      async function getJSON(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`${url} -> ${r.status}`);
+        return r.json();
+      }
+
+      async function postJSON(url, body) {
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error(`${url} -> ${r.status}`);
+        return r.json();
+      }
+
+      function renderState(s) {
+        // sprints banner
+        const sprintNames = {
+          sprint_1_vision: "Sprint 1 · Vision QC",
+          sprint_2_predmaint: "Sprint 2 · PredMaint",
+          sprint_3_rl: "Sprint 3 · RL",
+          sprint_4_agent: "Sprint 4 · Agent + MLOps",
+        };
+        const sprintsHtml = Object.entries(s.sprints || {}).map(([k, v]) => {
+          const cls = v.complete ? "complete" : (v.phases_done > 0 ? "partial" : "");
+          return `<div class="sprint ${cls}">
+            <div class="name">${sprintNames[k] || k}</div>
+            <div class="progress">${v.phases_done}/${v.phases_total} phases journaled</div>
+          </div>`;
+        }).join("");
+        setHTML("sprints", sprintsHtml);
+
+        // decisions
+        const decHtml = (s.decisions || []).map(d => `
+          <div class="decision ${d.resolved ? 'resolved' : ''}">
+            <span class="star">${d.resolved ? "★" : "☆"}</span>${d.name}
+          </div>
+        `).join("");
+        setHTML("decisions", decHtml);
+
+        // MOM banner
+        const banner = document.getElementById("banner-mom");
+        if (s.mom_mandate_active) {
+          banner.className = "banner-mom";
+          banner.innerHTML = `<strong>⚠ MOM/WSH SHADOW MANDATE ACTIVE</strong> — agent autonomy ladder for setpoint_adjustment + safety_alert is forced to "shadow". Quantify lost-RL-gain in <code>journal/phase_12_postwsh.md</code>. Estimated compliance shadow price: <strong>~$15,000/day</strong>.`;
+          banner.style.display = "";
+        } else {
+          banner.style.display = "none";
+        }
+
+        document.getElementById("last-poll").textContent =
+          "last poll: " + new Date().toISOString().split("T")[1].slice(0, 8) + " UTC";
+      }
+
+      function renderVision(lb) {
+        const rows = lb.leaderboard.map(r => `
+          <tr>
+            <td>${r.arch}</td>
+            <td class="num">${fmt(r.macro_f1, 3)}</td>
+            <td class="num">${r.embedding_dim}d</td>
+            <td>${r.arch === lb.chosen_arch ? '<span class="pill green">chosen</span>' : ''}</td>
+          </tr>
+        `).join("");
+        const sc = lb.promoted_thresholds && lb.promoted_thresholds.safety_critical_defect;
+        const scPill = sc != null && sc < lb.wsh_safety_floor
+          ? `<span class="pill red">below WSH floor ${lb.wsh_safety_floor}</span>`
+          : `<span class="pill green">≥ WSH floor ${lb.wsh_safety_floor}</span>`;
+        setHTML("vision-body", `
+          <table><thead><tr><th>arch</th><th>macro_f1</th><th>embed</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+          <div style="margin-top:6px;font-size:11px;color:var(--muted)">
+            stage: ${lb.stage} · safety_critical threshold: ${fmt(sc, 2)} ${scPill}
+          </div>
+        `);
+      }
+
+      function renderPredmaint(lb) {
+        const window = lb.chosen_window;
+        const rows = (lb.leaderboard[String(window)] || []).map(r => `
+          <tr>
+            <td>${r.family}</td>
+            <td class="num">${fmt(r.macro_f1, 3)}</td>
+            <td class="num">${fmt(r.brier, 3)}</td>
+            <td>${r.family === lb.chosen_family ? '<span class="pill green">chosen</span>' : ''}</td>
+          </tr>
+        `).join("");
+        setHTML("predmaint-body", `
+          <table><thead><tr><th>family</th><th>f1</th><th>brier</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+          <div style="margin-top:6px;font-size:11px;color:var(--muted)">
+            window: <strong>${window}d</strong> · stage: ${lb.stage}
+          </div>
+        `);
+      }
+
+      function renderRL(lb) {
+        const rows = lb.leaderboard.map(r => `
+          <tr>
+            <td>${r.policy}</td>
+            <td class="num">${fmt(r.throughput_boards_per_min, 1)}</td>
+            <td class="num">${fmtPct(r.defect_rate)}</td>
+            <td class="num">${r.safety_violations}</td>
+            <td>${r.policy === lb.chosen_policy ? '<span class="pill green">chosen</span>' : ''}</td>
+          </tr>
+        `).join("");
+        const rf = lb.reward_function || {};
+        setHTML("rl-body", `
+          <table><thead><tr><th>policy</th><th>thr</th><th>defect</th><th>viol</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+          <div style="margin-top:6px;font-size:11px;color:var(--muted)">
+            reward: thr=${fmt(rf.throughput,2)} defect=${fmt(rf.defect_cost,2)} energy=${fmt(rf.energy_cost,2)} safety=<strong>${fmt(rf.safety_penalty,2)}</strong>
+          </div>
+          <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+            hard floors: line ≤ ${rf.hard_floors && rf.hard_floors.line_speed_ceiling_boards_per_min} boards/min · zone ≤ ${rf.hard_floors && rf.hard_floors.reflow_temp_ceiling_celsius} °C
+          </div>
+        `);
+      }
+
+      function renderAgent(p) {
+        const rows = Object.entries(p.autonomy || {}).map(([k, v]) => {
+          const wsh = (p.wsh_affecting_task_classes || []).includes(k);
+          const pillCls = v === "act" ? "pill green" : v === "recommend" ? "pill amber" : "pill";
+          return `<tr><td>${k}${wsh ? ' <span class="pill red">WSH</span>' : ''}</td><td><span class="${pillCls}">${v}</span></td></tr>`;
+        }).join("");
+        setHTML("agent-body", `
+          <table><thead><tr><th>task class</th><th>autonomy</th></tr></thead><tbody>${rows}</tbody></table>
+          <div style="margin-top:6px;font-size:11px;color:var(--muted)">
+            MOM mandate: ${p.mom_mandate_active ? '<span class="pill red">ACTIVE</span>' : '<span class="pill green">cleared</span>'}
+          </div>
+        `);
+      }
+
+      async function renderDrift() {
+        try {
+          const [v, p, r] = await Promise.all([
+            postJSON(BACKEND + "/drift/check", { model_id: "vision", window: "recent_30d" }),
+            postJSON(BACKEND + "/drift/check", { model_id: "predmaint", window: "recent_30d" }),
+            postJSON(BACKEND + "/drift/check", { model_id: "rl", window: "recent_30d" }),
+          ]);
+          const sevPill = (sev) => sev === "stable" ? "pill green" : sev === "watch" ? "pill amber" : "pill red";
+          setHTML("drift-body", `
+            <table><thead><tr><th>model</th><th>cadence</th><th>psi</th><th>severity</th></tr></thead><tbody>
+              <tr><td>vision</td><td>${v.cadence}</td><td class="num">${fmt(v.psi,3)}</td><td><span class="${sevPill(v.severity)}">${v.severity}</span></td></tr>
+              <tr><td>predmaint</td><td>${p.cadence}</td><td class="num">${fmt(p.psi,3)}</td><td><span class="${sevPill(p.severity)}">${p.severity}</span></td></tr>
+              <tr><td>rl</td><td>${r.cadence}</td><td class="num">${fmt(r.psi,3)}</td><td><span class="${sevPill(r.severity)}">${r.severity}</span></td></tr>
+            </tbody></table>
+          `);
+        } catch (e) {
+          setHTML("drift-body", `<div class="err">${e.message}</div>`);
+        }
+      }
+
+      async function renderQueue() {
+        try {
+          const s = await getJSON(BACKEND + "/queue/state");
+          const last = await getJSON(BACKEND + "/queue/last_plan");
+          const rows = Object.entries(s.queue_depth).map(([k, v]) => {
+            const tier = s.tier_config[k];
+            return `<tr><td>${k}</td><td class="num">${v}</td><td class="num">${tier.mean_review_min}m</td><td class="num">$${tier.fn_dollar_per_board}</td></tr>`;
+          }).join("");
+          const planLine = last.plan_available
+            ? `last plan: critical=${last.plan.critical} major=${last.plan.major} minor=${last.plan.minor} · catch=$${fmt(last.expected_catch_value_dollars,0)}`
+            : `(no plan solved yet — POST /queue/solve)`;
+          setHTML("queue-body", `
+            <table><thead><tr><th>tier</th><th>queue</th><th>mean</th><th>FN $/board</th></tr></thead><tbody>${rows}</tbody></table>
+            <div style="margin-top:6px;font-size:11px;color:var(--muted)">${planLine}</div>
+          `);
+        } catch (e) {
+          setHTML("queue-body", `<div class="err">${e.message}</div>`);
+        }
+      }
+
+      async function poll() {
+        try {
+          const [state, vision, predmaint, rl, agent] = await Promise.all([
+            getJSON(BACKEND + "/state/current"),
+            getJSON(BACKEND + "/inspect/vision/leaderboard"),
+            getJSON(BACKEND + "/predict/maintenance/leaderboard"),
+            getJSON(BACKEND + "/optimize/rl/leaderboard"),
+            getJSON(BACKEND + "/agent/policy"),
+          ]);
+          renderState(state);
+          renderVision(vision);
+          renderPredmaint(predmaint);
+          renderRL(rl);
+          renderAgent(agent);
+          renderDrift();
+          renderQueue();
+        } catch (e) {
+          document.getElementById("last-poll").innerHTML = `<span class="err">${e.message}</span>`;
+        }
+      }
+
+      poll();
+      setInterval(poll, 5000);
+    </script>
+  </body>
+</html>
