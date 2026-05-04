@@ -177,12 +177,26 @@ def simulate(req: SimulateRequest) -> dict[str, Any]:
     temp_violations = int(
         sum(int(float(e.get("max_zone_temp", 0.0)) > RL_REFLOW_TEMP_CEILING) for e in sample)
     )
+    # Per `specs/compliance-floors.md`: line_speed and reflow_temp ceilings are HARD
+    # only when the MOM/WSH mandate is active. Pre-mandate they are soft envelope
+    # (workshop targets, not pass/fail). The WSH-notifiable safety_violation count
+    # is HARD always.
+    mom_active = ctx.agent_policy.mom_mandate_active
+    if mom_active:
+        hard_active = (safety_violations + line_speed_violations + temp_violations) > 0
+    else:
+        hard_active = safety_violations > 0
     log.info(
-        "rl.simulate.ok policy=%s n=%d mean_return=%.3f safety_violations=%d",
+        "rl.simulate.ok policy=%s n=%d mean_return=%.3f safety_violations=%d "
+        "line_speed_violations=%d temp_violations=%d mom_active=%s hard_floor=%s",
         req.policy,
         len(sample),
         float(np.mean(rets)),
         safety_violations,
+        line_speed_violations,
+        temp_violations,
+        mom_active,
+        hard_active,
     )
     return {
         "policy": req.policy,
@@ -194,7 +208,8 @@ def simulate(req: SimulateRequest) -> dict[str, Any]:
         "safety_violations": safety_violations,
         "line_speed_violations": line_speed_violations,
         "reflow_temp_violations": temp_violations,
-        "hard_floor_active": safety_violations + line_speed_violations + temp_violations > 0,
+        "mom_mandate_active": mom_active,
+        "hard_floor_active": hard_active,
     }
 
 

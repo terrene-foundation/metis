@@ -1,0 +1,54 @@
+# Session Notes — 2026-05-04
+
+## Where we are
+
+Week 7 (LumenCircuit Industrial AI) shipped end-to-end and pushed to
+`origin/main` as `0bce24a`. Workspace + scaffold + pre-run /analyze
++ pre-run /todos + /redteam R1/R2/R3 (all converged) all in one
+commit. Students open `claude`, paste the START_HERE.md §7 boot
+prompt, and jump straight to Sprint 1 Vision QC boot.
+
+## Read first
+
+1. `workspaces/metis/week-07-manufacturing/04-validate/redteam.md` —
+   full R1+R2+R3 audit; explains the 7 fixes that converged the spec
+   ↔ manifest ↔ code parity at 34 (METHOD, path) tuples
+2. `workspaces/metis/week-07-manufacturing/PRODUCT_BRIEF.md` — source
+   of truth (49:1 asymmetry, $1M WSH ceiling, $50K equipment damage,
+   5 ★ Trust-Plane moments)
+3. `workspaces/metis/week-07-manufacturing/SCAFFOLD_MANIFEST.md` —
+   34-route endpoint inventory + Implementation Deviations section
+4. `workspaces/metis/week-07-manufacturing/playbook/README.md` —
+   25-file playbook run order; workflow-03 is the densest (Sprint 1
+   boot, paste-ready)
+5. `workspaces/metis/week-07-manufacturing/START_HERE.md` §7 — student
+   opening prompt (boots backend + viewer + preflight)
+6. `git log -1 0bce24a` — body explains exactly what shipped + the
+   /redteam R1/R2/R3 finding chain
+
+## In-flight state
+
+(none — fully committed and pushed)
+
+## Traps
+
+- Students assume `/analyze` and `/todos` need to run. Tell Claude
+  Code "the analysis + todos files are pre-produced; copy them as the
+  basis and proceed straight to Sprint 1 boot" in the opener.
+- Backend startup requires `.venv/bin/python src/manufacturing/scripts/generate_data.py`
+  if `src/manufacturing/data/` is empty. Procedural PNGs are deterministic.
+- `routes/state.py::_detect_completed_phases` treats any `journal/phase_*.md`
+  >500 bytes as authored. Fake journals turn the banner green.
+- MOM injection mutates the workspace; `scripts/scenario_inject.py
+  mom_wsh_shadow_mandate --undo` reverts.
+- Booting uvicorn from inside `src/` cwd writes a stray `src/.claude/`
+  observations file. Always boot from repo root via
+  `bash src/manufacturing/scripts/run_backend.sh`.
+- Predmaint LSTM=0/Survival=0 at default seed is honest variance, not
+  a bug — see `journal/0002-RISK-predmaint-strict-ordering-overstated.md`
+  + the amended PRODUCT_BRIEF §4.2 Pedagogical leaderboard subsection.
+- Framework-first hook excludes `src/{retail,media,supply_chain,manufacturing}/`
+  + matching `apps/web/` paths. Other paths still BLOCK raw FastAPI/sklearn.
+- The SessionEnd hook will auto-write a `journal/.pending/*.md` skeleton
+  for `0bce24a` at session close. Promote-or-discard at start of next
+  workshop, otherwise it'll confuse the journal scan.

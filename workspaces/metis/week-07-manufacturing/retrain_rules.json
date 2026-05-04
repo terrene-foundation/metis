@@ -1,0 +1,28 @@
+{
+  "vision": {
+    "signal": "psi",
+    "threshold": 0.3,
+    "duration_window": "7d",
+    "hitl": "required_first_trigger",
+    "seasonal_exclusions": [
+      "q4_automotive_ramp",
+      "medical_certification_cycle"
+    ]
+  },
+  "predmaint": {
+    "signal": "calibration_decay",
+    "threshold": 0.1,
+    "duration_window": "3d",
+    "hitl": "required_first_trigger",
+    "seasonal_exclusions": [
+      "q4_automotive_ramp"
+    ]
+  },
+  "rl": {
+    "signal": "combined",
+    "threshold": 0.15,
+    "duration_window": "per_deployment",
+    "hitl": "required_first_trigger",
+    "seasonal_exclusions": []
+  }
+}

@@ -25,9 +25,9 @@ log = logging.getLogger("metis.manufacturing.state")
 
 SPRINT_PHASE_GROUPS: dict[str, list[str]] = {
     "sprint_1_vision": [
-        "phase_1",
-        "phase_2",
-        "phase_3",
+        "phase_1_frame",
+        "phase_2_data_audit",
+        "phase_3_features",
         "phase_4_vision",
         "phase_5_vision",
         "phase_6_vision",
